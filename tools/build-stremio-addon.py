@@ -17,7 +17,7 @@ def build(output):
     with zipfile.ZipFile(target, 'w', zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(SOURCE.rglob('*')):
             relative = path.relative_to(SOURCE)
-            if relative.parts[0] in {'.git', '.github', 'tools', 'tests', 'dist', '.venv'}:
+            if relative.parts[0] in {'.git', '.github', 'tools', 'tests', 'dist', '.venv', 'repository'}:
                 continue
             if relative.parts[0] in {'README.md', '.gitignore'}:
                 continue

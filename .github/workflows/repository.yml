@@ -1,0 +1,52 @@
+name: Publish Kodi repository
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Stable release tag to publish
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: kodi-repository
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.prerelease && !github.event.release.draft)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download stable release package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          gh release view "$RELEASE_TAG" --json isPrerelease,isDraft --jq 'if .isPrerelease or .isDraft then error("Only stable releases are published") else true end'
+          mkdir -p dist/release
+          gh release download "$RELEASE_TAG" --pattern 'script.stremioelec-*.zip' --dir dist/release
+      - uses: actions/checkout@v4
+        with:
+          ref: kodi-repository
+          path: dist/feed
+      - name: Build and publish feed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          python3 tools/build-kodi-repository.py --package dist/release/script.stremioelec-*.zip --output dist/feed
+          git -C dist/feed config user.name 'github-actions[bot]'
+          git -C dist/feed config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C dist/feed add addons.xml addons.xml.sha256 README.md script.stremioelec repository.stremioforkodi
+          if ! git -C dist/feed diff --cached --quiet; then
+            git -C dist/feed commit -m "Publish ${RELEASE_TAG} to Kodi repository"
+            git -C dist/feed push origin kodi-repository
+          fi
+          gh release upload "$RELEASE_TAG" dist/feed/repository.stremioforkodi/repository.stremioforkodi-*.zip --clobber

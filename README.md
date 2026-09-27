@@ -4,7 +4,9 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 ## Install
 
-Download `script.stremioelec-1.0.32.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+For installation and automatic updates, download [repository.stremioforkodi-1.0.0.zip](https://github.com/0eroiQ/Stremio-for-Kodi/releases/latest/download/repository.stremioforkodi-1.0.0.zip). In Kodi, choose **Add-ons → Install from zip file**, select that ZIP, then **Install from repository → Stremio for Kodi Repository → Program add-ons → Stremio for Kodi**. Enable automatic updates for the addon if desired.
+
+For a standalone installation, download `script.stremioelec-1.0.32.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
@@ -23,7 +25,7 @@ python3 -m unittest discover -s tests
 python3 tools/build-stremio-addon.py --output dist
 ```
 
-ZIP packages are distributed through GitHub Releases, not committed to the source tree. CI checks each push and pull request. To prepare a new version, update `addon.xml`, run the checks, and build the matching ZIP before publishing a release.
+ZIP packages are distributed through GitHub Releases. The `kodi-repository` branch holds the Kodi feed and released packages; `main` holds the source. The Publish Kodi repository workflow publishes stable release assets to that feed and attaches the repository installer to each release. It can also be run manually with a stable release tag. CI checks each push and pull request. To prepare a new version, update `addon.xml`, run the checks, and build the matching ZIP before publishing a release.
 
 ## Validation
 
