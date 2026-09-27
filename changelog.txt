@@ -1,3 +1,8 @@
+1.0.12
+- Persist catalog and metadata responses in the Kodi addon profile for faster repeated browsing across restarts.
+- Bound response data to 64 MiB; expire catalogs after 15 minutes and metadata after 24 hours.
+- Keep account sync, streams and subtitles outside the browse cache.
+
 1.0.11
 - Prepare Continue Watching hero metadata before displaying Home, reusing loaded catalogs and fetching missing details concurrently.
 - Use cached hero details immediately on repeated focus.
