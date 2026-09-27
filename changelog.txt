@@ -1,3 +1,7 @@
+1.0.18
+- Fix blank Home on reopening Kodi by avoiding strptime in embedded Python.
+- Expand descriptions to six lines.
+
 1.0.17
 - Use original Nimbus metadata chips with provider date, certification, genres and runtime.
 - Expand hero description space below the ratings.

@@ -49,7 +49,7 @@
         <left>0</left>
         <top>375</top>
         <width>760</width>
-        <height>170</height>
+        <height>205</height>
         <font>font27</font>
         <textcolor>FFADACB5</textcolor>
         <label>$INFO[Window.Property(plot)]</label>
