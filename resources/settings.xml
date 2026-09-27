@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <settings>
+  <category label="Language and location">
+    <setting type="action" label="Language and location" action="RunScript(script.stremioelec,locale)" />
+  </category>
   <category label="Stremio addons">
     <setting id="manifest" type="text" label="Catalog addon manifest URL" default="https://v3-cinemeta.strem.io/manifest.json" />
   </category>

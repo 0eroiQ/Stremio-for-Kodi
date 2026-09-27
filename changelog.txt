@@ -1,3 +1,10 @@
+1.0.4
+- Load bundled masks and overlays directly to preserve the Nimbus appearance on other Kodi skins.
+- Replace locale Welcome with Stremio QR account linking and expiry countdown.
+- Require a saved login before opening Home; setup completion alone is not login.
+- Move language and location to add-on settings.
+- Add visible purple button focus and left/right navigation.
+
 1.0.3
 - Remove the unused Main skin and rename the active Nimbus skin folder to Main.
 - Update Home, welcome and detail window paths without changing their appearance.

@@ -69,6 +69,14 @@ class AddonTests(unittest.TestCase):
             self.assertFalse((new/'account.json').exists())
             self.assertTrue((old/'account.json').exists())
 
+    def test_embedded_texture_paths_exist(self):
+        prefix = 'special://home/addons/script.stremioelec/'
+        for path in (SOURCE/'resources/skins/Main/1080i').glob('*.xml'):
+            for element in ET.parse(path).iter():
+                for value in [element.text or '', *element.attrib.values()]:
+                    if value.startswith(prefix):
+                        self.assertTrue((SOURCE/value[len(prefix):]).is_file(), value)
+
     def test_ordinary_media_launch_opens_nimbus(self):
         tree = ast.parse((SOURCE / 'plugin.py').read_text())
         run = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'run')

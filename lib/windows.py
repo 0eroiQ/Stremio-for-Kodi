@@ -39,37 +39,6 @@ HERO_TITLE = 311
 HERO_PLOT = 312
 
 
-class WelcomeWindow(xbmcgui.WindowXML):
-    def onInit(self):
-        self.setup = load_setup()
-        self.language = self.setup.get('language') or LANGUAGES[0]
-        self.region = self.setup.get('region') or REGIONS[0]
-        self._refresh()
-
-    def _refresh(self):
-        self.getControl(110).setLabel(self.language[0])
-        self.getControl(111).setLabel(self.region[0])
-
-    def onClick(self, control_id):
-        if control_id == BTN_LANGUAGE:
-            choice = xbmcgui.Dialog().select('Language', [row[0] for row in LANGUAGES])
-            if choice >= 0:
-                self.language = LANGUAGES[choice]
-                self._refresh()
-        elif control_id == BTN_LOCATION:
-            choice = xbmcgui.Dialog().select('Location', [row[0] for row in REGIONS])
-            if choice >= 0:
-                self.region = REGIONS[choice]
-                self._refresh()
-        elif control_id == BTN_CONTINUE:
-            apply_kodi_locale(self.language[1], self.region[1], self.language[2], self.language[2])
-            save_setup({
-                'welcome_done': True,
-                'language': self.language,
-                'region': self.region,
-            })
-            self.close()
-
 
 def _listitem(row):
     item = xbmcgui.ListItem(row['name'])

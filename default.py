@@ -1,5 +1,10 @@
-"""StremioELEC program entry. Opens the embedded Nimbus windows."""
-from lib.app import run
+"""Stremio for Kodi program entry."""
+import sys
 
 if __name__ == '__main__':
-    run()
+    if 'locale' in sys.argv[1:]:
+        from lib.settings import locale_menu
+        locale_menu()
+    else:
+        from lib.app import run
+        run()

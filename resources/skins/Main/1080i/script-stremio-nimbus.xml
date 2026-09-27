@@ -7,7 +7,7 @@
       <top>0</top>
       <width>1920</width>
       <height>1080</height>
-      <texture colordiffuse="FF0F1017">colors/white.png</texture>
+      <texture colordiffuse="FF0F1017">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture>
     </control>
     <control type="image">
       <left>623</left>
@@ -16,7 +16,7 @@
       <height>731</height>
       <aspectratio>stretch</aspectratio>
       <fadetime>350</fadetime>
-      <texture background="true" diffuse="overlays/netflixfanartdiffuse.png">$INFO[Window.Property(fanart)]</texture>
+      <texture background="true" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/netflixfanartdiffuse.png">$INFO[Window.Property(fanart)]</texture>
     </control>
     <control type="group">
       <top>28</top>
@@ -131,7 +131,7 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster.png</texture>
                   <visible>[[false + Control.HasFocus(400)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[false + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
                   <visible>!Container(400).IsUpdating</visible>
                 </control>
@@ -165,7 +165,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + false + Control.HasFocus(400)</visible>
@@ -175,7 +175,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" colordiffuse="FFE5E5E5" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + ![false + Control.HasFocus(400)]</visible>
@@ -188,7 +188,7 @@
                   <top>10</top>
                   <width>201</width>
                   <height>303</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-glow-widget.png</texture>
                   <bordersize>-20</bordersize>
                   <visible>[false + Control.HasFocus(400)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <animation type="Conditional" condition="true" pulse="true">
@@ -200,17 +200,17 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <texture colordiffuse="FFFFFFFF" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
                   <bordersize>1</bordersize>
                   <aspectratio scalediffuse="false">scale</aspectratio>
-                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-border-widget.png</bordertexture>
                 </control>
                 <control type="image">
                   <left>21</left>
                   <top>230</top>
                   <width>80</width>
                   <height>80</height>
-                  <texture>overlays/overlaybg-widget.png</texture>
+                  <texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlaybg-widget.png</texture>
                   <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)</visible>
                   <animation condition="       [[false + Control.HasFocus(400)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
                 </control>
@@ -219,7 +219,7 @@
                   <top>270</top>
                   <width>198</width>
                   <height>40</height>
-                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <texture colordiffuse="CCFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlayfade8-widget.png</texture>
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
@@ -289,7 +289,7 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster.png</texture>
                   <visible>[[true + Control.HasFocus(400)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[true + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
                   <visible>!Container(400).IsUpdating</visible>
                   <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
@@ -325,7 +325,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + true + Control.HasFocus(400)</visible>
@@ -335,7 +335,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" colordiffuse="FFE5E5E5" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + ![true + Control.HasFocus(400)]</visible>
@@ -348,7 +348,7 @@
                   <top>10</top>
                   <width>201</width>
                   <height>303</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-glow-widget.png</texture>
                   <bordersize>-20</bordersize>
                   <visible>[true + Control.HasFocus(400)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
@@ -362,17 +362,17 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <texture colordiffuse="FFFFFFFF" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
                   <bordersize>1</bordersize>
                   <aspectratio scalediffuse="false">scale</aspectratio>
-                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-border-widget.png</bordertexture>
                 </control>
                 <control type="image">
                   <left>21</left>
                   <top>230</top>
                   <width>80</width>
                   <height>80</height>
-                  <texture>overlays/overlaybg-widget.png</texture>
+                  <texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlaybg-widget.png</texture>
                   <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)</visible>
                   <animation condition="       [[true + Control.HasFocus(400)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
                 </control>
@@ -381,7 +381,7 @@
                   <top>270</top>
                   <width>198</width>
                   <height>40</height>
-                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <texture colordiffuse="CCFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlayfade8-widget.png</texture>
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
@@ -496,7 +496,7 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster.png</texture>
                   <visible>[[false + Control.HasFocus(401)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[false + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
                   <visible>!Container(401).IsUpdating</visible>
                 </control>
@@ -530,7 +530,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + false + Control.HasFocus(401)</visible>
@@ -540,7 +540,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" colordiffuse="FFE5E5E5" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + ![false + Control.HasFocus(401)]</visible>
@@ -553,7 +553,7 @@
                   <top>10</top>
                   <width>201</width>
                   <height>303</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-glow-widget.png</texture>
                   <bordersize>-20</bordersize>
                   <visible>[false + Control.HasFocus(401)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <animation type="Conditional" condition="true" pulse="true">
@@ -565,17 +565,17 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <texture colordiffuse="FFFFFFFF" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
                   <bordersize>1</bordersize>
                   <aspectratio scalediffuse="false">scale</aspectratio>
-                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-border-widget.png</bordertexture>
                 </control>
                 <control type="image">
                   <left>21</left>
                   <top>230</top>
                   <width>80</width>
                   <height>80</height>
-                  <texture>overlays/overlaybg-widget.png</texture>
+                  <texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlaybg-widget.png</texture>
                   <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)</visible>
                   <animation condition="       [[false + Control.HasFocus(401)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
                 </control>
@@ -584,7 +584,7 @@
                   <top>270</top>
                   <width>198</width>
                   <height>40</height>
-                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <texture colordiffuse="CCFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlayfade8-widget.png</texture>
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
@@ -654,7 +654,7 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster.png</texture>
                   <visible>[[true + Control.HasFocus(401)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[true + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
                   <visible>!Container(401).IsUpdating</visible>
                   <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
@@ -690,7 +690,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + true + Control.HasFocus(401)</visible>
@@ -700,7 +700,7 @@
                   <top>-7</top>
                   <width>270</width>
                   <height>270</height>
-                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" colordiffuse="FFE5E5E5" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
                   <aspectratio scalediffuse="false">scale</aspectratio>
                   <bordersize>20</bordersize>
                   <visible>!ListItem.IsParentFolder + ![true + Control.HasFocus(401)]</visible>
@@ -713,7 +713,7 @@
                   <top>10</top>
                   <width>201</width>
                   <height>303</height>
-                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-glow-widget.png</texture>
                   <bordersize>-20</bordersize>
                   <visible>[true + Control.HasFocus(401)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
@@ -727,17 +727,17 @@
                   <top>11</top>
                   <width>200</width>
                   <height>300</height>
-                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <texture colordiffuse="FFFFFFFF" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
                   <bordersize>1</bordersize>
                   <aspectratio scalediffuse="false">scale</aspectratio>
-                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-border-widget.png</bordertexture>
                 </control>
                 <control type="image">
                   <left>21</left>
                   <top>230</top>
                   <width>80</width>
                   <height>80</height>
-                  <texture>overlays/overlaybg-widget.png</texture>
+                  <texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlaybg-widget.png</texture>
                   <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)</visible>
                   <animation condition="       [[true + Control.HasFocus(401)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
                 </control>
@@ -746,7 +746,7 @@
                   <top>270</top>
                   <width>198</width>
                   <height>40</height>
-                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <texture colordiffuse="CCFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlayfade8-widget.png</texture>
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
@@ -826,7 +826,7 @@
         <effect type="slide" start="0" end="540" time="500" tween="cubic" easing="inout" />
       </animation>
       <control type="image">
-        <texture flipx="false" colordiffuse="FF121212">colors/white.png</texture>
+        <texture flipx="false" colordiffuse="FF121212">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture>
         <bordersize>40</bordersize>
         <width>549</width>
         <left>-40</left>
@@ -855,7 +855,7 @@
               <bottom>7</bottom>
               <width>5</width>
               <left>47</left>
-              <texture colordiffuse="FFFFFFFF">colors/white.png</texture>
+              <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture>
               <visible>Control.HasFocus(9000) + true</visible>
             </control>
             <control type="group">
@@ -907,7 +907,7 @@
               <bottom>7</bottom>
               <width>5</width>
               <left>47</left>
-              <texture colordiffuse="FFFFFFFF">colors/white.png</texture>
+              <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture>
               <visible>Control.HasFocus(9000) + false</visible>
             </control>
             <control type="group">

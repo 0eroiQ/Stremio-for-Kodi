@@ -345,12 +345,16 @@ def reset_account():
 
 def account_menu():
     state = Store(PROFILE).load()
-    options = ['Connect / sign in', 'Refresh library']
+    options = ['Sign in'] if not state.get('token') else ['Account connected', 'Refresh library']
     if state.get('token'):
         options.append('Disconnect this device')
     index = choose('Stremio account', options)
     if index == 0:
-        xbmc.executebuiltin('ActivateWindow(1193)')
+        from lib.signin import show_signin
+        if not state.get('token'):
+            show_signin()
+        else:
+            DIALOG.ok('Stremio account', 'This device is signed in.')
     elif index == 1:
         xbmc.executebuiltin('RunPlugin(plugin://script.stremioelec/?action=sync_library)')
     elif index == 2 and state.get('token'):
