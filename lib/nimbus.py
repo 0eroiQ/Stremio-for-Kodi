@@ -216,6 +216,9 @@ class HomeWindow(NimbusWindow):
         values = dict(catalog['defaults']); values.update(self.discover_extras)
         if self.discover_skip:
             values['skip'] = str(self.discover_skip)
+        self.setProperty('filter_label_0', catalog['kind'].title())
+        self.setProperty('filter_label_1', catalog['label'])
+        self.setProperty('filter_label_2', str(values.get('genre') or 'Genre'))
         summary = ' · '.join([catalog['kind'].title(), catalog['label']] + list(values.values()))
         self.setProperty('filters',  summary)
         rows = self.busy('Loading Discover', lambda: api.discover_items(catalog, values))
@@ -227,14 +230,17 @@ class HomeWindow(NimbusWindow):
     def load_library(self):
         from lib.browse import library_sections
         labels = {'recent':'Recently added', 'watched':'Last watched', 'name':'Name'}
+        self.setProperty('filter_label_0', self.library_kind.title())
+        self.setProperty('filter_label_1', labels[self.library_order])
+        self.setProperty('filter_label_2', 'Refresh')
         self.setProperty('filters',  self.library_kind.title() + ' · ' + labels[self.library_order])
         self.populate_rows('Library', library_sections(self.library_entries, self.library_kind, self.library_order))
         if not any(self.rows.values()):
             self.setFocusId(9200)
 
-    def edit_filters(self):
+    def edit_filters(self, direct=None):
         from lib.nimbus_select import Dialog
-        dialog = Dialog(PATH)
+        dialog = Dialog(PATH, left=50 + (direct or 0)*290)
         if self.getProperty('page') == 'Discover':
             choices = api.discover_choices()
             if not choices:
@@ -243,7 +249,11 @@ class HomeWindow(NimbusWindow):
             extras = [e for e in current['extras'] if e.get('name') not in ('skip','search') and e.get('options')]
             paging = any(e.get('name') == 'skip' for e in current['extras'])
             options = ['Type', 'Catalog'] + [e['name'].title() for e in extras]
-            option = dialog.select('Discover', options + (['Next page', 'First page'] if paging else []))
+            option = direct if direct is not None else dialog.select('Discover', options + (['Next page', 'First page'] if paging else []))
+            if option == 2 and direct is not None:
+                genre = next((i for i,e in enumerate(extras) if e['name'] == 'genre'), None)
+                if genre is None: return
+                option = genre + 2
             if option < 0:
                 return
             if paging and option >= len(options):
@@ -275,7 +285,7 @@ class HomeWindow(NimbusWindow):
                     self.discover_extras[extra['name']] = str(values[selected if required else selected-1])
             self.load_discover()
         elif self.getProperty('page') == 'Library':
-            option = dialog.select('Library', ['Type', 'Sort', 'Refresh from account'])
+            option = direct if direct is not None else dialog.select('Library', ['Type', 'Sort', 'Refresh from account'])
             if option == 0:
                 kinds = ['all'] + list(dict.fromkeys(e.get('type') for e in self.library_entries if e.get('type')))
                 selected = dialog.select('Type', [t.title() for t in kinds])
@@ -297,6 +307,9 @@ class HomeWindow(NimbusWindow):
             self.update_hero()
 
     def onAction(self, action):
+        if action.getId() == 117 and self.getProperty('page') == 'Discover':
+            self.edit_filters()
+            return
         if action.getId() in BACK:
             if self.getFocusId() in self.rows:
                 self.setFocusId(9000)
@@ -308,8 +321,8 @@ class HomeWindow(NimbusWindow):
             self.update_hero()
 
     def onClick(self, cid):
-        if cid == 9200:
-            self.edit_filters()
+        if cid in (9200, 9201, 9202):
+            self.edit_filters(cid-9200)
             return
         if cid == 9000:
             pos = self.getControl(9000).getSelectedPosition()

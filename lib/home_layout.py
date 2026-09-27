@@ -31,27 +31,26 @@ def build_layout(source, profile, count, appearance=None):
     menu = tree.find('.//control[@id="9000"]')
     menu.find('onright').text = 'SetFocus($INFO[Window.Property(first_row)])'
     controls = tree.getroot().find('controls')
-    button = ET.SubElement(controls, 'control', type='button', id='9200')
-    tags = {'left':'50', 'top':'535', 'width':'160', 'height':'65',
-            'font':'font25', 'textcolor':'FFFFFFFF', 'focusedcolor':'FF15161D',
-            'label':'Filters', 'align':'center',
-            'visible':'[String.IsEqual(Window.Property(page),Discover) | String.IsEqual(Window.Property(page),Library)]',
-            'onleft':'9000', 'onup':'9000', 'ondown':'SetFocus($INFO[Window.Property(first_row)])',
-            'texturefocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png',
-            'texturenofocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png'}
-    for key,value in tags.items():
-        node=ET.SubElement(button,key);node.text=value
-        if key in ('texturefocus','texturenofocus'):
-            node.set('border', '13')
-            node.set('colordiffuse', 'FFF0F0F2' if key=='texturefocus' else 'FF30313B')
-    button.append(copy.deepcopy(group.find('animation')))
-    summary = ET.SubElement(controls, 'control', type='label')
-    for key, value in {'left':'230', 'top':'535', 'width':'1000', 'height':'65',
-                       'font':'font25', 'textcolor':'FFBBBBBB',
-                       'label':'$INFO[Window.Property(filters)]',
-                       'visible':tags['visible']}.items():
-        ET.SubElement(summary, key).text = value
-    summary.append(copy.deepcopy(group.find('animation')))
+    for index in range(3):
+        button = ET.SubElement(controls, 'control', type='button', id=str(9200+index))
+        tags = {'left':str(50+index*290), 'top':'535', 'width':'275', 'height':'60',
+                'font':'font23', 'textcolor':'FFE5E5E7', 'focusedcolor':'FF15161D',
+                'label':'$INFO[Window.Property(filter_label_%d)]' % index, 'align':'left', 'textoffsetx':'20',
+                'visible':'[String.IsEqual(Window.Property(page),Discover) | String.IsEqual(Window.Property(page),Library)]',
+                'onleft':str(9199+index) if index else '9000', 'onright':str(9200+min(index+1,2)),
+                'onup':'9000', 'ondown':'SetFocus($INFO[Window.Property(first_row)])',
+                'texturefocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png',
+                'texturenofocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png'}
+        for key,value in tags.items():
+            node=ET.SubElement(button,key);node.text=value
+            if key in ('texturefocus','texturenofocus'):
+                node.set('border','13');node.set('colordiffuse','FFF0F0F2' if key=='texturefocus' else 'FF30313B')
+        button.append(copy.deepcopy(group.find('animation')))
+        arrow = ET.SubElement(controls, 'control', type='image')
+        for key,value in {'left':str(290+index*290),'top':'560','width':'16','height':'14',
+                          'texture':'special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/arrowdown.png',
+                          'visible':tags['visible']}.items(): ET.SubElement(arrow,key).text=value
+        arrow.append(copy.deepcopy(group.find('animation')))
     preview = tree.find('.//control[@id="2001"]')
     preview.find('label').text = '$INFO[Window.Property(next_row)]'
     preview.find('visible').text = '!String.IsEmpty(Window.Property(next_row)) + !Control.HasFocus(9000)'

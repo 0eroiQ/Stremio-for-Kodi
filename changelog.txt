@@ -1,3 +1,8 @@
+1.0.25
+- Discover: separate type, catalog and genre dropdowns.
+- Library: separate type, sort and refresh controls.
+- Anchor menus under their controls; keep extra Discover options in the context menu.
+
 1.0.24
 - Open Similar by default for movies.
 - Match Discover and Library filter buttons and selectors to Nimbus detail controls.
