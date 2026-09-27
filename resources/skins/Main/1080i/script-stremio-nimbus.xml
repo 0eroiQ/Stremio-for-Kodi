@@ -54,7 +54,7 @@
         <textcolor>FFE5E5E7</textcolor>
         <aligny>center</aligny>
         <label>$INFO[Window.Property(facts)]</label>
-      <scroll>true</scroll></control>
+      </control>
       <control type="label">
         <left>0</left>
         <top>237</top>
@@ -67,9 +67,9 @@
       </control>
       <control type="textbox">
         <left>0</left>
-        <top>282</top>
+        <top>375</top>
         <width>760</width>
-        <height>135</height>
+        <height>115</height>
         <font>font27</font>
         <textcolor>FFADACB5</textcolor>
         <label>$INFO[Window.Property(plot)]</label>
@@ -79,7 +79,237 @@
         <effect type="slide" start="0,0" end="0,-540" time="500" tween="cubic" easing="inout" />
         <effect type="fade" start="100" end="0" time="650" tween="cubic" easing="in" />
       </animation>
+    <control type="grouplist"><left>0</left><top>282</top><width>790</width><height>40</height><orientation>horizontal</orientation><itemgap>15</itemgap><control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating0_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating0_label)]</label><visible>!String.IsEmpty(Window.Property(rating0_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating0_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating0_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating0_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
     </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating1_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating1_label)]</label><visible>!String.IsEmpty(Window.Property(rating1_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating1_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating1_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating1_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating2_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating2_label)]</label><visible>!String.IsEmpty(Window.Property(rating2_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating2_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating2_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating2_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating3_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating3_label)]</label><visible>!String.IsEmpty(Window.Property(rating3_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating3_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating3_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating3_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating4_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating4_label)]</label><visible>!String.IsEmpty(Window.Property(rating4_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating4_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating4_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating4_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  </control><control type="grouplist"><left>0</left><top>325</top><width>790</width><height>40</height><orientation>horizontal</orientation><itemgap>15</itemgap><control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating5_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating5_label)]</label><visible>!String.IsEmpty(Window.Property(rating5_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating5_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating5_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating5_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating6_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating6_label)]</label><visible>!String.IsEmpty(Window.Property(rating6_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating6_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating6_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating6_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating7_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating7_label)]</label><visible>!String.IsEmpty(Window.Property(rating7_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating7_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating7_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating7_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating8_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating8_label)]</label><visible>!String.IsEmpty(Window.Property(rating8_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating8_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating8_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating8_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  <control type="grouplist">
+      <width>130</width>
+      <orientation>horizontal</orientation>
+      <itemgap>5</itemgap>
+      <align>left</align>
+      <visible>!String.IsEmpty(Window.Property(rating9_value))</visible>
+      <control type="label"><width>55</width><height>38</height><font>font23</font><label>$INFO[Window.Property(rating9_label)]</label><visible>!String.IsEmpty(Window.Property(rating9_label))</visible></control><control type="image">
+        <height>38</height>
+        <aspectratio>keep</aspectratio>
+        <align>left</align>
+        <aligny>center</aligny>
+        <texture>$INFO[Window.Property(rating9_icon)]</texture>
+      <width>55</width><visible>!String.IsEmpty(Window.Property(rating9_icon))</visible></control>
+      <control type="label">
+        <height>38</height>
+        <align>left</align>
+        <aligny>center</aligny>
+        <textoffsety>1</textoffsety>
+        <label>$INFO[Window.Property(rating9_value)]</label>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+      <width>70</width></control>
+    </control>
+  </control></control>
     <control type="label" id="2001">
       <left>50</left><top>1035</top><width>1750</width><height>40</height>
       <font>font25</font><textcolor>FFBBBBBB</textcolor>

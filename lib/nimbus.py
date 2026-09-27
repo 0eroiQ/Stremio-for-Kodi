@@ -65,8 +65,17 @@ class NimbusWindow(xbmcgui.WindowXML):
                   'genres': ' · '.join(row.get('genres') or []),
                   'facts': '  ·  '.join(str(v) for v in (
                       row.get('releaseInfo') or row.get('year'),
-                      row.get('rating_text') or (('★ ' + str(row['imdbRating'])) if row.get('imdbRating') else ''),
                       row.get('runtime'), {'series':'Series', 'movie':'Movie'}.get(row.get('type'), str(row.get('type') or '').title())) if v)}
+        ratings = row.get('rating_badges', [])
+        if not ratings and row.get('imdbRating') and (not mdblist.enabled() or ADDON.getSetting('rating_imdb') == 'true'):
+            ratings = [{'value': str(row['imdbRating']), 'icon': 'imdb.png'}]
+        if ADDON.getSetting('ui_show_rating') == 'false':
+            ratings = []
+        for index in range(10):
+            badge = ratings[index] if index < len(ratings) else {}
+            self.setProperty('rating%d_value' % index, badge.get('value', ''))
+            self.setProperty('rating%d_icon' % index, (PATH + '/resources/skins/Main/media/ratings/' + badge['icon']) if badge.get('icon') else '')
+            self.setProperty('rating%d_label' % index, badge.get('label', ''))
         for key, value in values.items():
             self.setProperty(key, value)
 

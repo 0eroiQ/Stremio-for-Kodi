@@ -29,6 +29,7 @@
   </category>
   <category label="Ratings">
     <setting id="mdblist_api_key" type="text" option="hidden" label="MDbList API key" default="" />
+    <setting id="rating_mdblist" type="bool" label="Show MDbList score" default="false" />
     <setting id="rating_imdb" type="bool" label="Show IMDb rating" default="true" />
     <setting id="rating_tmdb" type="bool" label="Show TMDb rating" default="false" />
     <setting id="rating_trakt" type="bool" label="Show Trakt rating" default="false" />

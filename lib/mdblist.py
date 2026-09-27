@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 SOURCES = [('imdb', 'IMDb'), ('tmdb', 'TMDb'), ('trakt', 'Trakt'),
            ('tomatoes', 'Rotten Tomatoes'), ('metacritic', 'Metacritic'),
            ('letterboxd', 'Letterboxd'), ('tomatoesaudience', 'RT Audience'),
-           ('metacriticuser', 'Metacritic User'), ('myanimelist', 'MyAnimeList')]
+           ('metacriticuser', 'Metacritic User'), ('myanimelist', 'MyAnimeList'), ('mdblist', 'MDbList')]
 
 
 def rating_text(payload, source):
@@ -48,7 +48,7 @@ def enrich(row):
             if payload.get('ratings'):
                 cache.put(url, payload, 86400)
         text = selected_text(payload, addon.getSetting)
-        return dict(row, rating_text=text) if text else row
+        return dict(row, rating_text=text, rating_badges=badges(payload, addon.getSetting))
     except Exception:
         # Never log request URLs or exception text containing the API key.
         return row
@@ -75,3 +75,29 @@ def import_nimbus_key():
         xbmcgui.Dialog().ok('MDbList', 'API key copied from Nimbus. Reopen the addon to apply.')
     except Exception:
         xbmcgui.Dialog().ok('MDbList', 'No saved Nimbus API key found. Enter your key in addon settings.')
+
+
+def badges(payload, get_setting):
+    """Nimbus-compatible scales and rating icons."""
+    result = []
+    icons = {'imdb':'imdb','tmdb':'tmdb','trakt':'trakt','letterboxd':'letterboxd',
+             'metacritic':'metacritic','metacriticuser':'metacritic','myanimelist':''}
+    for name, label in SOURCES:
+        if get_setting('rating_' + name) != 'true':
+            continue
+        entry = ({'value': payload.get('score')} if name == 'mdblist' else
+                 next((r for r in payload.get('ratings', []) if r.get('source') == name), {}))
+        try:
+            value = float(entry['value'])
+        except (KeyError, TypeError, ValueError):
+            continue
+        icon = icons.get(name, 'mdblist')
+        if name in ('tmdb', 'trakt'): value /= 10
+        if name == 'letterboxd': value *= 2
+        text = '{:g}'.format(value)
+        if name in ('tomatoes','tomatoesaudience','metacritic','mdblist'):
+            text += '%'
+        if name == 'tomatoes': icon = 'rtfresh' if value >= 60 else 'rtrotten'
+        if name == 'tomatoesaudience': icon = 'popcorn' if value >= 60 else 'popcorn_spilt'
+        result.append({'source':name,'value':text,'icon':icon+'.png' if icon else '', 'label':'MAL' if name == 'myanimelist' else ''})
+    return result

@@ -1,0 +1,1 @@
+Rating icons and adapted HorizontalRatingSlotTemplate copied from Nimbus by Ivar Brandt, GPL-2.0-or-later. Source: skin.nimbus/xml/Variables_Ratings.xml and resources/rating_images. Adapted window properties, explicit widths/colors, and two-row layout for Stremio for Kodi.
