@@ -29,3 +29,12 @@ class BrowseTests(unittest.TestCase):
 
     def test_empty_library_is_not_populated_with_home_catalogs(self):
         self.assertEqual(browse.library_sections([]),[])
+
+    def test_library_types_ignore_removed_temporary_and_invalid_entries(self):
+        entries = [{'_id':'m','type':'movie'}, {'_id':'s','type':'series'},
+                   {'_id':'x','type':'tv','removed':True},
+                   {'_id':'y','type':'channel','temp':True},
+                   {'_id':'z','type':'chaturbate','removed':True},
+                   {'type':'invalid'}]
+        self.assertEqual(browse.library_kinds(entries), ['all', 'movie', 'series'])
+        self.assertEqual(browse.library_kinds([]), ['all'])

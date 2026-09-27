@@ -228,7 +228,9 @@ class HomeWindow(NimbusWindow):
             self.setFocusId(9200)
 
     def load_library(self):
-        from lib.browse import library_sections
+        from lib.browse import library_sections, library_kinds
+        if self.library_kind not in library_kinds(self.library_entries):
+            self.library_kind = 'all'
         labels = {'recent':'Recently added', 'watched':'Last watched', 'name':'Name'}
         self.setProperty('filter_label_0', self.library_kind.title())
         self.setProperty('filter_label_1', labels[self.library_order])
@@ -287,7 +289,8 @@ class HomeWindow(NimbusWindow):
         elif self.getProperty('page') == 'Library':
             option = direct if direct is not None else dialog.select('Library', ['Type', 'Sort', 'Refresh from account'])
             if option == 0:
-                kinds = ['all'] + list(dict.fromkeys(e.get('type') for e in self.library_entries if e.get('type')))
+                from lib.browse import library_kinds
+                kinds = library_kinds(self.library_entries)
                 selected = dialog.select('Type', [t.title() for t in kinds])
                 if selected < 0: return
                 self.library_kind = kinds[selected]

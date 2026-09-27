@@ -1,3 +1,7 @@
+1.0.26
+- Derive Library types only from visible saved items, excluding removed and temporary sync records.
+- Reset stale Library type selection to All.
+
 1.0.25
 - Discover: separate type, catalog and genre dropdowns.
 - Library: separate type, sort and refresh controls.

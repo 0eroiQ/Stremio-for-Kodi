@@ -37,3 +37,10 @@ def library_sections(entries, kind='all', order='recent'):
     labels = {'movie': 'Movies', 'series': 'Series'}
     return [{'label': labels.get(t, t.title()), 'items': [e for e in items if (e.get('type') or 'other') == t]}
             for t in types if any((e.get('type') or 'other') == t for e in items)]
+
+
+def library_kinds(entries):
+    """Offer only types with visible, saved library items, never sync tombstones."""
+    sections = library_sections(entries)
+    return ['all'] + list(dict.fromkeys(item['type'] for section in sections
+                                      for item in section['items'] if item.get('type')))
