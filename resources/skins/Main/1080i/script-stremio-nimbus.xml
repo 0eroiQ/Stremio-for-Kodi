@@ -80,6 +80,12 @@
         <effect type="fade" start="100" end="0" time="650" tween="cubic" easing="in" />
       </animation>
     </control>
+    <control type="label" id="2001">
+      <left>50</left><top>1035</top><width>1750</width><height>40</height>
+      <font>font25</font><textcolor>FFBBBBBB</textcolor>
+      <label>$INFO[Window.Property(row401)]</label>
+      <visible>Control.HasFocus(400) + !String.IsEmpty(Window.Property(has401))</visible>
+    </control>
     <control type="grouplist" id="2000">
       <left>0</left>
       <top>630</top>

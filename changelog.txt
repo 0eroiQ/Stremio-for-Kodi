@@ -1,3 +1,6 @@
+1.0.6
+- Show the next available row title below the focused Home row.
+
 1.0.5
 - Align each focused Home row to the same position and hide the preceding row above the viewport.
 
