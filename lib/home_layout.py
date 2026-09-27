@@ -33,16 +33,17 @@ def build_layout(source, profile, count, appearance=None):
     controls = tree.getroot().find('controls')
     button = ET.SubElement(controls, 'control', type='button', id='9200')
     tags = {'left':'50', 'top':'535', 'width':'160', 'height':'65',
-            'font':'font25', 'textcolor':'FFFFFFFF', 'focusedcolor':'FFFFFFFF',
+            'font':'font25', 'textcolor':'FFFFFFFF', 'focusedcolor':'FF15161D',
             'label':'Filters', 'align':'center',
             'visible':'[String.IsEqual(Window.Property(page),Discover) | String.IsEqual(Window.Property(page),Library)]',
             'onleft':'9000', 'onup':'9000', 'ondown':'SetFocus($INFO[Window.Property(first_row)])',
-            'texturefocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png',
-            'texturenofocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png'}
+            'texturefocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png',
+            'texturenofocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png'}
     for key,value in tags.items():
         node=ET.SubElement(button,key);node.text=value
         if key in ('texturefocus','texturenofocus'):
-            node.set('colordiffuse', 'FF7355DE' if key=='texturefocus' else 'DD252333')
+            node.set('border', '13')
+            node.set('colordiffuse', 'FFF0F0F2' if key=='texturefocus' else 'FF30313B')
     button.append(copy.deepcopy(group.find('animation')))
     summary = ET.SubElement(controls, 'control', type='label')
     for key, value in {'left':'230', 'top':'535', 'width':'1000', 'height':'65',

@@ -1,3 +1,7 @@
+1.0.24
+- Open Similar by default for movies.
+- Match Discover and Library filter buttons and selectors to Nimbus detail controls.
+
 1.0.23
 - Display Similar titles with the Home portrait poster layout and focus.
 

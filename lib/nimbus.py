@@ -233,7 +233,8 @@ class HomeWindow(NimbusWindow):
             self.setFocusId(9200)
 
     def edit_filters(self):
-        dialog = xbmcgui.Dialog()
+        from lib.nimbus_select import Dialog
+        dialog = Dialog(PATH)
         if self.getProperty('page') == 'Discover':
             choices = api.discover_choices()
             if not choices:
@@ -397,7 +398,7 @@ class InfoWindow(NimbusWindow):
         self.setProperty('playlabel', 'Resume' if api.resume_seconds(self.resume_ms) else 'Play')
         self.setProperty('hastrailer', 'true' if ADDON.getSetting('trailers_enabled') != 'false' and api.trailer_rows(self.meta) else '')
         self.refresh_library()
-        self.select_section('Episodes' if series else 'Cast')
+        self.select_section('Episodes' if series else 'Similar')
         self.setFocusId(21001)
         if ADDON.getSetting('trailers_auto') == 'true' and self.getProperty('hastrailer'):
             window_id = xbmcgui.getCurrentWindowId()
