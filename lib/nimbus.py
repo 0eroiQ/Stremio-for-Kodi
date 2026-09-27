@@ -141,7 +141,8 @@ class HomeWindow(NimbusWindow):
             key = (cid, pos, row['id'])
             if key != self.hero_key:
                 self.hero_key = key
-                self.set_hero(row)
+                cached = self.hero_cache.get((row.get('type'), row.get('id')))
+                self.set_hero(cached or row)
                 self.request_hero(key, row)
 
     def request_hero(self, key, row):

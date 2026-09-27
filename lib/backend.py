@@ -136,6 +136,8 @@ def account_home():
     continuing = [dict(row, id=row.get('_id') or row.get('id'))
                   for row in library_rows(state.get('library', []), True)]
     if continuing:
+        from lib.hero_metadata import prepare
+        continuing = prepare(continuing, rows, metadata)
         rows.insert(0, {'label': 'Continue Watching', 'items': continuing, 'failed': False})
     return rows
 
