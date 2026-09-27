@@ -31,6 +31,9 @@ class AddonTests(unittest.TestCase):
                 self.assertEqual({p.split('/')[0] for p in names}, {'script.stremioelec'})
                 addon = ET.fromstring(archive.read('script.stremioelec/addon.xml'))
                 self.assertEqual(addon.get('name'), 'Stremio for Kodi')
+                self.assertEqual({p.split('/')[3] for p in names if p.startswith('script.stremioelec/resources/skins/')}, {'Main'})
+                for window in ('script-stremio-nimbus.xml', 'script-stremio-info.xml', 'script-stremio-welcome.xml'):
+                    self.assertIn('script.stremioelec/resources/skins/Main/1080i/' + window, names)
                 extensions = addon.findall('extension')
                 self.assertEqual(extensions[0].get('point'), 'xbmc.python.script')
                 for extension in extensions:

@@ -10,7 +10,7 @@ import json
 import re
 import xml.etree.ElementTree as E
 
-ROOT = Path(__file__).resolve().parents[1] / 'resources/skins/Nimbus'
+ROOT = Path(__file__).resolve().parents[1] / 'resources/skins/Main'
 SRC = ROOT / 'upstream/xml'
 registry = {}
 for path in SRC.glob('*.xml'):

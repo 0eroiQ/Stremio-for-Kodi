@@ -4,7 +4,7 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 ## Install
 
-Download `script.stremioelec-1.0.2.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+Download `script.stremioelec-1.0.3.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
@@ -31,4 +31,4 @@ Version 1.0.2 was launched in local macOS Kodi. Catalog loading and sidebar navi
 
 ## Credits and license
 
-GPL-2.0-or-later; see `LICENSE`. Nimbus layouts, artwork and fonts are by Ivar Brandt and their respective authors. Original attribution and bundled license notices are retained under `resources/skins/Nimbus/`.
+GPL-2.0-or-later; see `LICENSE`. Nimbus layouts, artwork and fonts are by Ivar Brandt and their respective authors. Original attribution and bundled license notices are retained under `resources/skins/Main/`.

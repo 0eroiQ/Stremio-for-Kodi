@@ -1,3 +1,7 @@
+1.0.3
+- Remove the unused Main skin and rename the active Nimbus skin folder to Main.
+- Update Home, welcome and detail window paths without changing their appearance.
+
 1.0.2
 - Combine program interface, media backend and subtitle service in one addon.
 - Rename the addon to Stremio for Kodi.

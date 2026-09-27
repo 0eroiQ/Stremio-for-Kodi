@@ -5,5 +5,4 @@ by Ivar Brandt. The original GPL license is included in LICENSE.txt. Font licens
 files accompany the original font resources where supplied.
 
 The Stremio for Kodi program windows are a local adaptation: they use WindowXML and
-the existing Stremio for Kodi backend, without changing Kodi's global skin. The old
-Main skin is retained for recovery; it is no longer the program Home entry.
+the existing Stremio for Kodi backend, without changing Kodi's global skin. The embedded skin is stored in the Main directory; the old fallback layout has been removed.

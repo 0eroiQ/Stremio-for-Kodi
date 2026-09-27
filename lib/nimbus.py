@@ -58,7 +58,7 @@ class NimbusWindow(xbmcgui.WindowXML):
             self.setProperty(key, value)
 
     def details(self, row):
-        window = InfoWindow('script-stremio-info.xml', PATH, 'Nimbus', '1080i', meta=row)
+        window = InfoWindow('script-stremio-info.xml', PATH, 'Main', '1080i', meta=row)
         window.doModal()
         del window
 

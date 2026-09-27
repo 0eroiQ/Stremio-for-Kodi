@@ -7,7 +7,7 @@ from lib.nimbus import HomeWindow
 
 ADDON = get_addon()
 ADDON_PATH = ADDON.getAddonInfo('path')
-SKIN = 'Nimbus'
+SKIN = 'Main'
 RES = '1080i'
 
 
