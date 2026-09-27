@@ -1,3 +1,6 @@
+1.0.21
+- Detail action icons expand to show their labels when focused.
+
 1.0.20
 - Refine detail action buttons with persistent labels, rounded Nimbus backgrounds and clear focus.
 - Restyle section and season selectors and their dropdown panels.
