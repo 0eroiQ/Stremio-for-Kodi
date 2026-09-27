@@ -191,7 +191,7 @@ class HomeWindow(NimbusWindow):
         if self.discover_skip:
             values['skip'] = str(self.discover_skip)
         summary = ' · '.join([catalog['kind'].title(), catalog['label']] + list(values.values()))
-        self.setProperty('filters', 'Filters: ' + summary)
+        self.setProperty('filters',  summary)
         rows = self.busy('Loading Discover', lambda: api.discover_items(catalog, values))
         if rows: self.discover_page_size = len(rows)
         self.populate_rows('Discover', [{'label': catalog['label'], 'items': rows or []}])
@@ -201,7 +201,7 @@ class HomeWindow(NimbusWindow):
     def load_library(self):
         from lib.browse import library_sections
         labels = {'recent':'Recently added', 'watched':'Last watched', 'name':'Name'}
-        self.setProperty('filters', 'Filters: ' + self.library_kind.title() + ' · ' + labels[self.library_order])
+        self.setProperty('filters',  self.library_kind.title() + ' · ' + labels[self.library_order])
         self.populate_rows('Library', library_sections(self.library_entries, self.library_kind, self.library_order))
         if not any(self.rows.values()):
             self.setFocusId(9200)

@@ -1,3 +1,6 @@
+1.0.10
+- Use a small Filters button with the current selection shown separately beside it.
+
 1.0.9
 - Make the Discover/Library filter button compact and slide it with the rows when opening the sidebar.
 
