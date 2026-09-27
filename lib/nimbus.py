@@ -477,6 +477,7 @@ class InfoWindow(NimbusWindow):
 
     def open_menu(self, mode):
         self.menu_mode = mode
+        self.setProperty('menu_kind', mode)
         self.menu_entries = ([r['season'] for r in self.available_seasons] if mode == 'seasons' else
                              (['Episodes'] if self.meta['type'] == 'series' else []) + ['Cast', 'Crew', 'Languages', 'Similar'])
         if not self.menu_entries:
@@ -501,9 +502,10 @@ class InfoWindow(NimbusWindow):
         aid = action.getId()
         if aid in BACK:
             if self.menu_mode:
+                target = 22011 if self.menu_mode == 'seasons' else 22001
                 self.clearProperty('menu')
                 self.menu_mode = None
-                self.setFocusId(22001)
+                self.setFocusId(target)
             else:
                 self.close()
         elif aid == 4 and self.getFocusId() in (21001, 21002, 21003, 21004, 21005):
