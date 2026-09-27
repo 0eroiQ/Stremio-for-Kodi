@@ -45,11 +45,13 @@
   <category label="Trailers">
     <setting id="trailers_enabled" type="bool" label="Enable trailers" default="true" />
     <setting id="trailers_quality" type="enum" label="Trailer quality" values="1080p|720p|480p" default="0" />
-    <setting id="trailers_auto" type="bool" label="Automatically preview trailer in hero" default="false" />
+    <setting id="trailers_auto" type="bool" label="Automatically preview trailers in Home and details hero" default="false" />
     <setting id="trailers_delay" type="enum" label="Autoplay delay" values="3 seconds|5 seconds|10 seconds|15 seconds|30 seconds" default="2" />
     <setting type="lsep" label="Direct IMDb trailers in Kodi. No YouTube addon or login required. Navigation cancels the hero preview. Trailer button plays fullscreen." />
   </category>
   <category label="Home and playback">
+    <setting id="playback_back_stops" type="bool" label="Back stops all fullscreen videos in Kodi" default="true" />
+    <setting type="lsep" label="Applies to Kodi fullscreen playback. Reopen addon after changing." />
     <setting id="tmdb_api_key" type="text" option="hidden" label="TMDb API key (optional override for trailers)" default="" />
     <setting type="action" label="Stremio subtitles for current video" action="RunPlugin(plugin://script.stremioelec/?action=subtitles)" />
     <setting type="lsep" label="Languages and automatic subtitle download follow Kodi Player settings." />

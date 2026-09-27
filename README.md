@@ -4,7 +4,7 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 ## Install
 
-Download `script.stremioelec-1.0.29.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+Download `script.stremioelec-1.0.30.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
@@ -52,3 +52,5 @@ Optional MDbList ratings: open addon Settings > Ratings, enter an API key or use
 ### Built-in trailers
 
 Trailers resolve directly from IMDb and play with Kodi's native player. No YouTube or SlyGuy addon, API key or trailer login is required. Settings → Trailers controls enablement, maximum MP4 quality (1080p/720p/480p), autoplay and delay. HLS is used when MP4 is unavailable. Availability depends on IMDb: titles without an IMDb ID or a playable trailer report unavailable; YouTube-only clips are not resolved. The supplied SlyGuy Trailers 0.2.0 IMDb route informed the protocol integration; no SlyGuy framework or credentials are bundled.
+
+Automatic trailers play in the Home and details hero with a background-sized video plane and edge fade. Back stops the preview and restores artwork. Home and playback settings also provide an addon-owned fullscreen Back-to-Stop keymap for all Kodi videos; disable the setting and reopen the addon to remove only that keymap.

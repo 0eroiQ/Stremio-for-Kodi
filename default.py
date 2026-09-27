@@ -2,6 +2,8 @@
 import sys
 
 if __name__ == '__main__':
+    from lib.playback_settings import apply
+    apply()
     if any(arg in ('cache_info', 'cache_clear') for arg in sys.argv[1:]):
         from lib.maintenance import cache_action
         cache_action('cache_clear' in sys.argv[1:])
