@@ -1,3 +1,6 @@
+1.0.9
+- Make the Discover/Library filter button compact and slide it with the rows when opening the sidebar.
+
 1.0.8
 - Use the Home hero, information and aligned poster rows in Discover and Library.
 - Read Discover catalogs and supported filters from account addons.

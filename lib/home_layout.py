@@ -32,10 +32,10 @@ def build_layout(source, profile, count):
     menu.find('onright').text = 'SetFocus($INFO[Window.Property(first_row)])'
     controls = tree.getroot().find('controls')
     button = ET.SubElement(controls, 'control', type='button', id='9200')
-    tags = {'left':'50', 'top':'535', 'width':'1300', 'height':'65',
+    tags = {'left':'50', 'top':'535', 'width':'560', 'height':'65',
             'font':'font25', 'textcolor':'FFFFFFFF', 'focusedcolor':'FFFFFFFF',
             'label':'$INFO[Window.Property(filters)]',
-            'visible':'[String.IsEqual(Window.Property(page),Discover) | String.IsEqual(Window.Property(page),Library)] + !Control.HasFocus(9000)',
+            'visible':'[String.IsEqual(Window.Property(page),Discover) | String.IsEqual(Window.Property(page),Library)]',
             'onleft':'9000', 'onup':'9000', 'ondown':'SetFocus($INFO[Window.Property(first_row)])',
             'texturefocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png',
             'texturenofocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png'}
@@ -43,6 +43,7 @@ def build_layout(source, profile, count):
         node=ET.SubElement(button,key);node.text=value
         if key in ('texturefocus','texturenofocus'):
             node.set('colordiffuse', 'FF7355DE' if key=='texturefocus' else 'DD252333')
+    button.append(copy.deepcopy(group.find('animation')))
     preview = tree.find('.//control[@id="2001"]')
     preview.find('label').text = '$INFO[Window.Property(next_row)]'
     preview.find('visible').text = '!String.IsEmpty(Window.Property(next_row)) + !Control.HasFocus(9000)'
