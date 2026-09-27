@@ -4,7 +4,7 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 ## Install
 
-Download `script.stremioelec-1.0.28.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+Download `script.stremioelec-1.0.29.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 

@@ -1,3 +1,7 @@
+1.0.29
+- Autoplay trailers inside the details hero while keeping information and cards visible.
+- Keep the Trailer button fullscreen; cancel hero previews on navigation and exit.
+
 1.0.28
 - Built-in direct IMDb trailers in the native Kodi player, without external trailer addons or login.
 - Add trailer quality setting and preserve autoplay controls.

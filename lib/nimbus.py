@@ -389,6 +389,9 @@ class InfoWindow(NimbusWindow):
         self.play_target = ''
         self.resume_ms = 0
         self.trailer_timer = None
+        self.preview_generation = 0
+        self.preview_url = None
+        self.preview_lock = threading.Lock()
 
     def onInit(self):
         if self.initialized:
@@ -422,15 +425,49 @@ class InfoWindow(NimbusWindow):
             delay = [3, 5, 10, 15, 30][int(ADDON.getSetting('trailers_delay') or 2)]
             def autoplay():
                 if xbmcgui.getCurrentWindowId() == window_id and not xbmc.Player().isPlaying():
-                    self.play_trailer()
+                    self.play_hero_trailer(window_id)
             self.trailer_timer = threading.Timer(delay, autoplay)
             self.trailer_timer.daemon = True
             self.trailer_timer.start()
+
+    def play_hero_trailer(self, window_id):
+        from lib.trailer_options import resolve
+        generation = self.preview_generation
+        try:
+            stream = resolve(imdb_id(self.meta),
+                             self.season if self.meta.get('type') == 'series' else -1,
+                             ADDON.getSetting('trailers_quality'))
+            with self.preview_lock:
+                if (not stream or generation != self.preview_generation or
+                        xbmcgui.getCurrentWindowId() != window_id or xbmc.Player().isPlaying()):
+                    return
+                entry = xbmcgui.ListItem(label=stream['title'], path=stream['url'])
+                entry.setMimeType(stream['mime'])
+                entry.setContentLookup(False)
+                entry.setProperty('StartOffset', '0')
+                entry.setProperty('script.trakt.exclude', '1')
+                self.preview_url = stream['url']
+                self.setProperty('hero_trailer', 'true')
+                xbmc.Player().play(stream['url'], entry, windowed=True)
+        except Exception:
+            # An unavailable preview must leave the static hero usable.
+            pass
 
     def cancel_trailer(self):
         if self.trailer_timer:
             self.trailer_timer.cancel()
             self.trailer_timer = None
+        with self.preview_lock:
+            self.preview_generation += 1
+            self.clearProperty('hero_trailer')
+            if self.preview_url:
+                player = xbmc.Player()
+                try:
+                    if player.isPlaying() and player.getPlayingFile() == self.preview_url:
+                        player.stop()
+                except RuntimeError:
+                    pass
+                self.preview_url = None
 
     def close(self):
         self.cancel_trailer()
