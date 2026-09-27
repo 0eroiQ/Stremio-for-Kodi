@@ -14,6 +14,14 @@ from urllib.request import Request, urlopen
 _CACHE = {}
 _CACHE_LOCK = threading.Lock()
 
+def autoplay_enabled(enabled, scope, location):
+    if enabled != 'true':
+        return False
+    # Existing installations without this setting keep both hero previews.
+    locations = {'0': ('home', 'info'), '1': ('home',), '2': ('info',)}
+    return location in locations.get(scope, locations['0'])
+
+
 def autoplay_delay(value):
     try:
         index = int(value)

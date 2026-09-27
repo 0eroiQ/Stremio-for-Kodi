@@ -52,3 +52,13 @@ class TrailerOptionsTests(unittest.TestCase):
             t.resolve('tt9')
             self.assertEqual(fetch.call_count,1)
         t._CACHE.clear()
+
+    def test_autoplay_location_and_master_switch(self):
+        from lib.trailer_options import autoplay_enabled
+        for scope, expected in [('0', (True, True)), ('1', (True, False)),
+                                ('2', (False, True)), ('', (True, True))]:
+            self.assertEqual(tuple(autoplay_enabled('true', scope, page)
+                                   for page in ('home', 'info')), expected)
+            for page in ('home', 'info'):
+                self.assertFalse(autoplay_enabled('false', scope, page))
+        self.assertFalse(autoplay_enabled('true', '0', 'discover'))

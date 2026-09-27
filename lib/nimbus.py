@@ -12,7 +12,7 @@ import xbmcgui
 
 from lib import backend as api
 from lib import mdblist
-from lib.trailer_options import imdb_id, autoplay_delay
+from lib.trailer_options import imdb_id, autoplay_delay, autoplay_enabled
 
 ADDON = get_addon()
 PATH = ADDON.getAddonInfo('path')
@@ -261,7 +261,8 @@ class HomeWindow(NimbusWindow):
                 self.request_hero(key, row)
                 if (self.getProperty('page') == 'Home' and imdb_id(row) and
                         ADDON.getSetting('trailers_enabled') != 'false' and
-                        ADDON.getSetting('trailers_auto') == 'true'):
+                        autoplay_enabled(ADDON.getSetting('trailers_auto'),
+                                         ADDON.getSetting('trailers_auto_scope'), 'home')):
                     delay = autoplay_delay(ADDON.getSetting('trailers_delay'))
                     generation = self.preview_generation
                     window_id = xbmcgui.getCurrentWindowId()
@@ -525,7 +526,9 @@ class InfoWindow(NimbusWindow):
         self.refresh_library()
         self.select_section('Episodes' if series else 'Similar')
         self.setFocusId(21001)
-        if ADDON.getSetting('trailers_auto') == 'true' and self.getProperty('hastrailer'):
+        if (autoplay_enabled(ADDON.getSetting('trailers_auto'),
+                             ADDON.getSetting('trailers_auto_scope'), 'info')
+                and self.getProperty('hastrailer')):
             window_id = xbmcgui.getCurrentWindowId()
             delay = autoplay_delay(ADDON.getSetting('trailers_delay'))
             generation = self.preview_generation

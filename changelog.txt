@@ -1,3 +1,7 @@
+1.0.32
+- Choose automatic trailers in Home hero only, Media info hero only, or both.
+- Keep the autoplay master switch and manual fullscreen Trailer button independent.
+
 1.0.31
 - Suspend Home previews while media info is open and stop queued previews on navigation.
 - Resolve hero trailers during the autoplay delay and cache direct URLs briefly.
