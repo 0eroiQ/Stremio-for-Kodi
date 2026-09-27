@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <window>
   <defaultcontrol always="true">9000</defaultcontrol>
   <controls>
@@ -82,9 +82,9 @@
     </control>
     <control type="grouplist" id="2000">
       <left>0</left>
-      <top>510</top>
+      <top>630</top>
       <width>1920</width>
-      <height>570</height>
+      <height>440</height>
       <orientation>vertical</orientation>
       <itemgap>0</itemgap>
       <scrolltime>500</scrolltime>
@@ -113,7 +113,7 @@
             <height>40</height>
             <top>0</top>
           </control>
-          <top>120</top>
+          <top>0</top>
         </control>
         <control type="fixedlist" id="400">
           <orientation>horizontal</orientation>
@@ -445,7 +445,7 @@
               </control>
             </control>
           </focusedlayout>
-          <top>142</top>
+          <top>22</top>
           <onleft>9000</onleft>
           <onback>9000</onback>
           <onup>9000</onup>
@@ -463,7 +463,7 @@
             <effect type="fadediffuse" start="FFE9E9E9" end="FFBABABA" time="300" />
           </animation>
           <left>50</left>
-          <top>80</top>
+          <top>0</top>
           <height>40</height>
           <width>1815</width>
           <visible>Integer.IsGreater(Container(401).NumItems,0) | [Container(401).IsUpdating + Integer.IsEqual(Container(401).NumItems,0)]</visible>
@@ -810,7 +810,7 @@
               </control>
             </control>
           </focusedlayout>
-          <top>122</top>
+          <top>22</top>
           <onleft>9000</onleft>
           <onback>9000</onback>
           <onup>400</onup>

@@ -1,3 +1,6 @@
+1.0.5
+- Align each focused Home row to the same position and hide the preceding row above the viewport.
+
 1.0.4
 - Load bundled masks and overlays directly to preserve the Nimbus appearance on other Kodi skins.
 - Replace locale Welcome with Stremio QR account linking and expiry countdown.
