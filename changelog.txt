@@ -1,3 +1,6 @@
+1.0.22
+- Move episode cards lower to give the season controls more space.
+
 1.0.21
 - Detail action icons expand to show their labels when focused.
 
