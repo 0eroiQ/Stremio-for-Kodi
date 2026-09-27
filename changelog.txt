@@ -1,3 +1,9 @@
+1.0.31
+- Suspend Home previews while media info is open and stop queued previews on navigation.
+- Resolve hero trailers during the autoplay delay and cache direct URLs briefly.
+- Add a one-second autoplay delay while preserving existing delay choices.
+- Top-align wide hero videos and hide static artwork during playback.
+
 1.0.30
 - Add selection-delayed trailer previews to Home.
 - Match hero background dimensions and add video edge fade in Home and details.

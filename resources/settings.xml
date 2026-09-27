@@ -46,7 +46,7 @@
     <setting id="trailers_enabled" type="bool" label="Enable trailers" default="true" />
     <setting id="trailers_quality" type="enum" label="Trailer quality" values="1080p|720p|480p" default="0" />
     <setting id="trailers_auto" type="bool" label="Automatically preview trailers in Home and details hero" default="false" />
-    <setting id="trailers_delay" type="enum" label="Autoplay delay" values="3 seconds|5 seconds|10 seconds|15 seconds|30 seconds" default="2" />
+    <setting id="trailers_delay" type="enum" label="Autoplay delay" values="3 seconds|5 seconds|10 seconds|15 seconds|30 seconds|1 second" default="5" />
     <setting type="lsep" label="Direct IMDb trailers in Kodi. No YouTube addon or login required. Navigation cancels the hero preview. Trailer button plays fullscreen." />
   </category>
   <category label="Home and playback">

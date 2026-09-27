@@ -1,6 +1,8 @@
 """Embedded Nimbus program windows. All navigation stays inside this addon."""
 import re
+import json
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import xbmc
@@ -10,7 +12,7 @@ import xbmcgui
 
 from lib import backend as api
 from lib import mdblist
-from lib.trailer_options import imdb_id
+from lib.trailer_options import imdb_id, autoplay_delay
 
 ADDON = get_addon()
 PATH = ADDON.getAddonInfo('path')
@@ -38,17 +40,26 @@ class NimbusWindow(xbmcgui.WindowXML):
         self.preview_generation = 0
         self.preview_url = None
         self.preview_lock = threading.Lock()
+        self.preview_suspended = False
 
-    def play_hero_trailer(self, window_id, meta=None, generation=None):
+    def play_hero_trailer(self, window_id, meta=None, generation=None, deadline=0):
         from lib.trailer_options import resolve
         generation = self.preview_generation if generation is None else generation
         meta = meta or self.meta
         try:
+            if generation != self.preview_generation:
+                return
             stream = resolve(imdb_id(meta),
                              getattr(self, 'season', -1) if meta.get('type') == 'series' else -1,
                              ADDON.getSetting('trailers_quality'))
+            # Resolve during the selected delay, not after it. Navigation cancels
+            # the pending preview without waiting for the network request.
+            while time.monotonic() < deadline:
+                if generation != self.preview_generation:
+                    return
+                xbmc.sleep(50)
             with self.preview_lock:
-                if (not stream or generation != self.preview_generation or
+                if (self.preview_suspended or not stream or generation != self.preview_generation or
                         xbmcgui.getCurrentWindowId() != window_id or xbmc.Player().isPlaying()):
                     return
                 entry = xbmcgui.ListItem(label=stream['title'], path=stream['url'])
@@ -56,9 +67,30 @@ class NimbusWindow(xbmcgui.WindowXML):
                 entry.setContentLookup(False)
                 entry.setProperty('StartOffset', '0')
                 entry.setProperty('script.trakt.exclude', '1')
+                self.getControl(9102).setPosition(0, 0)
+                self.getControl(9101).setHeight(731)
                 self.preview_url = stream['url']
                 self.setProperty('hero_trailer', 'true')
                 xbmc.Player().play(stream['url'], entry, windowed=True)
+            # Kodi centers wide video within its native video rectangle. Move
+            # that rectangle up by the letterbox inset, leaving fullscreen alone.
+            for _ in range(80):
+                if generation != self.preview_generation:
+                    return
+                if xbmc.Player().isPlayingVideo():
+                    result = json.loads(xbmc.executeJSONRPC(json.dumps({
+                        'jsonrpc': '2.0', 'id': 1, 'method': 'Player.GetProperties',
+                        'params': {'playerid': 1, 'properties': ['currentvideostream']}})))
+                    aspect = float(((result.get('result') or {}).get('currentvideostream') or {}).get('aspect') or 0)
+                    if aspect > 0:
+                        height = min(731, round(1300 / aspect))
+                        with self.preview_lock:
+                            if generation != self.preview_generation:
+                                return
+                            self.getControl(9102).setPosition(0, -round((731 - height) / 2))
+                            self.getControl(9101).setHeight(height)
+                        return
+                xbmc.sleep(100)
         except Exception:
             # An unavailable preview must leave the static hero usable.
             pass
@@ -73,8 +105,9 @@ class NimbusWindow(xbmcgui.WindowXML):
             if self.preview_url:
                 player = xbmc.Player()
                 try:
-                    if player.isPlaying() and player.getPlayingFile() == self.preview_url:
-                        player.stop()
+                    # play() is asynchronous: also stop a queued preview before
+                    # clearing its ownership, even if isPlaying() is still false.
+                    player.stop()
                 except RuntimeError:
                     pass
                 self.preview_url = None
@@ -130,9 +163,14 @@ class NimbusWindow(xbmcgui.WindowXML):
             self.setProperty(key, value)
 
     def details(self, row):
-        window = InfoWindow('script-stremio-info.xml', PATH, 'Main', '1080i', meta=row)
-        window.doModal()
-        del window
+        self.preview_suspended = True
+        self.cancel_trailer()
+        try:
+            window = InfoWindow('script-stremio-info.xml', PATH, 'Main', '1080i', meta=row)
+            window.doModal()
+            del window
+        finally:
+            self.preview_suspended = False
 
 
 class HomeWindow(NimbusWindow):
@@ -202,6 +240,8 @@ class HomeWindow(NimbusWindow):
         self.update_hero()
 
     def update_hero(self):
+        if self.preview_suspended:
+            return
         cid = self.getFocusId()
         if cid not in self.rows:
             self.cancel_trailer()
@@ -222,11 +262,11 @@ class HomeWindow(NimbusWindow):
                 if (self.getProperty('page') == 'Home' and imdb_id(row) and
                         ADDON.getSetting('trailers_enabled') != 'false' and
                         ADDON.getSetting('trailers_auto') == 'true'):
-                    delay = [3, 5, 10, 15, 30][int(ADDON.getSetting('trailers_delay') or 2)]
+                    delay = autoplay_delay(ADDON.getSetting('trailers_delay'))
                     generation = self.preview_generation
                     window_id = xbmcgui.getCurrentWindowId()
-                    self.trailer_timer = threading.Timer(delay, self.play_hero_trailer,
-                        args=(window_id, dict(row), generation))
+                    self.trailer_timer = threading.Timer(0.25, self.play_hero_trailer,
+                        args=(window_id, dict(row), generation, time.monotonic() + delay))
                     self.trailer_timer.daemon = True
                     self.trailer_timer.start()
 
@@ -487,12 +527,13 @@ class InfoWindow(NimbusWindow):
         self.setFocusId(21001)
         if ADDON.getSetting('trailers_auto') == 'true' and self.getProperty('hastrailer'):
             window_id = xbmcgui.getCurrentWindowId()
-            delay = [3, 5, 10, 15, 30][int(ADDON.getSetting('trailers_delay') or 2)]
+            delay = autoplay_delay(ADDON.getSetting('trailers_delay'))
             generation = self.preview_generation
+            deadline = time.monotonic() + delay
             def autoplay():
                 if xbmcgui.getCurrentWindowId() == window_id and not xbmc.Player().isPlaying():
-                    self.play_hero_trailer(window_id, generation=generation)
-            self.trailer_timer = threading.Timer(delay, autoplay)
+                    self.play_hero_trailer(window_id, generation=generation, deadline=deadline)
+            self.trailer_timer = threading.Timer(0.25, autoplay)
             self.trailer_timer.daemon = True
             self.trailer_timer.start()
 

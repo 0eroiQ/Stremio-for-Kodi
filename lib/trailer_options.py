@@ -6,8 +6,21 @@ are bundled; all requests and playback are implemented here.
 """
 import json
 import re
+import time
+import threading
 from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
+
+_CACHE = {}
+_CACHE_LOCK = threading.Lock()
+
+def autoplay_delay(value):
+    try:
+        index = int(value)
+        return (3, 5, 10, 15, 30, 1)[index] if 0 <= index <= 5 else 1
+    except (ValueError, TypeError):
+        return 1
+
 
 ENDPOINT = 'https://api.graphql.imdb.com/'
 HEADERS = {'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.imdb.com/',
@@ -65,6 +78,24 @@ def choose_stream(streams, quality='0'):
 
 
 def resolve(identity, season=-1, quality='0', request=query):
+    # Short-lived signed URLs stay in memory only; never store account data.
+    if request is not query:
+        return _resolve(identity, season, quality, request)
+    key = (identity, season, quality)
+    with _CACHE_LOCK:
+        cached = _CACHE.get(key)
+        if cached and time.monotonic() < cached[0]:
+            return dict(cached[1])
+    result = _resolve(identity, season, quality, request)
+    if result:
+        with _CACHE_LOCK:
+            if len(_CACHE) >= 64:
+                _CACHE.clear()
+            _CACHE[key] = (time.monotonic() + 120, dict(result))
+    return result
+
+
+def _resolve(identity, season=-1, quality='0', request=query):
     if not re.fullmatch(r'tt\d+', str(identity)):
         raise ValueError('No IMDb identity for this title')
     data = request('''query($id: ID!){title(id:$id){

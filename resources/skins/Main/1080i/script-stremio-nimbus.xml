@@ -16,9 +16,9 @@
       <height>731</height>
       <aspectratio>stretch</aspectratio>
       <fadetime>350</fadetime>
-      <texture background="true" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/netflixfanartdiffuse.png">$INFO[Window.Property(fanart)]</texture>
+      <visible>String.IsEmpty(Window.Property(hero_trailer)) | !Player.HasVideo</visible><texture background="true" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/netflixfanartdiffuse.png">$INFO[Window.Property(fanart)]</texture>
     </control>
-    <control type="videowindow" id="9100"><left>623</left><top>-3</top><width>1300</width><height>731</height><visible>!String.IsEmpty(Window.Property(hero_trailer)) + Player.HasVideo</visible></control><control type="image"><left>623</left><top>-3</top><width>1300</width><height>731</height><visible>!String.IsEmpty(Window.Property(hero_trailer)) + Player.HasVideo</visible><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/hero-video-gradient.png</texture></control><control type="group">
+    <control type="group" id="9102"><control type="videowindow" id="9100"><left>623</left><top>-3</top><width>1300</width><height>731</height><visible>!String.IsEmpty(Window.Property(hero_trailer)) + Player.HasVideo</visible></control></control><control type="image" id="9101"><left>623</left><top>-3</top><width>1300</width><height>731</height><visible>!String.IsEmpty(Window.Property(hero_trailer)) + Player.HasVideo</visible><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/hero-video-gradient.png</texture></control><control type="group">
       <top>28</top>
       <width>815</width>
       <height>500</height>

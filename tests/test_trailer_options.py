@@ -30,3 +30,25 @@ class TrailerOptionsTests(unittest.TestCase):
         self.assertEqual(resolve('tt1',request=request)['mime'],'video/mp4')
         self.assertEqual(calls,[{'id':'tt1'},{'id':'vi2'}])
         self.assertIsNone(resolve('tt1',request=lambda q,v:{}))
+
+    def test_fast_delay_preserves_existing_choices(self):
+        from lib.trailer_options import autoplay_delay
+        self.assertEqual([autoplay_delay(str(i)) for i in range(6)], [3,5,10,15,30,1])
+        self.assertEqual(autoplay_delay(''),1)
+        self.assertEqual(autoplay_delay('-1'),1)
+
+    def test_signed_preview_cache_expires_and_separates_quality(self):
+        from unittest.mock import patch
+        from lib import trailer_options as t
+        t._CACHE.clear()
+        stream={'url':'https://example.com/test.mp4','title':'Trailer','mime':'video/mp4'}
+        with patch.object(t, '_resolve', return_value=stream) as fetch, patch.object(t.time, 'monotonic', return_value=100):
+            self.assertEqual(t.resolve('tt9'), stream)
+            self.assertEqual(t.resolve('tt9'), stream)
+            self.assertEqual(fetch.call_count,1)
+            t.resolve('tt9', quality='1')
+            self.assertEqual(fetch.call_count,2)
+        with patch.object(t, '_resolve', return_value=stream) as fetch, patch.object(t.time, 'monotonic', return_value=221):
+            t.resolve('tt9')
+            self.assertEqual(fetch.call_count,1)
+        t._CACHE.clear()
