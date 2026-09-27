@@ -455,8 +455,8 @@ class InfoWindow(NimbusWindow):
                     lambda: api.recommendations(self.meta, api.providers())) or []
             rows = self.section_cache['Similar']
         self.cards = rows
-        self.active_list = 500 if section in ('Cast', 'Crew') else 502 if section == 'Languages' else 501
-        for cid in (500, 501, 502):
+        self.active_list = 500 if section in ('Cast', 'Crew') else 502 if section == 'Languages' else 503 if section == 'Similar' else 501
+        for cid in (500, 501, 502, 503):
             self.getControl(cid).reset()
         items = []
         for row in rows:
@@ -539,7 +539,7 @@ class InfoWindow(NimbusWindow):
                 return
             self.busy('Updating library', lambda: api.toggle_library(self.meta))
             self.refresh_library()
-        elif cid in (500, 501, 502):
+        elif cid in (500, 501, 502, 503):
             pos = self.getControl(cid).getSelectedPosition()
             if not 0 <= pos < len(self.cards):
                 return

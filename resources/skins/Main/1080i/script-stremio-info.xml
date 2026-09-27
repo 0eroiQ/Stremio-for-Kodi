@@ -292,7 +292,7 @@
 			<label>[UPPERCASE]$INFO[Window.Property(runtime_tag)][/UPPERCASE]</label>
 			<visible>!String.IsEmpty(Window.Property(runtime_tag))</visible>
 		<enable>false</enable><disabledcolor>FFE5E5E7</disabledcolor></control>
-	</control></control><control type="group"><left>50</left><top>575</top><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21001)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21001)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/play.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21001)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>$INFO[Window.Property(playlabel)]</label><visible>Control.HasFocus(21001)</visible><scroll>true</scroll></control><control type="button" id="21001"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21001</onleft><onright>21002</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/play.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21001)</visible></control></control><control type="group"><left>130</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21002)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21002)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21002)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>Trailer</label><visible>Control.HasFocus(21002)</visible><scroll>true</scroll></control><control type="button" id="21002"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21001</onleft><onright>21003</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21002)</visible></control></control><control type="group"><left>210</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001) | Control.HasFocus(21002)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21003)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21003)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/settings.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21003)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>Quality</label><visible>Control.HasFocus(21003)</visible><scroll>true</scroll></control><control type="button" id="21003"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21002</onleft><onright>21004</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/settings.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21003)</visible></control></control><control type="group"><left>290</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001) | Control.HasFocus(21002) | Control.HasFocus(21003)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21004)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21004)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/menu.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21004)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>All sources</label><visible>Control.HasFocus(21004)</visible><scroll>true</scroll></control><control type="button" id="21004"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21003</onleft><onright>21005</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/menu.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21004)</visible></control></control><control type="group"><left>370</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001) | Control.HasFocus(21002) | Control.HasFocus(21003) | Control.HasFocus(21004)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21005)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21005)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21005)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>$INFO[Window.Property(librarylabel)]</label><visible>Control.HasFocus(21005)</visible><scroll>true</scroll></control><control type="button" id="21005"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21004</onleft><onright>21005</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21005)</visible></control></control><control type="button" id="22011"><left>50</left><top>653</top><width>210</width><height>54</height><font>font23_title</font><align>left</align><aligny>center</aligny><textcolor>FFADACB5</textcolor><focusedcolor>FF15161D</focusedcolor><texturefocus border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturefocus><texturenofocus border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus><label>$INFO[Window.Property(seasonlabel)]</label><onright>22001</onright><onup>21001</onup><ondown>501</ondown><enable>String.IsEmpty(Window.Property(menu))</enable><visible>!String.IsEmpty(Window.Property(series))</visible><textoffsetx>20</textoffsetx></control><control type="group"><animation effect="slide" end="230,0" time="0" condition="!String.IsEmpty(Window.Property(series))">Conditional</animation><control type="button" id="22001"><left>50</left><top>653</top><width>230</width><height>54</height><font>font23_title</font><align>left</align><aligny>center</aligny><textcolor>FFADACB5</textcolor><focusedcolor>FF15161D</focusedcolor><texturefocus border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturefocus><texturenofocus border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus><label>$INFO[Window.Property(section)]</label><onleft>22011</onleft><onup>21001</onup><ondown condition="String.IsEqual(Window.Property(section),Cast) | String.IsEqual(Window.Property(section),Crew)">500</ondown><ondown condition="String.IsEqual(Window.Property(section),Languages)">502</ondown><ondown condition="String.IsEqual(Window.Property(section),Episodes) | String.IsEqual(Window.Property(section),Similar)">501</ondown><enable>String.IsEmpty(Window.Property(menu))</enable><textoffsetx>20</textoffsetx></control><control type="image"><left>240</left><top>673</top><width>16</width><height>14</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/arrowdown.png</texture></control></control><control type="label"><left>50</left><top>692</top><width>1650</width><height>44</height><font>font23</font><textcolor>FFE5E5E7</textcolor><aligny>center</aligny><label>$INFO[Window.Property(status)]</label></control><control type="fixedlist" id="500"><left>42</left><top>728</top><width>1870</width><height>330</height><orientation>horizontal</orientation><focusposition>0</focusposition><movement>5</movement><scrolltime tween="cubic">180</scrolltime><onup>22001</onup><visible>[String.IsEqual(Window.Property(section),Cast) | String.IsEqual(Window.Property(section),Crew)] + !String.IsEmpty(Window.Property(hascards))</visible><enable>String.IsEmpty(Window.Property(menu))</enable><itemlayout width="245" height="320"><control type="group">
+	</control></control><control type="group"><left>50</left><top>575</top><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21001)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21001)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/play.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21001)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>$INFO[Window.Property(playlabel)]</label><visible>Control.HasFocus(21001)</visible><scroll>true</scroll></control><control type="button" id="21001"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21001</onleft><onright>21002</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/play.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21001)</visible></control></control><control type="group"><left>130</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21002)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21002)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21002)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>Trailer</label><visible>Control.HasFocus(21002)</visible><scroll>true</scroll></control><control type="button" id="21002"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21001</onleft><onright>21003</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21002)</visible></control></control><control type="group"><left>210</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001) | Control.HasFocus(21002)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21003)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21003)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/settings.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21003)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>Quality</label><visible>Control.HasFocus(21003)</visible><scroll>true</scroll></control><control type="button" id="21003"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21002</onleft><onright>21004</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/osd/fullscreen/buttons/settings.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21003)</visible></control></control><control type="group"><left>290</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001) | Control.HasFocus(21002) | Control.HasFocus(21003)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21004)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21004)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/menu.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21004)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>All sources</label><visible>Control.HasFocus(21004)</visible><scroll>true</scroll></control><control type="button" id="21004"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21003</onleft><onright>21005</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/menu.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21004)</visible></control></control><control type="group"><left>370</left><top>575</top><animation effect="slide" end="180,0" time="140" condition="Control.HasFocus(21001) | Control.HasFocus(21002) | Control.HasFocus(21003) | Control.HasFocus(21004)">Conditional</animation><control type="image"><left>0</left><top>0</top><width>240</width><height>64</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture><visible>Control.HasFocus(21005)</visible></control><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><visible>!Control.HasFocus(21005)</visible><texture border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FFFFFFFF</colordiffuse><visible>!Control.HasFocus(21005)</visible></control><control type="label"><left>60</left><top>0</top><width>172</width><height>64</height><font>font23_title</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>$INFO[Window.Property(librarylabel)]</label><visible>Control.HasFocus(21005)</visible><scroll>true</scroll></control><control type="button" id="21005"><left>0</left><top>0</top><width>64</width><height>64</height><texturefocus /><texturenofocus /><onleft>21004</onleft><onright>21005</onright><ondown>22001</ondown><enable>String.IsEmpty(Window.Property(menu))</enable></control><control type="image"><left>18</left><top>18</top><width>28</width><height>28</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/icons/collection.png</texture><colordiffuse>FF15161D</colordiffuse><visible>Control.HasFocus(21005)</visible></control></control><control type="button" id="22011"><left>50</left><top>653</top><width>210</width><height>54</height><font>font23_title</font><align>left</align><aligny>center</aligny><textcolor>FFADACB5</textcolor><focusedcolor>FF15161D</focusedcolor><texturefocus border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturefocus><texturenofocus border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus><label>$INFO[Window.Property(seasonlabel)]</label><onright>22001</onright><onup>21001</onup><ondown>501</ondown><enable>String.IsEmpty(Window.Property(menu))</enable><visible>!String.IsEmpty(Window.Property(series))</visible><textoffsetx>20</textoffsetx></control><control type="group"><animation effect="slide" end="230,0" time="0" condition="!String.IsEmpty(Window.Property(series))">Conditional</animation><control type="button" id="22001"><left>50</left><top>653</top><width>230</width><height>54</height><font>font23_title</font><align>left</align><aligny>center</aligny><textcolor>FFADACB5</textcolor><focusedcolor>FF15161D</focusedcolor><texturefocus border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturefocus><texturenofocus border="13" colordiffuse="FF30313B">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus><label>$INFO[Window.Property(section)]</label><onleft>22011</onleft><onup>21001</onup><ondown condition="String.IsEqual(Window.Property(section),Cast) | String.IsEqual(Window.Property(section),Crew)">500</ondown><ondown condition="String.IsEqual(Window.Property(section),Languages)">502</ondown><ondown condition="String.IsEqual(Window.Property(section),Episodes)">501</ondown><enable>String.IsEmpty(Window.Property(menu))</enable><textoffsetx>20</textoffsetx><ondown condition="String.IsEqual(Window.Property(section),Similar)">503</ondown></control><control type="image"><left>240</left><top>673</top><width>16</width><height>14</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/arrowdown.png</texture></control></control><control type="label"><left>50</left><top>692</top><width>1650</width><height>44</height><font>font23</font><textcolor>FFE5E5E7</textcolor><aligny>center</aligny><label>$INFO[Window.Property(status)]</label></control><control type="fixedlist" id="500"><left>42</left><top>728</top><width>1870</width><height>330</height><orientation>horizontal</orientation><focusposition>0</focusposition><movement>5</movement><scrolltime tween="cubic">180</scrolltime><onup>22001</onup><visible>[String.IsEqual(Window.Property(section),Cast) | String.IsEqual(Window.Property(section),Crew)] + !String.IsEmpty(Window.Property(hascards))</visible><enable>String.IsEmpty(Window.Property(menu))</enable><itemlayout width="245" height="320"><control type="group">
 <control type="image"><left>8</left><top>8</top><width>221</width><height>280</height><colordiffuse>FF20222F</colordiffuse><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/masks/dialog-bg-nobo.png</texture></control>
 <control type="image"><left>8</left><top>8</top><width>221</width><height>280</height><aspectratio>scale</aspectratio><texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster.png">$INFO[ListItem.Art(thumb)]</texture></control>
 <control type="label"><left>8</left><top>65</top><width>221</width><height>70</height><font>font27_title</font><textcolor>FFE5E5E7</textcolor><aligny>center</aligny><label>$INFO[ListItem.Property(initials)]</label><align>center</align><visible>String.IsEmpty(ListItem.Art(thumb))</visible></control>
@@ -306,7 +306,7 @@
 <control type="image"><left>2</left><top>2</top><width>233</width><height>292</height><visible>Control.HasFocus(500)</visible><texture border="8" infill="false" colordiffuse="FF4564FF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/focus.png</texture></control>
 <control type="label"><left>18</left><top>220</top><width>201</width><height>36</height><font>font23_title</font><textcolor>FFE5E5E7</textcolor><aligny>center</aligny><label>$INFO[ListItem.Label]</label><scroll>true</scroll></control>
 <control type="label"><left>18</left><top>252</top><width>201</width><height>28</height><font>font10</font><textcolor>FFE5E5E7</textcolor><aligny>center</aligny><label>$INFO[ListItem.Property(job)]</label></control>
-</control></focusedlayout></control><control type="fixedlist" id="501"><left>42</left><top>728</top><width>1870</width><height>300</height><orientation>horizontal</orientation><focusposition>0</focusposition><movement>5</movement><scrolltime tween="cubic">180</scrolltime><onup>22001</onup><visible>[String.IsEqual(Window.Property(section),Episodes) | String.IsEqual(Window.Property(section),Similar)] + !String.IsEmpty(Window.Property(hascards))</visible><enable>String.IsEmpty(Window.Property(menu))</enable><itemlayout width="420" height="280"><control type="group">
+</control></focusedlayout></control><control type="fixedlist" id="501"><left>42</left><top>728</top><width>1870</width><height>300</height><orientation>horizontal</orientation><focusposition>0</focusposition><movement>5</movement><scrolltime tween="cubic">180</scrolltime><onup>22001</onup><visible>String.IsEqual(Window.Property(section),Episodes) + !String.IsEmpty(Window.Property(hascards))</visible><enable>String.IsEmpty(Window.Property(menu))</enable><itemlayout width="420" height="280"><control type="group">
 <control type="image"><left>8</left><top>8</top><width>396</width><height>205</height><colordiffuse>FF20222F</colordiffuse><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/masks/dialog-bg-nobo.png</texture></control>
 <control type="image"><left>8</left><top>8</top><width>396</width><height>205</height><aspectratio>scale</aspectratio><texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/landscape.png">$INFO[ListItem.Art(thumb)]</texture></control>
 
@@ -339,4 +339,327 @@
 <control type="list" id="600"><left>65</left><top>728</top><width>380</width><height>320</height><onleft>600</onleft><onright>600</onright><onup>600</onup><ondown>600</ondown>
 <itemlayout width="380" height="64"><control type="label"><left>18</left><top>0</top><width>300</width><height>64</height><font>font23</font><textcolor>FFE5E5E7</textcolor><aligny>center</aligny><label>$INFO[ListItem.Label]</label></control><control type="label"><left>320</left><top>0</top><width>40</width><height>64</height><font>font23</font><textcolor>FFE5E5E7</textcolor><aligny>center</aligny><label>$INFO[ListItem.Property(selected)]</label></control></itemlayout>
 <focusedlayout width="380" height="64"><control type="image"><left>0</left><top>2</top><width>380</width><height>60</height><texture border="13" colordiffuse="FFF0F0F2">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texture></control><control type="label"><left>18</left><top>0</top><width>300</width><height>64</height><font>font23</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>$INFO[ListItem.Label]</label></control><control type="label"><left>320</left><top>0</top><width>40</width><height>64</height><font>font23</font><textcolor>FF15161D</textcolor><aligny>center</aligny><label>$INFO[ListItem.Property(selected)]</label></control></focusedlayout>
-</control><animation effect="slide" end="230,0" time="0" condition="!String.IsEmpty(Window.Property(series)) + String.IsEqual(Window.Property(menu_kind),sections)">Conditional</animation></control><control type="image"><left>220</left><top>673</top><width>16</width><height>14</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/arrowdown.png</texture><visible>!String.IsEmpty(Window.Property(series))</visible></control></controls></window>
+</control><animation effect="slide" end="230,0" time="0" condition="!String.IsEmpty(Window.Property(series)) + String.IsEqual(Window.Property(menu_kind),sections)">Conditional</animation></control><control type="image"><left>220</left><top>673</top><width>16</width><height>14</height><texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/arrowdown.png</texture><visible>!String.IsEmpty(Window.Property(series))</visible></control><control type="fixedlist" id="503"><left>0</left><top>728</top><width>1920</width><height>346</height><orientation>horizontal</orientation><focusposition>0</focusposition><movement>7</movement><scrolltime>180</scrolltime><onup>22001</onup><visible>String.IsEqual(Window.Property(section),Similar) + !String.IsEmpty(Window.Property(hascards))</visible><enable>String.IsEmpty(Window.Property(menu))</enable><itemlayout width="230.5" height="393">
+            <control type="group">
+              <left>33</left>
+              <top>15</top>
+              <control type="group">
+                <visible>String.IsEmpty(ListItem.Art(fanart)) + String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster.png</texture>
+                  <visible>[[false + Control.HasFocus(503)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[false + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
+                  <visible>!Container(503).IsUpdating</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFFFFFFF</textcolor>
+                  <autoscroll time="2000" delay="1000" repeat="2000">false + Control.HasFocus(503)</autoscroll>
+                  <visible>!ListItem.IsParentFolder + [false + Control.HasFocus(503)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFE5E5E5</textcolor>
+                  <visible>!ListItem.IsParentFolder + [!false | [!Control.HasFocus(503) + ![Control.IsVisible(54) | Control.IsVisible(500)]]]</visible>
+                </control>
+                <control type="image">
+                  <left>1</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + false + Control.HasFocus(503)</visible>
+                </control>
+                <control type="image">
+                  <left>2.5</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" colordiffuse="FFE5E5E5" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + ![false + Control.HasFocus(503)]</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>!String.IsEmpty(ListItem.Art(fanart)) | !String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>10</top>
+                  <width>201</width>
+                  <height>303</height>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-glow-widget.png</texture>
+                  <bordersize>-20</bordersize>
+                  <visible>[false + Control.HasFocus(503)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <animation type="Conditional" condition="true" pulse="true">
+                    <effect type="zoom" time="1733" start="97" end="100" center="100.5,150.5" tween="cubic" easing="in" />
+                  </animation>
+                </control>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <bordersize>1</bordersize>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-border-widget.png</bordertexture>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>230</top>
+                  <width>80</width>
+                  <height>80</height>
+                  <texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlaybg-widget.png</texture>
+                  <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation condition="       [[false + Control.HasFocus(503)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>270</top>
+                  <width>198</width>
+                  <height>40</height>
+                  <texture colordiffuse="CCFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlayfade8-widget.png</texture>
+                  <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
+                  <visible>
+						[
+							[false + Control.HasFocus(503)] |
+							false + [Control.IsVisible(54) | Control.IsVisible(500)]
+						] +
+						[
+							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) +
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) +
+							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
+						] |
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] +
+							!Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress), 0)
+							]
+						]
+					</visible>
+                </control>
+                <control type="label">
+                  <left>-70</left>
+                  <top>276</top>
+                  <width>280</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(WatchedProgress)]% watched[/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[[false + Control.HasFocus(503)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] + [String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
+                <top>265</top>
+                <control type="label">
+                  <left>41</left>
+                  <top>9</top>
+                  <width>169</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(UnwatchedEpisodes),, remaining][/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[false + Control.HasFocus(503)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <visible>
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) +
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) +
+						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
+					</visible>
+                </control>
+              </control>
+              <control type="image">
+                <left>31</left>
+                <top>280</top>
+                <width>19</width>
+                <height>19</height>
+                <texture />
+              </control>
+            </control>
+          </itemlayout><focusedlayout width="230.5" height="393">
+            <control type="group">
+              <depth>0</depth>
+              <left>33</left>
+              <top>15</top>
+              <control type="group">
+                <visible>String.IsEmpty(ListItem.Art(fanart)) + String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster.png</texture>
+                  <visible>[[true + Control.HasFocus(503)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[true + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
+                  <visible>!Container(503).IsUpdating</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFFFFFFF</textcolor>
+                  <autoscroll time="2000" delay="1000" repeat="2000">true + Control.HasFocus(503)</autoscroll>
+                  <visible>!ListItem.IsParentFolder + [true + Control.HasFocus(503)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFE5E5E5</textcolor>
+                  <visible>!ListItem.IsParentFolder + [!true | [!Control.HasFocus(503) + ![Control.IsVisible(54) | Control.IsVisible(500)]]]</visible>
+                </control>
+                <control type="image">
+                  <left>1</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + true + Control.HasFocus(503)</visible>
+                </control>
+                <control type="image">
+                  <left>2.5</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/addons.png" colordiffuse="FFE5E5E5" fallback="special://home/addons/script.stremioelec/resources/skins/Main/media/DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + ![true + Control.HasFocus(503)]</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>!String.IsEmpty(ListItem.Art(fanart)) | !String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>10</top>
+                  <width>201</width>
+                  <height>303</height>
+                  <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-glow-widget.png</texture>
+                  <bordersize>-20</bordersize>
+                  <visible>[true + Control.HasFocus(503)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                  <animation type="Conditional" condition="true" pulse="true">
+                    <effect type="zoom" time="1733" start="97" end="100" center="100.5,150.5" tween="cubic" easing="in" />
+                  </animation>
+                </control>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF" diffuse="special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <bordersize>1</bordersize>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/poster-border-widget.png</bordertexture>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>230</top>
+                  <width>80</width>
+                  <height>80</height>
+                  <texture>special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlaybg-widget.png</texture>
+                  <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation condition="       [[true + Control.HasFocus(503)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>270</top>
+                  <width>198</width>
+                  <height>40</height>
+                  <texture colordiffuse="CCFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/overlayfade8-widget.png</texture>
+                  <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
+                  <visible>
+						[
+							[true + Control.HasFocus(503)] |
+							true + [Control.IsVisible(54) | Control.IsVisible(500)]
+						] +
+						[
+							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) +
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) +
+							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
+						] |
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] +
+							!Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress), 0)
+							]
+						]
+					</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+                <control type="label">
+                  <left>-70</left>
+                  <top>276</top>
+                  <width>280</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(WatchedProgress)]% watched[/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[[true + Control.HasFocus(503)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] + [String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsEqual(Container(503).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+              </control>
+              <control type="group">
+                <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
+                <top>265</top>
+                <control type="label">
+                  <left>41</left>
+                  <top>9</top>
+                  <width>169</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(UnwatchedEpisodes),, remaining][/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[true + Control.HasFocus(503)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <visible>
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) +
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) +
+						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
+					</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+              </control>
+              <control type="image">
+                <left>31</left>
+                <top>280</top>
+                <width>19</width>
+                <height>19</height>
+                <texture />
+              </control>
+            </control>
+          </focusedlayout></control></controls></window>

@@ -1,3 +1,6 @@
+1.0.23
+- Display Similar titles with the Home portrait poster layout and focus.
+
 1.0.22
 - Move episode cards lower to give the season controls more space.
 
