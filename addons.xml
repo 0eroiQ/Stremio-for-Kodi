@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.32" provider-name="0eroiQ">
+  <requires>
+    <import addon="xbmc.python" version="3.0.0" />
+    <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
+  </requires>
+  <extension point="xbmc.python.script" library="default.py">
+    <provides>executable</provides>
+  </extension>
+  <extension point="xbmc.python.pluginsource" library="plugin.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.subtitle.module" library="subtitle_service.py" />
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Stremio experience on Kodi</summary>
+    <description lang="en_GB">Stremio for Kodi program addon with embedded Nimbus Home and media information. Nimbus layouts and artwork by Ivar Brandt. Kodi remains the playback engine; the global Kodi skin is unchanged.</description>
+    <platform>all</platform>
+    <license>GPL-2.0-or-later</license>
+    <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
+    <news>Embedded Nimbus menu, original poster widgets and animations, movie and series details, season and section selectors. Credit Ivar Brandt.</news>
+  </extension>
+</addon><addon id="repository.stremioforkodi" name="Stremio for Kodi Repository" version="1.0.0" provider-name="0eroiQ">
+  <extension point="xbmc.addon.repository" name="Stremio for Kodi Repository">
+    <dir minversion="19.0.0">
+      <info>https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/addons.xml</info>
+      <checksum>https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/addons.xml.sha256</checksum>
+      <datadir>https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/</datadir>
+      <hashes>false</hashes>
+    </dir>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Install and update Stremio for Kodi</summary>
+    <description lang="en_GB">Stable releases of the Stremio for Kodi program addon.</description>
+    <platform>all</platform>
+    <license>GPL-2.0-or-later</license>
+    <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
+  </extension>
+</addon></addons>
