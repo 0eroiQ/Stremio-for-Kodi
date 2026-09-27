@@ -1,3 +1,6 @@
+1.0.27
+- Render media info dropdown menus above Similar posters and other cards.
+
 1.0.26
 - Derive Library types only from visible saved items, excluding removed and temporary sync records.
 - Reset stale Library type selection to All.
