@@ -1,3 +1,8 @@
+1.0.15
+- Select each MDbList rating source independently and display multiple enabled ratings.
+- Add trailer enable, playback provider, detail-screen autoplay and delay settings.
+- Cancel pending trailer autoplay on navigation or closing details.
+
 1.0.14
 - Add addon-owned focus color, animation and sidebar row dimming preferences.
 - Add title logo/text and hero description, rating, genre and runtime toggles.

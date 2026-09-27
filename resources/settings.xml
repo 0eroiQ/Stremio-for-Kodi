@@ -29,9 +29,24 @@
   </category>
   <category label="Ratings">
     <setting id="mdblist_api_key" type="text" option="hidden" label="MDbList API key" default="" />
-    <setting id="mdblist_rating_source" type="enum" label="Rating source" values="IMDb|TMDb|Trakt|Rotten Tomatoes|Metacritic|Letterboxd" default="0" />
+    <setting id="rating_imdb" type="bool" label="Show IMDb rating" default="true" />
+    <setting id="rating_tmdb" type="bool" label="Show TMDb rating" default="false" />
+    <setting id="rating_trakt" type="bool" label="Show Trakt rating" default="false" />
+    <setting id="rating_tomatoes" type="bool" label="Show Rotten Tomatoes rating" default="false" />
+    <setting id="rating_metacritic" type="bool" label="Show Metacritic rating" default="false" />
+    <setting id="rating_letterboxd" type="bool" label="Show Letterboxd rating" default="false" />
+    <setting id="rating_tomatoesaudience" type="bool" label="Show RT Audience rating" default="false" />
+    <setting id="rating_metacriticuser" type="bool" label="Show Metacritic User rating" default="false" />
+    <setting id="rating_myanimelist" type="bool" label="Show MyAnimeList rating" default="false" />
     <setting type="action" label="Import API key from Nimbus" action="RunScript(script.stremioelec,import_mdblist)" />
     <setting type="lsep" label="Optional. Ratings are cached for 24 hours. Reopen addon after changes." />
+  </category>
+  <category label="Trailers">
+    <setting id="trailers_enabled" type="bool" label="Enable trailers" default="true" />
+    <setting id="trailers_provider" type="enum" label="Trailer playback provider" values="Automatic|SlyGuy Trailers|YouTube" default="0" />
+    <setting id="trailers_auto" type="bool" label="Automatically play trailer on details screen" default="false" />
+    <setting id="trailers_delay" type="enum" label="Autoplay delay" values="3 seconds|5 seconds|10 seconds|15 seconds|30 seconds" default="2" />
+    <setting type="lsep" label="Any navigation cancels autoplay. Requires an installed trailer provider." />
   </category>
   <category label="Home and playback">
     <setting id="tmdb_api_key" type="text" option="hidden" label="TMDb API key (optional override for trailers)" default="" />

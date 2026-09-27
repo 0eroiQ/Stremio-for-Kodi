@@ -9,3 +9,9 @@ class RatingTests(unittest.TestCase):
         self.assertEqual(rating_text(data,4),'')
     def test_missing_rating_keeps_fallback(self):
         self.assertEqual(rating_text({'ratings':[{'source':'imdb','value':None}]},0),'')
+    def test_multiple_selected_ratings(self):
+        from lib.mdblist import selected_text
+        settings={'rating_imdb':'true','rating_tmdb':'true','rating_trakt':'false'}
+        data={'ratings':[{'source':'imdb','value':8},{'source':'tmdb','value':80},{'source':'trakt','value':90}]}
+        self.assertEqual(selected_text(data,lambda key: settings.get(key,'')), 'IMDb 8  ·  TMDb 80')
+        self.assertEqual(selected_text(data,lambda key:'false'),'')

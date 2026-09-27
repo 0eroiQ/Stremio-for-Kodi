@@ -4,7 +4,8 @@ from urllib.parse import urlencode
 
 SOURCES = [('imdb', 'IMDb'), ('tmdb', 'TMDb'), ('trakt', 'Trakt'),
            ('tomatoes', 'Rotten Tomatoes'), ('metacritic', 'Metacritic'),
-           ('letterboxd', 'Letterboxd')]
+           ('letterboxd', 'Letterboxd'), ('tomatoesaudience', 'RT Audience'),
+           ('metacriticuser', 'Metacritic User'), ('myanimelist', 'MyAnimeList')]
 
 
 def rating_text(payload, source):
@@ -13,6 +14,12 @@ def rating_text(payload, source):
         if rating.get('source') == name and rating.get('value') is not None:
             return '{} {}'.format(label, rating['value'])
     return ''
+
+
+def selected_text(payload, get_setting):
+    return '  ·  '.join(text for index, (name, _) in enumerate(SOURCES)
+                       if get_setting('rating_' + name) == 'true'
+                       for text in [rating_text(payload, index)] if text)
 
 
 def enabled():
@@ -40,7 +47,7 @@ def enrich(row):
             payload = fetch(url, timeout=8)
             if payload.get('ratings'):
                 cache.put(url, payload, 86400)
-        text = rating_text(payload, int(addon.getSetting('mdblist_rating_source') or 0))
+        text = selected_text(payload, addon.getSetting)
         return dict(row, rating_text=text) if text else row
     except Exception:
         # Never log request URLs or exception text containing the API key.

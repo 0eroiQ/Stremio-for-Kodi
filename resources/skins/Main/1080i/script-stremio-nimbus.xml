@@ -54,7 +54,7 @@
         <textcolor>FFE5E5E7</textcolor>
         <aligny>center</aligny>
         <label>$INFO[Window.Property(facts)]</label>
-      </control>
+      <scroll>true</scroll></control>
       <control type="label">
         <left>0</left>
         <top>237</top>

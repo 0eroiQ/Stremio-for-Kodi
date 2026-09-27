@@ -9,6 +9,7 @@ from addon_state import get_addon
 import xbmcgui
 
 from lib import backend as api
+from lib import mdblist
 
 ADDON = get_addon()
 PATH = ADDON.getAddonInfo('path')
@@ -48,6 +49,8 @@ class NimbusWindow(xbmcgui.WindowXML):
 
     def set_hero(self, row):
         row = dict(row)
+        if mdblist.enabled() and ADDON.getSetting('rating_imdb') != 'true' and not row.get('rating_text'):
+            row.pop('imdbRating', None)
         for setting, fields in {
             'ui_show_logo': ('logo',), 'ui_show_plot': ('description',),
             'ui_show_genres': ('genres',), 'ui_show_rating': ('rating_text', 'imdbRating'),
@@ -356,6 +359,7 @@ class InfoWindow(NimbusWindow):
         self.cards = []
         self.play_target = ''
         self.resume_ms = 0
+        self.trailer_timer = None
 
     def onInit(self):
         if self.initialized:
@@ -363,7 +367,7 @@ class InfoWindow(NimbusWindow):
         self.initialized = True
         self.meta = self.preview
         self.set_hero(self.meta)
-        self.meta = self.busy('Loading details', lambda: api.metadata(self.preview)) or self.preview
+        self.meta = self.busy('Loading details', lambda: mdblist.enrich(api.metadata(self.preview))) or self.preview
         self.set_hero(self.meta)
         series = self.meta.get('type') == 'series'
         self.setProperty('series', 'true' if series else '')
@@ -380,10 +384,43 @@ class InfoWindow(NimbusWindow):
             self.play_target = self.meta['id']
             self.resume_ms = (saved.get('state') or {}).get('timeOffset') or 0
         self.setProperty('playlabel', 'Resume' if api.resume_seconds(self.resume_ms) else 'Play')
-        self.setProperty('hastrailer', 'true' if api.trailer_rows(self.meta) else '')
+        self.setProperty('hastrailer', 'true' if ADDON.getSetting('trailers_enabled') != 'false' and api.trailer_rows(self.meta) else '')
         self.refresh_library()
         self.select_section('Episodes' if series else 'Cast')
         self.setFocusId(21001)
+        if ADDON.getSetting('trailers_auto') == 'true' and self.getProperty('hastrailer'):
+            window_id = xbmcgui.getCurrentWindowId()
+            delay = [3, 5, 10, 15, 30][int(ADDON.getSetting('trailers_delay') or 2)]
+            def autoplay():
+                if xbmcgui.getCurrentWindowId() == window_id and not xbmc.Player().isPlaying():
+                    self.play_trailer()
+            self.trailer_timer = threading.Timer(delay, autoplay)
+            self.trailer_timer.daemon = True
+            self.trailer_timer.start()
+
+    def cancel_trailer(self):
+        if self.trailer_timer:
+            self.trailer_timer.cancel()
+            self.trailer_timer = None
+
+    def close(self):
+        self.cancel_trailer()
+        super().close()
+
+    def play_trailer(self):
+        self.cancel_trailer()
+        if ADDON.getSetting('trailers_enabled') == 'false':
+            return
+        trailers = api.trailer_rows(self.meta)
+        if not trailers:
+            return
+        from lib.trailer_options import playback_url
+        url = playback_url(trailers[0]['id'], ADDON.getSetting('trailers_provider'),
+                           lambda name: xbmc.getCondVisibility('System.HasAddon(' + name + ')'))
+        if url:
+            xbmc.executebuiltin('PlayMedia(' + url + ')')
+        else:
+            self.report('Install the selected Kodi trailer provider to play this trailer.')
 
     def refresh_library(self):
         self.setProperty('librarylabel', 'In library' if api.in_library(self.meta) else 'Add to library')
@@ -449,6 +486,7 @@ class InfoWindow(NimbusWindow):
             listing.selectItem(self.menu_entries.index(current))
 
     def onAction(self, action):
+        self.cancel_trailer()
         aid = action.getId()
         if aid in BACK:
             if self.menu_mode:
@@ -461,6 +499,7 @@ class InfoWindow(NimbusWindow):
             self.setFocusId(22001)
 
     def onClick(self, cid):
+        self.cancel_trailer()
         if cid == 22001:
             self.open_menu('sections')
         elif cid == 22011:
@@ -480,18 +519,7 @@ class InfoWindow(NimbusWindow):
             else:
                 self.report('Select an episode when episode metadata is available.')
         elif cid == 21002:
-            trailers = api.trailer_rows(self.meta)
-            if trailers:
-                from urllib.parse import urlencode
-                vid = trailers[0]['id']
-                if xbmc.getCondVisibility('System.HasAddon(slyguy.trailers)'):
-                    url = 'plugin://slyguy.trailers/play/?' + urlencode({'video_id': vid})
-                elif xbmc.getCondVisibility('System.HasAddon(plugin.video.youtube)'):
-                    url = 'plugin://plugin.video.youtube/play/?' + urlencode({'video_id': vid})
-                else:
-                    self.report('Install a Kodi trailer provider to play this trailer.')
-                    return
-                xbmc.executebuiltin('PlayMedia(' + url + ')')
+            self.play_trailer()
         elif cid == 21005:
             if not api.STORE.load().get('token'):
                 self.report('Connect your Stremio account in Settings first.')
