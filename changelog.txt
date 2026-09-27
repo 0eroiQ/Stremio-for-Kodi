@@ -1,3 +1,8 @@
+1.0.14
+- Add addon-owned focus color, animation and sidebar row dimming preferences.
+- Add title logo/text and hero description, rating, genre and runtime toggles.
+- Add cache information and clearing actions while preserving account data.
+
 1.0.13
 - Add optional addon-owned MDbList API key and rating source settings.
 - Import an existing Nimbus key without changing global skin settings.

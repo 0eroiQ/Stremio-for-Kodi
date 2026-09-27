@@ -15,11 +15,12 @@ def run():
     import xbmcvfs
     from lib import backend
     from lib.home_layout import build_layout
+    from lib.appearance import options
     progress = xbmcgui.DialogProgressBG()
     progress.create('Stremio for Kodi', 'Loading your account catalogs…')
     try:
         rows = backend.account_home()
-        filename, path, count = build_layout(ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')), max(8, len(rows)))
+        filename, path, count = build_layout(ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')), max(8, len(rows)), options(ADDON))
     finally:
         progress.close()
     window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)

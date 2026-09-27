@@ -47,6 +47,15 @@ class NimbusWindow(xbmcgui.WindowXML):
             progress.close()
 
     def set_hero(self, row):
+        row = dict(row)
+        for setting, fields in {
+            'ui_show_logo': ('logo',), 'ui_show_plot': ('description',),
+            'ui_show_genres': ('genres',), 'ui_show_rating': ('rating_text', 'imdbRating'),
+            'ui_show_runtime': ('runtime',),
+        }.items():
+            if ADDON.getSetting(setting) == 'false':
+                for field in fields:
+                    row.pop(field, None)
         values = {'title': clean(row.get('name')), 'plot': clean(row.get('description')),
                   'fanart': row.get('background') or row.get('poster') or '',
                   'logo': row.get('logo') or '',

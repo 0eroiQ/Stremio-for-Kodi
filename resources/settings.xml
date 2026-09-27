@@ -11,6 +11,22 @@
     <setting id="weather_lat" type="text" label="Weather latitude" default="" />
     <setting id="weather_lon" type="text" label="Weather longitude" default="" />
   </category>
+  <category label="Appearance">
+    <setting id="ui_focus_color" type="enum" label="Poster focus color" values="Original|Purple|Blue|Green|Gold" default="0" />
+    <setting id="ui_animations" type="bool" label="Enable animations" default="true" />
+    <setting id="ui_dim_rows" type="bool" label="Dim rows while the side menu is open" default="false" />
+    <setting id="ui_show_logo" type="bool" label="Use title logo (otherwise show text)" default="true" />
+    <setting id="ui_show_plot" type="bool" label="Show description" default="true" />
+    <setting id="ui_show_rating" type="bool" label="Show rating" default="true" />
+    <setting id="ui_show_genres" type="bool" label="Show genres" default="true" />
+    <setting id="ui_show_runtime" type="bool" label="Show runtime" default="true" />
+    <setting type="lsep" label="Reopen the addon to apply appearance changes." />
+  </category>
+  <category label="Cache and maintenance">
+    <setting type="action" label="Cache information" action="RunScript(script.stremioelec,cache_info)" />
+    <setting type="action" label="Clear addon browsing and ratings cache" action="RunScript(script.stremioelec,cache_clear)" />
+    <setting type="lsep" label="Clearing the cache refreshes data on next load. Your login and library are kept." />
+  </category>
   <category label="Ratings">
     <setting id="mdblist_api_key" type="text" option="hidden" label="MDbList API key" default="" />
     <setting id="mdblist_rating_source" type="enum" label="Rating source" values="IMDb|TMDb|Trakt|Rotten Tomatoes|Metacritic|Letterboxd" default="0" />

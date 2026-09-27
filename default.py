@@ -2,7 +2,10 @@
 import sys
 
 if __name__ == '__main__':
-    if 'import_mdblist' in sys.argv[1:]:
+    if any(arg in ('cache_info', 'cache_clear') for arg in sys.argv[1:]):
+        from lib.maintenance import cache_action
+        cache_action('cache_clear' in sys.argv[1:])
+    elif 'import_mdblist' in sys.argv[1:]:
         from lib.mdblist import import_nimbus_key
         import_nimbus_key()
     elif 'locale' in sys.argv[1:]:

@@ -5,7 +5,7 @@ import re
 import xml.etree.ElementTree as ET
 
 
-def build_layout(source, profile, count):
+def build_layout(source, profile, count, appearance=None):
     tree = ET.parse(Path(source)/'resources/skins/Main/1080i/script-stremio-nimbus.xml')
     group = tree.find('.//control[@id="2000"]')
     template = copy.deepcopy(group.find('control'))
@@ -54,6 +54,8 @@ def build_layout(source, profile, count):
     preview = tree.find('.//control[@id="2001"]')
     preview.find('label').text = '$INFO[Window.Property(next_row)]'
     preview.find('visible').text = '!String.IsEmpty(Window.Property(next_row)) + !Control.HasFocus(9000)'
+    from lib.appearance import apply
+    apply(tree, appearance or {})
     # Unique filename ensures the active global skin cannot substitute its own XML.
     path = Path(profile)/'home-layout'
     output = path/'resources/skins/Main/1080i'
