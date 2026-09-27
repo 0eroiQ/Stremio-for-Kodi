@@ -48,7 +48,12 @@ def enrich(row):
             if payload.get('ratings'):
                 cache.put(url, payload, 86400)
         text = selected_text(payload, addon.getSetting)
-        return dict(row, rating_text=text, rating_badges=badges(payload, addon.getSetting))
+        result = dict(row, rating_text=text, rating_badges=badges(payload, addon.getSetting))
+        if payload.get('certification'):
+            result['certification'] = payload['certification']
+        if payload.get('released'):
+            result['released'] = payload['released']
+        return result
     except Exception:
         # Never log request URLs or exception text containing the API key.
         return row

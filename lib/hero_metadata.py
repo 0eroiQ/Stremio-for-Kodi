@@ -17,7 +17,7 @@ def prepare(rows, catalogs, fetch_details):
                 return result
         # Keep playback state and identity from the account entry.
         for field in ('name', 'background', 'logo', 'description', 'year', 'releaseInfo',
-                      'imdbRating', 'runtime', 'genres'):
+                      'imdbRating', 'runtime', 'genres', 'released', 'certification', 'mpaa'):
             if full.get(field):
                 result[field] = full[field]
         return result

@@ -45,35 +45,15 @@
         <label>$INFO[Window.Property(title)]</label>
         <visible>String.IsEmpty(Window.Property(logo))</visible>
       </control>
-      <control type="label">
-        <left>0</left>
-        <top>190</top>
-        <width>790</width>
-        <height>42</height>
-        <font>font27</font>
-        <textcolor>FFE5E5E7</textcolor>
-        <aligny>center</aligny>
-        <label>$INFO[Window.Property(facts)]</label>
-      </control>
-      <control type="label">
-        <left>0</left>
-        <top>237</top>
-        <width>790</width>
-        <height>40</height>
-        <font>font23</font>
-        <textcolor>FFE5E5E7</textcolor>
-        <aligny>center</aligny>
-        <label>$INFO[Window.Property(genres)]</label>
-      </control>
       <control type="textbox">
         <left>0</left>
         <top>375</top>
         <width>760</width>
-        <height>115</height>
+        <height>170</height>
         <font>font27</font>
         <textcolor>FFADACB5</textcolor>
         <label>$INFO[Window.Property(plot)]</label>
-      </control>
+      <animation effect="slide" end="0,-43" time="0" condition="String.IsEmpty(Window.Property(rating5_value))">Conditional</animation></control>
       <left>50</left>
       <animation type="Conditional" condition="Control.HasFocus(9000)" reversible="true">
         <effect type="slide" start="0,0" end="0,-540" time="500" tween="cubic" easing="inout" />
@@ -309,7 +289,67 @@
         <textcolor>FFADACB5</textcolor>
       <width>70</width></control>
     </control>
-  </control></control>
+  </control><control type="grouplist"><left>0</left><top>225</top><width>790</width><height>49</height><orientation>horizontal</orientation><itemgap>15</itemgap><control type="togglebutton">
+			<left>0</left>
+			<width>auto</width>
+			<top>0</top>
+			<height>49</height>
+			<align>left</align>
+			<aligny>center</aligny>
+			<textoffsetx>14</textoffsetx>
+
+			<font>font23</font>
+			<textcolor>FFE5E5E7</textcolor>
+			<texturenofocus border="13" colordiffuse="DD353238">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus>
+			<label>[UPPERCASE]$INFO[Window.Property(premiered)][/UPPERCASE]</label>
+			<visible>!String.IsEmpty(Window.Property(premiered))</visible>
+		<enable>false</enable><disabledcolor>FFE5E5E7</disabledcolor></control>
+	<control type="togglebutton">
+			<left>0</left>
+			<width>auto</width>
+			<top>0</top>
+			<height>49</height>
+			<align>left</align>
+			<aligny>center</aligny>
+			<textoffsetx>14</textoffsetx>
+
+			<font>font23</font>
+			<textcolor>FFE5E5E7</textcolor>
+			<texturenofocus border="13" colordiffuse="DD353238">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus>
+			<label>[UPPERCASE]$INFO[Window.Property(certificate)][/UPPERCASE]</label>
+			<visible>!String.IsEmpty(Window.Property(certificate))</visible>
+		<enable>false</enable><disabledcolor>FFE5E5E7</disabledcolor></control>
+	<control type="togglebutton">
+			<left>0</left>
+			<width>auto</width>
+			<top>0</top>
+			<height>49</height>
+			<align>left</align>
+			<aligny>center</aligny>
+			<textoffsetx>14</textoffsetx>
+
+			<font>font23</font>
+			<textcolor>FFE5E5E7</textcolor>
+			<texturenofocus border="13" colordiffuse="DD353238">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus>
+			<label>[UPPERCASE]$INFO[Window.Property(genre_tag)][/UPPERCASE]</label>
+			<visible>!String.IsEmpty(Window.Property(genre_tag))</visible>
+		<enable>false</enable><disabledcolor>FFE5E5E7</disabledcolor></control>
+	<control type="togglebutton">
+			<left>0</left>
+			<width>auto</width>
+			<top>0</top>
+			<height>49</height>
+			<align>left</align>
+			<aligny>center</aligny>
+			<textoffsetx>14</textoffsetx>
+
+			<font>font23</font>
+			<textcolor>FFE5E5E7</textcolor>
+			<texturenofocus border="13" colordiffuse="DD353238">special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png</texturenofocus>
+			<label>[UPPERCASE]$INFO[Window.Property(runtime_tag)][/UPPERCASE]</label>
+			<visible>!String.IsEmpty(Window.Property(runtime_tag))</visible>
+		<enable>false</enable><disabledcolor>FFE5E5E7</disabledcolor></control>
+	</control></control>
     <control type="label" id="2001">
       <left>50</left><top>1035</top><width>1750</width><height>40</height>
       <font>font25</font><textcolor>FFBBBBBB</textcolor>
@@ -459,16 +499,16 @@
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
-							[false + Control.HasFocus(400)] | 
+							[false + Control.HasFocus(400)] |
 							false + [Control.IsVisible(54) | Control.IsVisible(500)]
-						] + 
+						] +
 						[
 							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
-							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
-							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) +
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) +
 							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
-						] | 
-							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+						] |
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] +
 							!Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress), 0)
 							]
 						]
@@ -498,8 +538,8 @@
                   <align>right</align>
                   <visible>[false + Control.HasFocus(400)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <visible>
-						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
-						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) +
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) +
 						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
 					</visible>
                 </control>
@@ -621,16 +661,16 @@
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
-							[true + Control.HasFocus(400)] | 
+							[true + Control.HasFocus(400)] |
 							true + [Control.IsVisible(54) | Control.IsVisible(500)]
-						] + 
+						] +
 						[
 							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
-							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
-							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) +
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) +
 							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
-						] | 
-							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+						] |
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] +
 							!Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress), 0)
 							]
 						]
@@ -664,8 +704,8 @@
                   <align>right</align>
                   <visible>[true + Control.HasFocus(400)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <visible>
-						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
-						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) +
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) +
 						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
 					</visible>
                   <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
@@ -824,16 +864,16 @@
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
-							[false + Control.HasFocus(401)] | 
+							[false + Control.HasFocus(401)] |
 							false + [Control.IsVisible(54) | Control.IsVisible(500)]
-						] + 
+						] +
 						[
 							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
-							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
-							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) +
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) +
 							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
-						] | 
-							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+						] |
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] +
 							!Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress), 0)
 							]
 						]
@@ -863,8 +903,8 @@
                   <align>right</align>
                   <visible>[false + Control.HasFocus(401)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <visible>
-						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
-						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) +
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) +
 						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
 					</visible>
                 </control>
@@ -986,16 +1026,16 @@
                   <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
                   <visible>
 						[
-							[true + Control.HasFocus(401)] | 
+							[true + Control.HasFocus(401)] |
 							true + [Control.IsVisible(54) | Control.IsVisible(500)]
-						] + 
+						] +
 						[
 							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
-							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
-							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) +
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) +
 							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
-						] | 
-							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+						] |
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] +
 							!Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress), 0)
 							]
 						]
@@ -1029,8 +1069,8 @@
                   <align>right</align>
                   <visible>[true + Control.HasFocus(401)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
                   <visible>
-						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
-						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) +
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) +
 						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
 					</visible>
                   <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>

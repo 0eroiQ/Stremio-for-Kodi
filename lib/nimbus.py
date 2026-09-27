@@ -66,6 +66,8 @@ class NimbusWindow(xbmcgui.WindowXML):
                   'facts': '  ·  '.join(str(v) for v in (
                       row.get('releaseInfo') or row.get('year'),
                       row.get('runtime'), {'series':'Series', 'movie':'Movie'}.get(row.get('type'), str(row.get('type') or '').title())) if v)}
+        from lib.hero_tags import tags
+        values.update(tags(row))
         ratings = row.get('rating_badges', [])
         if not ratings and row.get('imdbRating') and (not mdblist.enabled() or ADDON.getSetting('rating_imdb') == 'true'):
             ratings = [{'value': str(row['imdbRating']), 'icon': 'imdb.png'}]
