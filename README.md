@@ -4,7 +4,7 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 ## Install
 
-Download `script.stremioelec-1.0.12.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+Download `script.stremioelec-1.0.13.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
@@ -46,3 +46,5 @@ The number of rows is generated from the account collection. Each selected row s
 Discover uses the signed-in account addons and their supported catalog filters. Press Up from the first row to change filters or browse another page where supported. Library shows saved account titles grouped by type, with sorting and account refresh from the same filter bar. Both use the Home hero and poster layout.
 
 Browsing responses are cached in the addon Kodi profile across restarts: catalogs for 15 minutes and metadata for 24 hours, with a 64 MiB response-data budget. Kodi manages artwork caching. Account synchronization, stream and subtitle responses are not cached by this layer.
+
+Optional MDbList ratings: open addon Settings > Ratings, enter an API key or use Import API key from Nimbus, and select a rating source. Reopen the addon after changing these settings. Lookup supports IMDb movie/show IDs; unavailable ratings retain the original Stremio rating.

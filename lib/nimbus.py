@@ -53,7 +53,7 @@ class NimbusWindow(xbmcgui.WindowXML):
                   'genres': ' · '.join(row.get('genres') or []),
                   'facts': '  ·  '.join(str(v) for v in (
                       row.get('releaseInfo') or row.get('year'),
-                      ('★ ' + str(row['imdbRating'])) if row.get('imdbRating') else '',
+                      row.get('rating_text') or (('★ ' + str(row['imdbRating'])) if row.get('imdbRating') else ''),
                       row.get('runtime'), {'series':'Series', 'movie':'Movie'}.get(row.get('type'), str(row.get('type') or '').title())) if v)}
         for key, value in values.items():
             self.setProperty(key, value)
@@ -150,7 +150,8 @@ class HomeWindow(NimbusWindow):
         if identity in self.hero_cache:
             self.set_hero(self.hero_cache[identity])
             return
-        if row.get('background') and row.get('description'):
+        from lib import mdblist
+        if row.get('background') and row.get('description') and not mdblist.enabled():
             return
         self.hero_request = (key, dict(row), self.getProperty('page'))
         if self.hero_loading:
@@ -163,7 +164,8 @@ class HomeWindow(NimbusWindow):
                     self.hero_request = None
                     request_key, preview, page = request
                     try:
-                        full = api.metadata(preview)
+                        full = preview if preview.get('background') and preview.get('description') else api.metadata(preview)
+                        full = mdblist.enrich(full)
                         self.hero_cache[(preview.get('type'), preview.get('id'))] = full
                         if not self.closed and self.hero_key == request_key and self.getProperty('page') == page:
                             self.set_hero(full)

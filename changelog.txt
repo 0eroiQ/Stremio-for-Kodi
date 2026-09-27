@@ -1,3 +1,8 @@
+1.0.13
+- Add optional addon-owned MDbList API key and rating source settings.
+- Import an existing Nimbus key without changing global skin settings.
+- Load focused title ratings asynchronously with 24-hour caching and Stremio rating fallback.
+
 1.0.12
 - Persist catalog and metadata responses in the Kodi addon profile for faster repeated browsing across restarts.
 - Bound response data to 64 MiB; expire catalogs after 15 minutes and metadata after 24 hours.
