@@ -109,8 +109,9 @@ def route(**params):
     return BASE + '?' + urlencode(params)
 
 
-def trailer_route(video_id):
-    return 'plugin://slyguy.trailers/play/?' + urlencode({'video_id': video_id})
+def trailer_route(identity):
+    from lib.trailer_options import playback_url
+    return playback_url(identity)
 
 
 def catalog_entries(state, section='home'):
@@ -243,14 +244,14 @@ def item(meta):
         entry.setInfo('video', details)
     except Exception:
         pass
-    trailers = metadata_trailers(meta)
-    if trailers:
-        trailer = trailer_route(trailers[0]['id'])
+    from lib.trailer_options import imdb_id
+    trailer_identity = imdb_id(meta)
+    if trailer_identity:
+        trailer = trailer_route(trailer_identity)
         try:
             info.setTrailer(trailer)
         except Exception:
             entry.setProperty('Trailer', trailer)
-        entry.setProperty('StremioTrailerYouTubeID', trailers[0]['id'])
         entry.setProperty('StremioTrailerURL', trailer)
 
     entry.setProperty('StremioID', identity)
@@ -551,6 +552,29 @@ def run(params):
         xbmc.executebuiltin('RunScript(script.stremioelec)')
         return
     action = params['action']
+    if action == 'play_trailer':
+        from lib.trailer_options import resolve
+        entry = xbmcgui.ListItem()
+        try:
+            if ADDON.getSetting('trailers_enabled') == 'false':
+                raise ValueError('Trailers disabled')
+            stream = resolve(params.get('id', ''), int(params.get('season', -1)),
+                             ADDON.getSetting('trailers_quality'))
+            if not stream:
+                raise ValueError('No trailer')
+            entry.setPath(stream['url'])
+            entry.setLabel(stream['title'])
+            entry.setMimeType(stream['mime'])
+            entry.setContentLookup(False)
+            entry.setProperty('IsPlayable', 'true')
+            entry.setProperty('StartOffset', '0')
+            entry.setProperty('script.trakt.exclude', '1')
+            entry.getVideoInfoTag().setTitle(stream['title'])
+            xbmcplugin.setResolvedUrl(HANDLE, True, entry)
+        except Exception:
+            xbmcgui.Dialog().notification('Stremio for Kodi', 'Trailer unavailable. Please try another title or retry later.')
+            xbmcplugin.setResolvedUrl(HANDLE, False, entry)
+        return
     if action == 'open_season':
         target = route(action='episodes', kind='series',
                        id=params.get('id', ''), season=params.get('season', '0'))
@@ -837,10 +861,10 @@ def run(params):
                                   id=row.get('id', '')), item(row), True)
         elif action == 'details_trailers':
             xbmcplugin.setContent(HANDLE, 'videos')
-            for row in metadata_trailers(meta):
-                entry = xbmcgui.ListItem(label=row['name'])
-                entry.setProperty('StremioTrailerYouTubeID', row['id'])
-                target = trailer_route(row['id'])
+            from lib.trailer_options import imdb_id
+            target = trailer_route(imdb_id(meta))
+            if target:
+                entry = xbmcgui.ListItem(label='Trailer')
                 entry.setProperty('StremioTrailerURL', target)
                 entry.setProperty('IsPlayable', 'true')
                 xbmcplugin.addDirectoryItem(HANDLE, target, entry, False)
@@ -895,14 +919,6 @@ def run(params):
         xbmcplugin.endOfDirectory(HANDLE)
         if action == 'more_episodes':
             xbmc.executebuiltin('Container.SetViewMode(527)')
-        return
-
-    if action == 'trailer_unavailable':
-        xbmcgui.Dialog().ok(
-            'Stremio for Kodi trailer',
-            'Trailer metadata now comes directly from Stremio. '
-            'A built-in YouTube playback resolver is not installed on this Kodi test setup yet.')
-        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
         return
 
     provider = params.get('provider', '')

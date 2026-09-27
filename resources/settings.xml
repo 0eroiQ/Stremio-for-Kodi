@@ -44,10 +44,10 @@
   </category>
   <category label="Trailers">
     <setting id="trailers_enabled" type="bool" label="Enable trailers" default="true" />
-    <setting id="trailers_provider" type="enum" label="Trailer playback provider" values="Automatic|SlyGuy Trailers|YouTube" default="0" />
+    <setting id="trailers_quality" type="enum" label="Trailer quality" values="1080p|720p|480p" default="0" />
     <setting id="trailers_auto" type="bool" label="Automatically play trailer on details screen" default="false" />
     <setting id="trailers_delay" type="enum" label="Autoplay delay" values="3 seconds|5 seconds|10 seconds|15 seconds|30 seconds" default="2" />
-    <setting type="lsep" label="Any navigation cancels autoplay. Requires an installed trailer provider." />
+    <setting type="lsep" label="Direct IMDb trailers in Kodi. No YouTube addon or login required. Navigation cancels autoplay." />
   </category>
   <category label="Home and playback">
     <setting id="tmdb_api_key" type="text" option="hidden" label="TMDb API key (optional override for trailers)" default="" />

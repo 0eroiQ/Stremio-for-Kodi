@@ -10,6 +10,7 @@ import xbmcgui
 
 from lib import backend as api
 from lib import mdblist
+from lib.trailer_options import imdb_id
 
 ADDON = get_addon()
 PATH = ADDON.getAddonInfo('path')
@@ -412,7 +413,7 @@ class InfoWindow(NimbusWindow):
             self.play_target = self.meta['id']
             self.resume_ms = (saved.get('state') or {}).get('timeOffset') or 0
         self.setProperty('playlabel', 'Resume' if api.resume_seconds(self.resume_ms) else 'Play')
-        self.setProperty('hastrailer', 'true' if ADDON.getSetting('trailers_enabled') != 'false' and api.trailer_rows(self.meta) else '')
+        self.setProperty('hastrailer', 'true' if ADDON.getSetting('trailers_enabled') != 'false' and imdb_id(self.meta) else '')
         self.refresh_library()
         self.select_section('Episodes' if series else 'Similar')
         self.setFocusId(21001)
@@ -439,16 +440,13 @@ class InfoWindow(NimbusWindow):
         self.cancel_trailer()
         if ADDON.getSetting('trailers_enabled') == 'false':
             return
-        trailers = api.trailer_rows(self.meta)
-        if not trailers:
-            return
-        from lib.trailer_options import playback_url
-        url = playback_url(trailers[0]['id'], ADDON.getSetting('trailers_provider'),
-                           lambda name: xbmc.getCondVisibility('System.HasAddon(' + name + ')'))
+        from lib.trailer_options import playback_url, imdb_id
+        url = playback_url(imdb_id(self.meta), self.season if self.meta.get('type') == 'series' else -1)
         if url:
+            self.report('')
             xbmc.executebuiltin('PlayMedia(' + url + ')')
         else:
-            self.report('Install the selected Kodi trailer provider to play this trailer.')
+            self.report('No direct trailer is available for this title.')
 
     def refresh_library(self):
         self.setProperty('librarylabel', 'In library' if api.in_library(self.meta) else 'Add to library')

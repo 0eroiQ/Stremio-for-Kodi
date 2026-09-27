@@ -1,3 +1,8 @@
+1.0.28
+- Built-in direct IMDb trailers in the native Kodi player, without external trailer addons or login.
+- Add trailer quality setting and preserve autoplay controls.
+- Route both embedded details and Kodi metadata trailer actions through this addon.
+
 1.0.27
 - Render media info dropdown menus above Similar posters and other cards.
 
