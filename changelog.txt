@@ -1,3 +1,10 @@
+1.0.8
+- Use the Home hero, information and aligned poster rows in Discover and Library.
+- Read Discover catalogs and supported filters from account addons.
+- Sync saved library titles with type, sorting and refresh controls.
+- Enrich sparse library metadata for the hero without blocking navigation.
+- Remove the obsolete Bingie Home (10 rows) settings action.
+
 1.0.7
 - Build Home rows from the signed-in account catalog collection and order instead of two fixed Cinemeta rows.
 - Add account Continue Watching and support a dynamic number of rows.

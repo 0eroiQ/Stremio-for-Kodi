@@ -13,7 +13,6 @@
   </category>
   <category label="Home and playback">
     <setting id="tmdb_api_key" type="text" option="hidden" label="TMDb API key (optional override for trailers)" default="" />
-    <setting type="action" label="Set up Bingie Home (10 rows)" action="RunPlugin(plugin://script.stremioelec/?action=setup_home)" />
     <setting type="action" label="Stremio subtitles for current video" action="RunPlugin(plugin://script.stremioelec/?action=subtitles)" />
     <setting type="lsep" label="Languages and automatic subtitle download follow Kodi Player settings." />
     <setting type="lsep" label="Unverified HDMI: decoded audio; display mode switching off. Decoder defaults retained." />

@@ -138,3 +138,25 @@ def account_home():
     if continuing:
         rows.insert(0, {'label': 'Continue Watching', 'items': continuing, 'failed': False})
     return rows
+
+
+def discover_choices():
+    from lib.browse import discover_catalogs
+    return discover_catalogs(STORE.load().get('addons', []))
+
+
+def discover_items(catalog, extras=None):
+    values = dict(catalog['defaults'])
+    values.update(extras or {})
+    data = fetch(resource_url(catalog['url'], 'catalog', catalog['kind'], catalog['id'], values))
+    return [dict(row, type=row.get('type') or catalog['kind']) for row in data.get('metas', [])
+            if isinstance(row, dict) and row.get('id')][:100]
+
+
+def account_library(refresh=True):
+    from account import pull_library
+    state = STORE.load()
+    if refresh and state.get('token'):
+        state['library'] = pull_library(state['token'])
+        STORE.save(state)
+    return state.get('library', [])

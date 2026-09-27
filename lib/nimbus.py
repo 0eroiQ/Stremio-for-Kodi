@@ -1,5 +1,6 @@
 """Embedded Nimbus program windows. All navigation stays inside this addon."""
 import re
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 import xbmc
@@ -53,7 +54,7 @@ class NimbusWindow(xbmcgui.WindowXML):
                   'facts': '  ·  '.join(str(v) for v in (
                       row.get('releaseInfo') or row.get('year'),
                       ('★ ' + str(row['imdbRating'])) if row.get('imdbRating') else '',
-                      row.get('runtime'), 'Series' if row.get('type') == 'series' else 'Movie') if v)}
+                      row.get('runtime'), {'series':'Series', 'movie':'Movie'}.get(row.get('type'), str(row.get('type') or '').title())) if v)}
         for key, value in values.items():
             self.setProperty(key, value)
 
@@ -67,6 +68,17 @@ class HomeWindow(NimbusWindow):
     def __init__(self, *args, **kwargs):
         self.account_rows = kwargs.pop('account_rows', [])
         self.row_count = kwargs.pop('row_count', 2)
+        self.discover_skip = 0
+        self.discover_page_size = 100
+        self.discover_catalog = None
+        self.discover_extras = {}
+        self.library_kind = 'all'
+        self.library_order = 'recent'
+        self.library_entries = []
+        self.hero_cache = {}
+        self.hero_request = None
+        self.hero_loading = False
+        self.closed = False
         super().__init__(*args, **kwargs)
 
     def onInit(self):
@@ -89,6 +101,8 @@ class HomeWindow(NimbusWindow):
 
     def populate_rows(self, section, catalogs):
         self.setProperty('page', section)
+        self.setProperty('next_row', '')
+        self.set_hero({})
         self.hero_key = None
         self.row_labels = {}
         for index, cid in enumerate(self.rows):
@@ -103,14 +117,14 @@ class HomeWindow(NimbusWindow):
             self.setProperty('has'+str(cid), 'true' if rows else '')
         available = [cid for cid, rows in self.rows.items() if rows]
         for index, cid in enumerate(available):
-            up = available[index-1] if index else 9000
+            up = available[index-1] if index else (9200 if section in ('Discover', 'Library') else 9000)
             down = available[index+1] if index+1 < len(available) else cid
             self.getControl(cid).setNavigation(self.getControl(up), self.getControl(down),
                                                self.getControl(9000), self.getControl(cid))
         self.setProperty('first_row', str(available[0] if available else 9000))
         failed = sum(bool(c.get('failed')) for c in catalogs)
         self.report(('Some account catalogs could not load. Reopen the addon to retry.' if failed else '')
-                    if available else 'No account catalogs available. Check your Stremio add-ons and connection.')
+                    if available else ('Your library has no saved titles for this filter.' if section == 'Library' else 'No titles available for this selection.'))
         selected = available[0] if available else 9000
         self.setFocusId(selected)
         self.update_hero()
@@ -128,6 +142,128 @@ class HomeWindow(NimbusWindow):
             if key != self.hero_key:
                 self.hero_key = key
                 self.set_hero(row)
+                self.request_hero(key, row)
+
+    def request_hero(self, key, row):
+        identity = (row.get('type'), row.get('id'))
+        if identity in self.hero_cache:
+            self.set_hero(self.hero_cache[identity])
+            return
+        if row.get('background') and row.get('description'):
+            return
+        self.hero_request = (key, dict(row), self.getProperty('page'))
+        if self.hero_loading:
+            return
+        self.hero_loading = True
+        def enrich():
+            try:
+                while self.hero_request and not self.closed:
+                    request = self.hero_request
+                    self.hero_request = None
+                    request_key, preview, page = request
+                    try:
+                        full = api.metadata(preview)
+                        self.hero_cache[(preview.get('type'), preview.get('id'))] = full
+                        if not self.closed and self.hero_key == request_key and self.getProperty('page') == page:
+                            self.set_hero(full)
+                    except Exception:
+                        pass
+            finally:
+                self.hero_loading = False
+        threading.Thread(target=enrich, daemon=True).start()
+
+    def close(self):
+        self.closed = True
+        self.hero_request = None
+        super().close()
+
+    def load_discover(self):
+        choices = api.discover_choices()
+        if not choices:
+            self.setProperty('filters', 'Discover · No account catalogs')
+            self.populate_rows('Discover', [])
+            self.setFocusId(9200)
+            return
+        if self.discover_catalog is None:
+            self.discover_catalog = choices[0]
+        catalog = self.discover_catalog
+        values = dict(catalog['defaults']); values.update(self.discover_extras)
+        if self.discover_skip:
+            values['skip'] = str(self.discover_skip)
+        summary = ' · '.join([catalog['kind'].title(), catalog['label']] + list(values.values()))
+        self.setProperty('filters', 'Filters: ' + summary)
+        rows = self.busy('Loading Discover', lambda: api.discover_items(catalog, values))
+        if rows: self.discover_page_size = len(rows)
+        self.populate_rows('Discover', [{'label': catalog['label'], 'items': rows or []}])
+        if not rows:
+            self.setFocusId(9200)
+
+    def load_library(self):
+        from lib.browse import library_sections
+        labels = {'recent':'Recently added', 'watched':'Last watched', 'name':'Name'}
+        self.setProperty('filters', 'Filters: ' + self.library_kind.title() + ' · ' + labels[self.library_order])
+        self.populate_rows('Library', library_sections(self.library_entries, self.library_kind, self.library_order))
+        if not any(self.rows.values()):
+            self.setFocusId(9200)
+
+    def edit_filters(self):
+        dialog = xbmcgui.Dialog()
+        if self.getProperty('page') == 'Discover':
+            choices = api.discover_choices()
+            if not choices:
+                return
+            current = self.discover_catalog or choices[0]
+            extras = [e for e in current['extras'] if e.get('name') not in ('skip','search') and e.get('options')]
+            paging = any(e.get('name') == 'skip' for e in current['extras'])
+            options = ['Type', 'Catalog'] + [e['name'].title() for e in extras]
+            option = dialog.select('Discover', options + (['Next page', 'First page'] if paging else []))
+            if option < 0:
+                return
+            if paging and option >= len(options):
+                self.discover_skip = self.discover_skip + self.discover_page_size if option == len(options) else 0
+                self.load_discover()
+                return
+            self.discover_skip = 0
+            if option == 0:
+                types = list(dict.fromkeys(c['kind'] for c in choices))
+                selected = dialog.select('Type', [t.title() for t in types])
+                if selected < 0: return
+                self.discover_catalog = next(c for c in choices if c['kind'] == types[selected])
+                self.discover_extras = {}
+            elif option == 1:
+                matching = [c for c in choices if c['kind'] == current['kind']]
+                selected = dialog.select('Catalog', [c['label'] + ' · ' + c['addon'] for c in matching])
+                if selected < 0: return
+                self.discover_catalog = matching[selected]
+                self.discover_extras = {}
+            else:
+                extra = extras[option-2]
+                required = extra['name'] in current['defaults']
+                values = list(extra['options'])
+                selected = dialog.select(extra['name'].title(), ([] if required else ['All']) + [str(v) for v in values])
+                if selected < 0: return
+                if not required and selected == 0:
+                    self.discover_extras.pop(extra['name'], None)
+                else:
+                    self.discover_extras[extra['name']] = str(values[selected if required else selected-1])
+            self.load_discover()
+        elif self.getProperty('page') == 'Library':
+            option = dialog.select('Library', ['Type', 'Sort', 'Refresh from account'])
+            if option == 0:
+                kinds = ['all'] + list(dict.fromkeys(e.get('type') for e in self.library_entries if e.get('type')))
+                selected = dialog.select('Type', [t.title() for t in kinds])
+                if selected < 0: return
+                self.library_kind = kinds[selected]
+            elif option == 1:
+                selected = dialog.select('Sort', ['Recently added', 'Last watched', 'Name'])
+                if selected < 0: return
+                self.library_order = ['recent', 'watched', 'name'][selected]
+            elif option == 2:
+                rows = self.busy('Syncing your library', api.account_library)
+                if rows is not None: self.library_entries = rows
+            else:
+                return
+            self.load_library()
 
     def onFocus(self, control_id):
         if getattr(self, 'initialized', False):
@@ -145,6 +281,9 @@ class HomeWindow(NimbusWindow):
             self.update_hero()
 
     def onClick(self, cid):
+        if cid == 9200:
+            self.edit_filters()
+            return
         if cid == 9000:
             pos = self.getControl(9000).getSelectedPosition()
             cid = (202, 201, 203, 204, 205, 206)[pos] if 0 <= pos < 6 else 202
@@ -164,20 +303,11 @@ class HomeWindow(NimbusWindow):
                 self.populate('Search: ' + query, [r for r in result if r.get('type') == 'movie'],
                               [r for r in result if r.get('type') == 'series'])
         elif cid == 203:
-            genres = ['All', 'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary',
-                      'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller']
-            choice = xbmcgui.Dialog().select('Discover · Genre', genres)
-            if choice >= 0:
-                genre = '' if choice == 0 else genres[choice]
-                def load():
-                    with ThreadPoolExecutor(max_workers=2) as pool:
-                        return list(pool.map(lambda k: api.catalog(k, genre), ('movie', 'series')))
-                result = self.busy('Discover', load) or ([], [])
-                self.populate('Discover · ' + genres[choice], *result)
+            self.load_discover()
         elif cid == 204:
-            rows = api.library()
-            self.populate('Library', [r for r in rows if r.get('type') == 'movie'],
-                          [r for r in rows if r.get('type') == 'series'])
+            entries = self.busy('Syncing your library', api.account_library)
+            self.library_entries = entries if entries is not None else api.account_library(False)
+            self.load_library()
         elif cid == 205:
             rows = api.providers()
             choice = xbmcgui.Dialog().select('Installed Stremio addons',

@@ -19,7 +19,7 @@ def run():
     progress.create('Stremio for Kodi', 'Loading your account catalogs…')
     try:
         rows = backend.account_home()
-        filename, path, count = build_layout(ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')), len(rows))
+        filename, path, count = build_layout(ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')), max(8, len(rows)))
     finally:
         progress.close()
     window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)
