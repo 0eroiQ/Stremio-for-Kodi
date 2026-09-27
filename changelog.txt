@@ -1,3 +1,6 @@
+1.0.19
+- Compact rating icons and values into one horizontal row.
+
 1.0.18
 - Fix blank Home on reopening Kodi by avoiding strptime in embedded Python.
 - Expand descriptions to six lines.
