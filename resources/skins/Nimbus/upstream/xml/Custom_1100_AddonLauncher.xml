@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window id="1100">
+	<defaultcontrol>9000</defaultcontrol>
+	<backgroundcolor>background</backgroundcolor>
+	<controls>
+		<include>DefaultBackground</include>
+		<control type="group">
+			<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="$EXP[infodialog_active]">Conditional</animation>
+			<control type="group" id="400">
+				<include>OpenClose_Right</include>
+				<include content="AddonLauncherPanel">
+					<param name="group_id" value="500" />
+					<param name="id" value="video" />
+					<param name="container_path" value="addons://sources/video/" />
+					<param name="container_target" value="videos" />
+					<param name="imagewidget_onclick" value="ActivateWindow(addonbrowser,addons://all/xbmc.addon.video,return)" />
+				</include>
+				<include content="AddonLauncherPanel">
+					<param name="group_id" value="501" />
+					<param name="id" value="music" />
+					<param name="container_path" value="addons://sources/audio/" />
+					<param name="container_target" value="music" />
+					<param name="imagewidget_onclick" value="ActivateWindow(addonbrowser,addons://all/xbmc.addon.audio,return)" />
+				</include>
+				<include content="AddonLauncherPanel">
+					<param name="group_id" value="509" />
+					<param name="id" value="game" />
+					<param name="container_path" value="addons://sources/game/" />
+					<param name="container_target" value="games" />
+					<param name="imagewidget_onclick" value="ActivateWindow(addonbrowser,addons://all/category.standalonegames,return)" />
+				</include>
+				<include content="AddonLauncherPanel">
+					<param name="group_id" value="502" />
+					<param name="id" value="addons" />
+					<param name="container_path" value="addons://sources/executable/" />
+					<param name="container_target" value="programs" />
+					<param name="imagewidget_onclick" value="ActivateWindow(addonbrowser,addons://all/xbmc.addon.executable,return)" />
+				</include>
+				<include content="AddonLauncherPanel" condition="System.Platform.Android">
+					<param name="group_id" value="506" />
+					<param name="id" value="android" />
+					<param name="container_path" value="androidapp://sources/apps/" />
+					<param name="container_target" value="programs" />
+				</include>
+				<include content="AddonLauncherPanel">
+					<param name="group_id" value="503" />
+					<param name="id" value="pictures" />
+					<param name="container_path" value="addons://sources/image/" />
+					<param name="container_target" value="pictures" />
+					<param name="imagewidget_onclick" value="ActivateWindow(addonbrowser,addons://all/xbmc.addon.image,return)" />
+				</include>
+				<include content="AddonLauncherPanel">
+					<param name="group_id" value="507" />
+					<param name="id" value="download" />
+					<param name="container_path" value="addons://all/" />
+					<param name="container_target" value="addonbrowser" />
+				</include>
+				<include content="AddonLauncherPanel">
+					<param name="group_id" value="508" />
+					<param name="id" value="manage" />
+					<param name="container_path" value="addons://user" />
+					<param name="container_target" value="addonbrowser" />
+				</include>
+			</control>
+			<control type="group">
+				<include>OpenClose_Left</include>
+				<include content="MenuContentPanel">
+					<param name="width" value="475" />
+				</include>
+				<control type="fixedlist" id="9000">
+					<left>25</left>
+					<top>250</top>
+					<width>462</width>
+					<height>733</height>
+					<pagecontrol>70</pagecontrol>
+					<movement>9</movement>
+					<focusposition>0</focusposition>
+					<onup>700</onup>
+					<ondown>9000</ondown>
+					<onright>SetFocus($INFO[Container(9000).ListItem.Property(menu_id)])</onright>
+					<scrolltime tween="cubic" easing="out">500</scrolltime>
+					<include content="List">
+						<param name="id" value="9000" />
+						<param name="list_width" value="310" />
+					</include>
+					<content>
+						<item id="1">
+							<label>$LOCALIZE[157]</label>
+							<onclick>ActivateWindow(videos,addons://sources/video/,return)</onclick>
+							<property name="id">video</property>
+							<property name="path">addons://sources/video/</property>
+							<property name="menu_id">$NUMBER[500]</property>
+						</item>
+						<item id="2">
+							<label>$LOCALIZE[249]</label>
+							<onclick>ActivateWindow(music,addons://sources/audio/,return)</onclick>
+							<property name="id">music</property>
+							<property name="path">addons://sources/audio/</property>
+							<property name="menu_id">$NUMBER[501]</property>
+						</item>
+						<item id="8">
+							<label>game</label>
+							<visible>System.GetBool(gamesgeneral.enable)</visible>
+							<onclick>ActivateWindow(games,addons://sources/game/,return)</onclick>
+							<property name="id">game</property>
+							<property name="path">addons://sources/game/</property>
+							<property name="menu_id">$NUMBER[509]</property>
+						</item>
+						<item id="3">
+							<label>program</label>
+							<onclick>ActivateWindow(programs,addons://sources/executable/,return)</onclick>
+							<property name="id">addons</property>
+							<property name="path">addons://sources/executable/</property>
+							<property name="menu_id">$NUMBER[502]</property>
+						</item>
+						<item id="4">
+							<label>android</label>
+							<onclick>ActivateWindow(programs,androidapp://sources/apps/,return)</onclick>
+							<property name="id">android</property>
+							<property name="path">androidapp://sources/apps/</property>
+							<property name="menu_id">$NUMBER[506]</property>
+							<visible>System.Platform.Android</visible>
+						</item>
+						<item id="5">
+							<label>picture</label>
+							<onclick>ActivateWindow(pictures,addons://sources/image/,return)</onclick>
+							<property name="id">pictures</property>
+							<property name="path">addons://sources/image/</property>
+							<property name="menu_id">$NUMBER[503]</property>
+						</item>
+						<item id="7">
+							<label>$LOCALIZE[24998]</label>
+							<onclick>ActivateWindow(addonbrowser,addons://user/,return)</onclick>
+							<property name="id">manage</property>
+							<property name="path">addons://user/</property>
+							<property name="menu_id">$NUMBER[508]</property>
+						</item>
+						<item id="6">
+							<label>$LOCALIZE[33003]</label>
+							<onclick>ActivateWindow(addonbrowser,addons://all/,return)</onclick>
+							<property name="id">download</property>
+							<property name="path">addons://all/</property>
+							<property name="menu_id">$NUMBER[507]</property>
+						</item>
+					</content>
+				</control>
+				<control type="group">
+					<left>65</left>
+					<top>130</top>
+					<width>343</width>
+					<height>140</height>
+					<control type="grouplist" id="700">
+						<orientation>horizontal</orientation>
+						<itemgap>-19</itemgap>
+						<width>343</width>
+						<height>100</height>
+						<onup>SetFocus(9000,99,absolute)</onup>
+						<ondown>SetFocus(9000,0,absolute)</ondown>
+						<onright>400</onright>
+						<onback>9000</onback>
+						<align>left</align>
+						<include content="IconButton">
+							<param name="control_id" value="801" />
+							<param name="onclick" value="ActivateWindow(addonbrowser,root)" />
+							<param name="icon" value="icons/submenu/addons.png" />
+						</include>
+						<include content="IconButton">
+							<param name="control_id" value="802" />
+							<param name="onclick" value="ActivateWindow(addonbrowser,addons://outdated/,return)" />
+							<param name="icon" value="icons/submenu/updates.png" />
+							<param name="visible" value="Integer.IsGreater(System.AddonUpdateCount,0)" />
+						</include>
+						<include content="IconButton">
+							<param name="control_id" value="803" />
+							<param name="onclick" value="ActivateWindow(systemsettings,addons)" />
+							<param name="icon" value="icons/submenu/settings.png" />
+						</include>
+					</control>
+					<control type="label">
+						<left>17</left>
+						<top>-30</top>
+						<width>340</width>
+						<height>30</height>
+						<font>font12</font>
+						<align>left</align>
+						<aligny>center</aligny>
+						<textcolor>grey</textcolor>
+						<label>$VAR[AddonLauncherSubmenuButtonLabelsVar]</label>
+					</control>
+				</control>
+			</control>
+			<include content="TopBar">
+				<param name="breadcrumbs_label" value="[COLOR unfocused_text]$LOCALIZE[24001][/COLOR]" />
+			</include>
+			<include>BottomBar</include>
+			<control type="group">
+				<left>-10000</left>
+				<include content="InfoList">
+					<param name="path" value="addons://outdated/" />
+					<param name="bottom" value="1" />
+					<param name="width" value="1" />
+					<param name="list_id" value="8000" />
+					<param name="item_label" value="" />
+				</include>
+			</control>
+		</control>
+	</controls>
+</window>

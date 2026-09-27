@@ -1,0 +1,6 @@
+1.0.2
+- Combine program interface, media backend and subtitle service in one addon.
+- Rename the addon to Stremio for Kodi.
+- Preserve the supplied Nimbus interface and assets.
+- Migrate legacy profile data without overwriting current data.
+- Open Nimbus on ordinary addon launch.

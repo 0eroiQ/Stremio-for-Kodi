@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="utf-8"?>
+<includes>
+	<include name="MediaMenuItemsCommon">
+		<width>470</width>
+		<textoffsetx>20</textoffsetx>
+		<textoffsety>14</textoffsety>
+		<top>0</top>
+		<height>71</height>
+		<radioposx>370</radioposx>
+		<aligny>left</aligny>
+		<textcolor>unfocused_text</textcolor>
+		<focusedcolor>$VAR[FocusedTextColorVar]</focusedcolor>
+		<invalidcolor>invalid</invalidcolor>
+		<texturefocus colordiffuse="$VAR[FocusColorTheme]">masks/focus.png</texturefocus>
+		<texturenofocus />
+		<alttexturefocus colordiffuse="$VAR[FocusColorTheme]">masks/focus.png</alttexturefocus>
+		<alttexturenofocus></alttexturenofocus>
+	</include>
+	<include name="PVRQuickNavItemsCommon">
+		<param name="height">110</param>
+		<definition>
+			<control type="radiobutton" id="$PARAM[control_id]">
+				<width>92</width>
+				<height>92</height>
+				<align>center</align>
+				<aligny>center</aligny>
+				<font></font>
+				<texturefocus colordiffuse="$VAR[FocusColorTheme]">buttons/roundbutton-fo.png</texturefocus>
+				<texturenofocus />
+				<radioposx>26</radioposx>
+				<radioposy>0</radioposy>
+				<radiowidth>40</radiowidth>
+				<radioheight>40</radioheight>
+				<textureradioonfocus colordiffuse="$VAR[FocusedTextColorVar]">$PARAM[icon]</textureradioonfocus>
+				<textureradioonnofocus colordiffuse="unfocused_text">$PARAM[icon]</textureradioonnofocus>
+				<textureradioofffocus colordiffuse="$VAR[FocusedTextColorVar]">$PARAM[icon]</textureradioofffocus>
+				<textureradiooffnofocus colordiffuse="unfocused_text">$PARAM[icon]</textureradiooffnofocus>
+				<textureradiooffdisabled colordiffuse="$VAR[MenuSelectorColor]">$PARAM[icon]</textureradiooffdisabled>
+				<onclick condition="String.IsEmpty(Window.Property(IsRadio))">ActivateWindow(TV$PARAM[area])</onclick>
+				<onclick condition="!String.IsEmpty(Window.Property(IsRadio))">ActivateWindow(Radio$PARAM[area])</onclick>
+				<enable>!Window.IsActive(TV$PARAM[area]) + !Window.IsActive(Radio$PARAM[area])</enable>
+			</control>
+		</definition>
+	</include>
+	<include name="PVRSideBar">
+		<param name="group_label2">$INFO[Control.GetLabel(29)]</param>
+		<definition>
+			<control type="button" id="28">
+				<label></label>
+				<include>HiddenObject</include>
+			</control>
+			<control type="grouplist" id="9000">
+				<top>50</top>
+				<left>20</left>
+				<width>470</width>
+				<height>100%</height>
+				<onleft>9000</onleft>
+				<onup>9000</onup>
+				<onright>50</onright>
+				<ondown>14100</ondown>
+				<onback>50</onback>
+				<control type="group" id="60520">
+					<height>50</height>
+					<control type="label">
+						<include>MediaMenuLabelCommon</include>
+						<label>$LOCALIZE[31148]</label>
+					</control>
+					<control type="label">
+						<width>470</width>
+						<textoffsetx>20</textoffsetx>
+						<textoffsety>15</textoffsety>
+						<height>50</height>
+						<font>font12</font>
+						<align>right</align>
+						<aligny>top</aligny>
+						<textcolor>grey</textcolor>
+						<label>$VAR[PVRAreaVar]</label>
+					</control>
+				</control>
+				<control type="group" id="60560">
+					<height>95</height>
+					<control type="grouplist" id="6056">
+						<orientation>horizontal</orientation>
+						<itemgap>-18</itemgap>
+						<left>0</left>
+						<height>120</height>
+						<onleft>6056</onleft>
+						<onright>50</onright>
+						<onup>14100</onup>
+						<ondown>6054</ondown>
+						<width>1000</width>
+						<include content="PVRQuickNavItemsCommon">
+							<param name="control_id" value="100" />
+							<param name="area" value="Channels" />
+							<param name="icon" value="icons/submenu/channels.png" />
+						</include>
+						<include content="PVRQuickNavItemsCommon">
+							<param name="control_id" value="101" />
+							<param name="area" value="Guide" />
+							<param name="icon" value="icons/submenu/guide.png" />
+						</include>
+						<include content="PVRQuickNavItemsCommon">
+							<param name="control_id" value="102" />
+							<param name="area" value="Recordings" />
+							<param name="icon" value="icons/submenu/recordings.png" />
+						</include>
+						<include content="PVRQuickNavItemsCommon">
+							<param name="control_id" value="103" />
+							<param name="area" value="Timers" />
+							<param name="icon" value="icons/submenu/timers.png" />
+						</include>
+						<include content="PVRQuickNavItemsCommon">
+							<param name="control_id" value="104" />
+							<param name="area" value="TimerRules" />
+							<param name="icon" value="icons/submenu/timer-rules.png" />
+						</include>
+						<include content="PVRQuickNavItemsCommon">
+							<param name="control_id" value="105" />
+							<param name="area" value="Search" />
+							<param name="icon" value="icons/submenu/tv-search.png" />
+						</include>
+					</control>
+				</control>
+				<control type="label" id="200">
+					<include>MediaMenuLabelCommon</include>
+					<label>$LOCALIZE[14018]</label>
+				</control>
+				<!-- <control type="button" id="6051">
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[31023]</label>
+					<label2>[B]$INFO[Container.Viewmode][/B]</label2>
+					<onclick>Container.NextViewMode</onclick>
+					<visible>Window.IsActive(MyPVRGuide.xml)</visible>
+				</control> -->
+				<control type="button" id="6054">
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[19141]</label>
+					<label2>[B]$PARAM[group_label2][/B]</label2>
+					<onclick>SendClick(28)</onclick>
+					<visible>Window.IsActive(MyPVRChannels.xml) | Window.IsActive(MyPVRGuide.xml)</visible>
+				</control>
+				<control type="radiobutton" id="6060">
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[31127]</label>
+					<selected>Control.IsVisible(50)</selected>
+					<onclick>Container.NextViewMode</onclick>
+					<visible>Window.IsActive(MyPVRChannels.xml)</visible>
+				</control>
+				<control type="button" id="6053">
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[31022]</label>
+					<label2>[B]$INFO[Container.SortMethod][/B]</label2>
+					<onclick>SendClick(3)</onclick>
+				</control>
+				<control type="button" id="6055">
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[31032]</label>
+					<label2>[B]$INFO[Container.SortOrder][/B]</label2>
+					<onclick>Container.SetSortDirection</onclick>
+				</control>
+				<control type="button" id="10">
+					<description>Watched Toggle</description>
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[20367]</label>
+					<label2>[B]$INFO[Container.NumNonFolderItems][/B]</label2>
+					<visible>Window.IsActive(MyPVRRecordings.xml)</visible>
+				</control>
+				<control type="label" id="300">
+					<label>$LOCALIZE[31021]</label>
+					<include>MediaMenuLabelCommon</include>
+					<visible>Control.IsVisible(31) | Control.IsVisible(5) | Control.IsVisible(6) | Control.IsVisible(7) | Control.IsVisible(8)</visible>
+				</control>
+				<control type="radiobutton" id="31">
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[587]</label>
+					<selected>Container.Filtered</selected>
+					<onclick>right</onclick>
+					<visible>Window.IsActive(MyPVRChannels.xml)</visible>
+				</control>
+				<control type="radiobutton" id="5">
+					<description>Group recording items by folder structure</description>
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[19270]</label>
+					<visible>Window.IsActive(MyPVRRecordings.xml)</visible>
+				</control>
+				<control type="radiobutton" id="6">
+					<description>Show hidden channels</description>
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[19051]</label>
+					<visible>Window.IsActive(MyPVRChannels.xml)</visible>
+				</control>
+				<control type="radiobutton" id="7">
+					<description>Show deleted recordings</description>
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[19184]</label>
+					<visible>Window.IsActive(MyPVRRecordings.xml)</visible>
+				</control>
+				<control type="radiobutton" id="8">
+					<description>Hide disabled timers</description>
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[19077]</label>
+					<visible>Window.IsActive(MyPVRTimers.xml)</visible>
+				</control>
+				<control type="label" id="301">
+					<include>MediaMenuLabelCommon</include>
+					<label>$LOCALIZE[31020]</label>
+					<visible>Control.IsVisible(302)</visible>
+				</control>
+				<control type="button" id="302">
+					<description>Go to playlist</description>
+					<include>MediaMenuItemsCommon</include>
+					<label>$LOCALIZE[31056]</label>
+					<onclick>ActivateWindow(videoplaylist)</onclick>
+					<visible>Window.IsActive(MyPVRRecordings.xml) + Integer.IsGreater(Playlist.Length(video),0)</visible>
+				</control>
+				<control type="group" id="141000">
+					<control type="grouplist" id="14100">
+						<animation effect="fade" start="0" end="100" time="400">WindowOpen</animation>
+						<animation effect="fade" start="100" end="0" time="300">WindowClose</animation>
+						<animation effect="fade" time="300">VisibleChange</animation>
+						<orientation>horizontal</orientation>
+						<itemgap>-17</itemgap>
+						<left>5</left>
+						<onleft>14100</onleft>
+						<onup>302</onup>
+						<ondown>6056</ondown>
+						<align>center</align>
+						<visible>Player.HasMedia + [$EXP[sidebar_visible]]</visible>
+						<visible>!System.HasActiveModalDialog</visible>
+						<include content="BottomMainMenuToggleItem">
+							<param name="control_id" value="14101" />
+							<param name="onclick" value="PlayerControl(Play)" />
+							<param name="icon_on" value="icons/now-playing/play.png" />
+							<param name="icon_off" value="icons/now-playing/pause.png" />
+							<param name="selected" value="Player.Paused" />
+						</include>
+						<include content="IconButton">
+							<param name="control_id" value="14102" />
+							<param name="onclick" value="Stop" />
+							<param name="icon" value="icons/now-playing/stop.png" />
+						</include>
+						<include content="IconButton">
+							<param name="control_id" value="14104" />
+							<param name="onclick" value="Next" />
+							<param name="icon" value="icons/now-playing/next.png" />
+						</include>
+						<include content="IconButton">
+							<param name="control_id" value="14105" />
+							<param name="onclick" value="Fullscreen" />
+							<param name="icon" value="icons/now-playing/fullscreen.png" />
+						</include>
+					</control>
+				</control>
+			</control>
+		</definition>
+	</include>
+	<include name="MediaMenuLabelCommon">
+		<width>470</width>
+		<textoffsetx>20</textoffsetx>
+		<textoffsety>10</textoffsety>
+		<height>50</height>
+		<radioposx>300</radioposx>
+		<font>font25_title</font>
+		<aligny>top</aligny>
+		<textcolor>$VAR[FocusColorTheme]</textcolor>
+	</include>
+	<include name="MediaMenuCommon">
+		<include>OpenClose_Left</include>
+		<depth>DepthSideBlade</depth>
+		<left>-570</left>
+		<animation type="Conditional" condition="$EXP[sidebar_visible]" reversible="true">
+			<effect type="slide" start="0" end="570" time="500" tween="cubic" easing="inout" />
+		</animation>
+		<!-- <control type="image">
+			<width>4000</width>
+			<height>100%</height>
+			<aspectratio>scale</aspectratio>
+			<texture colordiffuse="80FFFFFF">colors/black.png</texture>
+			<visible>$EXP[sidebar_visible] + !System.HasActiveModalDialog</visible>
+			<animation effect="fade" time="200">VisibleChange</animation>
+		</control> -->
+		<control type="image">
+			<left>0</left>
+			<top>0</top>
+			<width>570</width>
+			<height>100%</height>
+			<texture colordiffuse="$VAR[MediaMenuDiffuse]">masks/mediapanel.png</texture>
+			<visible>!Control.IsVisible(51)</visible>
+		</control>
+		<control type="image">
+			<left>0</left>
+			<top>0</top>
+			<width>515</width>
+			<height>100%</height>
+			<texture colordiffuse="$VAR[MediaMenuDiffuse]">colors/white.png</texture>
+			<visible>Control.IsVisible(51)</visible>
+		</control>
+		<control type="button" id="6131">
+			<left>0</left>
+			<top>0</top>
+			<width>500</width>
+			<height>100%</height>
+			<label></label>
+			<texturefocus />
+			<texturenofocus />
+		</control>
+		<control type="button" id="3">
+			<description>Viewtype Toggle</description>
+			<include>HiddenObject</include>
+		</control>
+		<control type="button" id="4">
+			<description>Order Toggle</description>
+			<include>HiddenObject</include>
+		</control>
+	</include>
+	<include name="MediaMenuNowPlaying">
+        <param name="left">5</param>
+		<definition>
+			<control type="grouplist" id="14100">
+				<animation effect="fade" start="0" end="100" time="400">WindowOpen</animation>
+				<animation effect="fade" start="100" end="0" time="300">WindowClose</animation>
+				<animation effect="fade" time="300">VisibleChange</animation>
+				<animation effect="slide" end="-10,0" time="0" condition ="Window.IsActive(MyPlaylist.xml)">Conditional</animation>
+				<orientation>horizontal</orientation>
+				<itemgap>-17</itemgap>
+				<left>$PARAM[left]</left>
+				<onleft>14100</onleft>
+				<width>450</width>
+				<visible>Player.HasMedia + [$EXP[sidebar_visible]]</visible>
+				<visible>!System.HasActiveModalDialog</visible>
+				<align>center</align>
+				<include content="BottomMainMenuToggleItem">
+					<param name="control_id" value="14101" />
+					<param name="onclick" value="PlayerControl(Play)" />
+					<param name="icon_on" value="icons/now-playing/play.png" />
+					<param name="icon_off" value="icons/now-playing/pause.png" />
+					<param name="selected" value="Player.Paused" />
+				</include>
+				<include content="IconButton">
+					<param name="control_id" value="14102" />
+					<param name="onclick" value="Stop" />
+					<param name="onclick_2" value="SetFocus(50)" />
+					<param name="icon" value="icons/now-playing/stop.png" />
+				</include>
+				<include content="IconButton">
+					<param name="control_id" value="14104" />
+					<param name="onclick" value="PlayerControl(Next)" />
+					<param name="icon" value="icons/now-playing/next.png" />
+				</include>
+				<include content="IconButton">
+					<param name="control_id" value="14105" />
+					<param name="onclick" value="Fullscreen" />
+					<param name="icon" value="icons/now-playing/fullscreen.png" />
+				</include>
+			</control>
+		</definition>
+	</include>
+	<include name="MediaMenuListCommon">
+		<definition>
+			<left>20</left>
+			<top>100</top>
+			<width>470</width>
+			<height>970</height>
+			<onleft>9000</onleft>
+			<onup>9000</onup>
+			<onright condition="![Window.IsVisible(musicplaylist) | Window.IsVisible(videoplaylist)]">50</onright>
+			<onright condition="Window.IsVisible(musicplaylist) | Window.IsVisible(videoplaylist)">56</onright>
+			<ondown>9000</ondown>
+			<onback>50</onback>
+			<control type="label" id="200">
+				<include>MediaMenuLabelCommon</include>
+				<label>$LOCALIZE[14018]$VAR[ContentTypeLabel]</label>
+			</control>
+			<control type="button" id="6051">
+				<include>MediaMenuItemsCommon</include>
+				<label>$LOCALIZE[31023]</label>
+				<label2>$VAR[ForcedViewLabel]</label2>
+				<!-- Unlock the view if it's locked, else cycle to the next view and lock it -->
+				<!-- Unlock condition -->
+				<onclick condition="Container.Content(episodes) + !String.StartsWith(Container.PluginCategory,Season)">Skin.Reset(Skin.ForcedView.episodes.outside,$INFO[Container.Viewmode])</onclick>
+				<onclick condition="Container.Content(episodes) + String.StartsWith(Container.PluginCategory,Season)">Skin.Reset(Skin.ForcedView.episodes.inside,$INFO[Container.Viewmode])</onclick>
+				<onclick condition="!Container.Content(episodes)">Skin.Reset(Skin.ForcedView.$INFO[Container.Content])</onclick>
+				<!-- Cycle View and Lock condition -->
+				<onclick>Container.NextViewMode</onclick>
+				<onclick>Skin.TimerStart(autolock_view_timer)</onclick>
+			</control>
+
+			<!-- <control type="button" id="6051">
+				<include>MediaMenuItemsCommon</include>
+				<label>$LOCALIZE[31023]</label>
+				<label2>$VAR[ForcedViewLabel]</label2>
+		
+				Unlock the view if it's locked, else cycle to the next view and lock it
+				Unlock condition
+				<onclick condition="[Container.Content() + !String.IsEmpty(Skin.String(Skin.ForcedView.))]">Skin.Reset(Skin.ForcedView.)</onclick>
+				<onclick condition="[Container.Content(actors) + !String.IsEmpty(Skin.String(Skin.ForcedView.actors))]">Skin.Reset(Skin.ForcedView.actors)</onclick>
+				<onclick condition="[Container.Content(addons) + !String.IsEmpty(Skin.String(Skin.ForcedView.addons))]">Skin.Reset(Skin.ForcedView.addons)</onclick>
+				<onclick condition="[Container.Content(albums) + !String.IsEmpty(Skin.String(Skin.ForcedView.albums))]">Skin.Reset(Skin.ForcedView.albums)</onclick>
+				<onclick condition="[Container.Content(artists) + !String.IsEmpty(Skin.String(Skin.ForcedView.artists))]">Skin.Reset(Skin.ForcedView.artists)</onclick>
+				<onclick condition="[Container.Content(countries) + !String.IsEmpty(Skin.String(Skin.ForcedView.countries))]">Skin.Reset(Skin.ForcedView.countries)</onclick>
+				<onclick condition="[Container.Content(directors) + !String.IsEmpty(Skin.String(Skin.ForcedView.directors))]">Skin.Reset(Skin.ForcedView.directors)</onclick>
+				<onclick condition="Container.Content(episodes) + !String.StartsWith(Container.PluginCategory,Season) + !String.IsEmpty(Skin.String(Skin.ForcedView.episodes.outside))">Skin.Reset(Skin.ForcedView.episodes.outside)</onclick>
+				<onclick condition="Container.Content(episodes) + String.StartsWith(Container.PluginCategory,Season) + !String.IsEmpty(Skin.String(Skin.ForcedView.episodes.inside))">Skin.Reset(Skin.ForcedView.episodes.inside)</onclick>
+				<onclick condition="[Container.Content(files) + !String.IsEmpty(Skin.String(Skin.ForcedView.files))]">Skin.Reset(Skin.ForcedView.files)</onclick>
+				<onclick condition="[Container.Content(games) + !String.IsEmpty(Skin.String(Skin.ForcedView.games))]">Skin.Reset(Skin.ForcedView.games)</onclick>
+				<onclick condition="[Container.Content(genres) + !String.IsEmpty(Skin.String(Skin.ForcedView.genres))]">Skin.Reset(Skin.ForcedView.genres)</onclick>
+				<onclick condition="[Container.Content(images) + !String.IsEmpty(Skin.String(Skin.ForcedView.images))]">Skin.Reset(Skin.ForcedView.images)</onclick>
+				<onclick condition="[Container.Content(mixed) + !String.IsEmpty(Skin.String(Skin.ForcedView.mixed))]">Skin.Reset(Skin.ForcedView.mixed)</onclick>
+				<onclick condition="[Container.Content(movies) + !String.IsEmpty(Skin.String(Skin.ForcedView.movies))]">Skin.Reset(Skin.ForcedView.movies)</onclick>
+				<onclick condition="[Container.Content(musicvideos) + !String.IsEmpty(Skin.String(Skin.ForcedView.musicvideos))]">Skin.Reset(Skin.ForcedView.musicvideos)</onclick>
+				<onclick condition="[Container.Content(playlists) + !String.IsEmpty(Skin.String(Skin.ForcedView.playlists))]">Skin.Reset(Skin.ForcedView.playlists)</onclick>
+				<onclick condition="[Container.Content(seasons) + !String.IsEmpty(Skin.String(Skin.ForcedView.seasons))]">Skin.Reset(Skin.ForcedView.seasons)</onclick>
+				<onclick condition="[Container.Content(sets) + !String.IsEmpty(Skin.String(Skin.ForcedView.sets))]">Skin.Reset(Skin.ForcedView.sets)</onclick>
+				<onclick condition="[Container.Content(songs) + !String.IsEmpty(Skin.String(Skin.ForcedView.songs))]">Skin.Reset(Skin.ForcedView.songs)</onclick>
+				<onclick condition="[Container.Content(studios) + !String.IsEmpty(Skin.String(Skin.ForcedView.studios))]">Skin.Reset(Skin.ForcedView.studios)</onclick>
+				<onclick condition="[Container.Content(tags) + !String.IsEmpty(Skin.String(Skin.ForcedView.tags))]">Skin.Reset(Skin.ForcedView.tags)</onclick>
+				<onclick condition="[Container.Content(tvshows) + !String.IsEmpty(Skin.String(Skin.ForcedView.tvshows))]">Skin.Reset(Skin.ForcedView.tvshows)</onclick>
+				<onclick condition="[Container.Content(unknown) + !String.IsEmpty(Skin.String(Skin.ForcedView.unknown))]">Skin.Reset(Skin.ForcedView.unknown)</onclick>
+				<onclick condition="[Container.Content(videos) + !String.IsEmpty(Skin.String(Skin.ForcedView.videos))]">Skin.Reset(Skin.ForcedView.videos)</onclick>
+				<onclick condition="[Container.Content(years) + !String.IsEmpty(Skin.String(Skin.ForcedView.years))]">Skin.Reset(Skin.ForcedView.years)</onclick>
+				
+				Cycle View and Lock condition
+				<onclick condition="[String.IsEmpty(Skin.String(Skin.ForcedView.)) | String.IsEmpty(Skin.String(Skin.ForcedView.actors)) | String.IsEmpty(Skin.String(Skin.ForcedView.addons)) | String.IsEmpty(Skin.String(Skin.ForcedView.albums)) | String.IsEmpty(Skin.String(Skin.ForcedView.artists)) | String.IsEmpty(Skin.String(Skin.ForcedView.countries)) | String.IsEmpty(Skin.String(Skin.ForcedView.directors)) | String.IsEmpty(Skin.String(Skin.ForcedView.episodes.outside)) | String.IsEmpty(Skin.String(Skin.ForcedView.episodes.inside)) | String.IsEmpty(Skin.String(Skin.ForcedView.files)) | String.IsEmpty(Skin.String(Skin.ForcedView.games)) | String.IsEmpty(Skin.String(Skin.ForcedView.genres)) | String.IsEmpty(Skin.String(Skin.ForcedView.images)) | String.IsEmpty(Skin.String(Skin.ForcedView.mixed)) | String.IsEmpty(Skin.String(Skin.ForcedView.movies)) | String.IsEmpty(Skin.String(Skin.ForcedView.musicvideos)) | String.IsEmpty(Skin.String(Skin.ForcedView.playlists)) | String.IsEmpty(Skin.String(Skin.ForcedView.seasons)) | String.IsEmpty(Skin.String(Skin.ForcedView.sets)) | String.IsEmpty(Skin.String(Skin.ForcedView.songs)) | String.IsEmpty(Skin.String(Skin.ForcedView.studios)) | String.IsEmpty(Skin.String(Skin.ForcedView.tags)) | String.IsEmpty(Skin.String(Skin.ForcedView.tvshows)) | String.IsEmpty(Skin.String(Skin.ForcedView.unknown)) | String.IsEmpty(Skin.String(Skin.ForcedView.videos)) | String.IsEmpty(Skin.String(Skin.ForcedView.years))]">Container.NextViewMode</onclick>
+				<onclick condition="[String.IsEmpty(Skin.String(Skin.ForcedView.)) | String.IsEmpty(Skin.String(Skin.ForcedView.actors)) | String.IsEmpty(Skin.String(Skin.ForcedView.addons)) | String.IsEmpty(Skin.String(Skin.ForcedView.albums)) | String.IsEmpty(Skin.String(Skin.ForcedView.artists)) | String.IsEmpty(Skin.String(Skin.ForcedView.countries)) | String.IsEmpty(Skin.String(Skin.ForcedView.directors)) | String.IsEmpty(Skin.String(Skin.ForcedView.episodes.outside)) | String.IsEmpty(Skin.String(Skin.ForcedView.episodes.inside)) | String.IsEmpty(Skin.String(Skin.ForcedView.files)) | String.IsEmpty(Skin.String(Skin.ForcedView.games)) | String.IsEmpty(Skin.String(Skin.ForcedView.genres)) | String.IsEmpty(Skin.String(Skin.ForcedView.images)) | String.IsEmpty(Skin.String(Skin.ForcedView.mixed)) | String.IsEmpty(Skin.String(Skin.ForcedView.movies)) | String.IsEmpty(Skin.String(Skin.ForcedView.musicvideos)) | String.IsEmpty(Skin.String(Skin.ForcedView.playlists)) | String.IsEmpty(Skin.String(Skin.ForcedView.seasons)) | String.IsEmpty(Skin.String(Skin.ForcedView.sets)) | String.IsEmpty(Skin.String(Skin.ForcedView.songs)) | String.IsEmpty(Skin.String(Skin.ForcedView.studios)) | String.IsEmpty(Skin.String(Skin.ForcedView.tags)) | String.IsEmpty(Skin.String(Skin.ForcedView.tvshows)) | String.IsEmpty(Skin.String(Skin.ForcedView.unknown)) | String.IsEmpty(Skin.String(Skin.ForcedView.videos)) | String.IsEmpty(Skin.String(Skin.ForcedView.years))]">Skin.TimerStart(autolock_view_timer)</onclick>
+			</control> -->
+			<control type="radiobutton" id="6052">
+				<label>Clearlogo</label>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.ToggleSetting(Enable.Clearlogo)</onclick>
+				<selected>Skin.HasSetting(Enable.Clearlogo)</selected>
+				<visible>!Control.IsVisible(50) + !Control.IsVisible(51) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="radiobutton" id="6053">
+				<label>Clearlogo</label>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.ToggleSetting(Enable.LandscapeClearlogo)</onclick>
+				<selected>Skin.HasSetting(Enable.LandscapeClearlogo)</selected>
+				<visible>
+					Control.IsVisible(50) + 
+					[
+						[Container.Content(movies) + String.IsEqual(Skin.String(ListLandscape.movies),1)] | [Container.Content(tvshows) + String.IsEqual(Skin.String(ListLandscape.tvshows),1)] | [Container.Content(seasons) + String.IsEqual(Skin.String(ListLandscape.seasons),1)] | [Container.Content(episodes) + String.IsEqual(Skin.String(ListLandscape.episodes),0)] |
+						[Container.Content(episodes) + String.IsEqual(Skin.String(ListLandscape.episodes),1)]
+					] +
+					[
+						[Container.Content(movies) + String.IsEqual(Skin.String(ListArtworkChoice.movies),0)] | 
+						[Container.Content(tvshows) + String.IsEqual(Skin.String(ListArtworkChoice.tvshows),0)] | 
+						[Container.Content(seasons) + String.IsEqual(Skin.String(ListArtworkChoice.seasons),0)] | 
+						[Container.Content(episodes) + String.IsEqual(Skin.String(ListArtworkChoice.episodes),0)]
+					]
+				</visible>
+			</control>
+			<control type="radiobutton" id="6054">
+				<label>Clearlogo</label>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.ToggleSetting(Enable.FanartClearlogo)</onclick>
+				<selected>Skin.HasSetting(Enable.FanartClearlogo)</selected>
+				<visible>
+					Control.IsVisible(50) +
+					[
+						[Container.Content(movies) + String.IsEqual(Skin.String(ListArtworkChoice.movies),2)] | 
+						[Container.Content(tvshows) + String.IsEqual(Skin.String(ListArtworkChoice.tvshows),2)] | 
+						[Container.Content(seasons) + String.IsEqual(Skin.String(ListArtworkChoice.seasons),2)] | 
+						[Container.Content(episodes) + String.IsEqual(Skin.String(ListArtworkChoice.episodes),2)]
+					]
+				</visible>
+			</control>
+			<control type="radiobutton" id="6055">
+				<label>Clearlogo (Auto info)</label>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.ToggleSetting(Enable.AutoInfoClearlogo)</onclick>
+				<selected>Skin.HasSetting(Enable.AutoInfoClearlogo)</selected>
+				<visible>Control.IsVisible(51) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="radiobutton" id="6056">
+				<label>Clearlogo (Spine)</label>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.ToggleSetting(Enable.SpineClearlogo)</onclick>
+				<selected>Skin.HasSetting(Enable.SpineClearlogo)</selected>
+				<visible>Control.IsVisible(51) + !Skin.HasSetting(Disable.PosterFlowArtworkDimming) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="button" id="6057">
+				<include>MediaMenuItemsCommon</include>
+				<label>    - Font style</label>
+				<label2>[B]$VAR[TitleSettingVar][/B]</label2>
+				<onclick>$VAR[TitleSettingToggleVar]</onclick>
+				<visible>!Control.IsVisible(50) + !Skin.HasSetting(Enable.Clearlogo) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<!-- <control type="radiobutton" id="6058">
+				<include>MediaMenuItemsCommon</include>
+				<label>Background blur</label>
+				<onclick>Skin.ToggleSetting(Enable.BackgroundBlur)</onclick>
+				<selected>Skin.HasSetting(Enable.BackgroundBlur)</selected>
+			</control> -->
+			<control type="button" id="6058">
+				<include>MediaMenuItemsCommon</include>
+				<label>Artwork (Main)</label>
+				<label2>[B]$VAR[FanartSettingVar][/B]</label2>
+				<onclick>$VAR[FanartToggleVar]</onclick>
+				<visible>[Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)] + [Control.IsVisible(54) | Control.IsVisible(55) | Control.IsVisible(56)]</visible>
+			</control>
+			<control type="button" id="6059">
+				<include>MediaMenuItemsCommon</include>
+				<label>Layout</label>
+				<label2>[B]$VAR[ListArtworkSettingVar][/B]</label2>
+				<onclick>$VAR[ListArtworkToggleVar]</onclick>
+				<visible>Control.IsVisible(50) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes) | Container.Content(videos) | Container.Content(addons) | Container.Content(files) | Container.Content(favourites) | Container.Content]</visible>
+			</control>
+			<control type="button" id="6060">
+				<include>MediaMenuItemsCommon</include>
+				<label>    - Use</label>
+				<label2>[B]$VAR[LandscapeFanartSettingVar][/B]</label2>
+				<onclick>$VAR[LandscapeFanartToggleVar]</onclick>
+				<visible>![Control.IsVisible(50) | Control.IsVisible(51) | Control.IsVisible(500) | Control.IsVisible(501)] + [[Container.Content(movies) + String.IsEqual(Skin.String(ArtworkChoice.movies),1)] | [Container.Content(tvshows) + String.IsEqual(Skin.String(ArtworkChoice.tvshows),1)] | [Container.Content(seasons) + String.IsEqual(Skin.String(ArtworkChoice.seasons),1)] | [Container.Content(episodes) + String.IsEqual(Skin.String(ArtworkChoice.episodes),1)]]</visible>
+			</control>
+			<control type="button" id="6061">
+				<include>MediaMenuItemsCommon</include>
+				<label>    - Use</label>
+				<label2>[B]$VAR[ListLandscapeSettingVar][/B]</label2>
+				<onclick>$VAR[ListLandscapeToggleVar]</onclick>
+				<visible>
+					Control.IsVisible(50) + 
+					$EXP[isContent] + 
+					[
+						[Container.Content(movies) + String.IsEqual(Skin.String(ListArtworkChoice.movies),0)] | 
+						[Container.Content(tvshows) + String.IsEqual(Skin.String(ListArtworkChoice.tvshows),0)] | 
+						[Container.Content(seasons) + String.IsEqual(Skin.String(ListArtworkChoice.seasons),0)] | 
+						[Container.Content(episodes) + String.IsEqual(Skin.String(ListArtworkChoice.episodes),0)]
+					]
+				</visible>
+			</control>
+			<control type="button" id="6062">
+				<include>MediaMenuItemsCommon</include>
+				<label>Artwork (Items)</label>
+				<label2>[B]$VAR[ItemFanartSettingVar][/B]</label2>
+				<onclick>$VAR[ItemFanartToggleVar]</onclick>
+				<visible>Control.IsVisible(55) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons)]</visible>
+			</control>
+			<control type="button" id="6063">
+				<include>MediaMenuItemsCommon</include>
+				<label>On down action</label>
+				<label2>[B]$VAR[OnDownSettingVar.MovieTV][/B]</label2>
+				<onclick>$VAR[OnDownToggleVar.MovieTV]</onclick>
+				<visible>[Control.IsVisible(54) | Control.IsVisible(55)] + [[Container.Content(movies) + !String.StartsWith(Container.PluginName,plugin.video.the-loop)] | Container.Content(tvshows)]</visible>
+			</control>
+			<control type="button" id="6064">
+				<include>MediaMenuItemsCommon</include>
+				<label>On down action</label>
+				<label2>[B]$VAR[OnDownSettingVar.Other][/B]</label2>
+				<onclick>$VAR[OnDownToggleVar.Other]</onclick>
+				<visible>[Control.IsVisible(54) | Control.IsVisible(55)] + [Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="button" id="6065">
+				<label>    - Set delay (seconds)</label>
+				<label2>[B]$VAR[SkinSettingRevertFromWallDelay][/B]</label2>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.SetNumeric(RevertFromWallDelay)</onclick>
+				<visible>[Control.IsVisible(54) | Control.IsVisible(55)] + String.IsEqual(Skin.String(OnDownSetting.MovieTV),1) + [Container.Content(movies) | Container.Content(tvshows)]</visible>
+			</control>
+			<control type="button" id="6066">
+				<label>    - Set delay (seconds)</label>
+				<label2>[B]$VAR[SkinSettingRevertFromWallDelay][/B]</label2>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.SetNumeric(RevertFromWallDelay)</onclick>
+				<visible>[Control.IsVisible(54) | Control.IsVisible(55)] + String.IsEqual(Skin.String(OnDownSetting.Other),1) + [Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="radiobutton" id="6067">
+				<label>Dim unfocused artwork</label>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.ToggleSetting(Disable.PosterFlowArtworkDimming)</onclick>
+				<selected>!Skin.HasSetting(Disable.PosterFlowArtworkDimming)</selected>
+				<visible>Control.IsVisible(51) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="radiobutton" id="6068">
+				<label>Auto info</label>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.ToggleSetting(Disable.PosterFlowAutoInfo)</onclick>
+				<selected>!Skin.HasSetting(Disable.PosterFlowAutoInfo)</selected>
+				<visible>Control.IsVisible(51) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="button" id="6069">
+				<label>    - Set delay (seconds)</label>
+				<label2>[B]$VAR[SkinSettingPosterFlowAutoInfoDelay][/B]</label2>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>Skin.SetNumeric(PosterFlowAutoInfoDelay)</onclick>
+				<visible>Control.IsVisible(51) + !Skin.HasSetting(Disable.PosterFlowAutoInfo)  + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="button" id="6070">
+				<include>MediaMenuItemsCommon</include>
+				<label>On down action</label>
+				<label2>[B]$VAR[PosterFlowOnDownSettingVar.MovieTV][/B]</label2>
+				<onclick>$VAR[PosterFlowOnDownToggleVar.MovieTV]</onclick>
+				<visible>Control.IsVisible(51) + [[Container.Content(movies) + !String.StartsWith(Container.PluginName,plugin.video.the-loop)] | Container.Content(tvshows)]</visible>
+			</control>
+			<control type="button" id="6071">
+				<include>MediaMenuItemsCommon</include>
+				<label>On down action</label>
+				<label2>[B]$VAR[PosterFlowOnDownSettingVar.Other][/B]</label2>
+				<onclick>$VAR[PosterFlowOnDownToggleVar.Other]</onclick>
+				<visible>Control.IsVisible(51) + [Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="button" id="6072">
+				<include>MediaMenuItemsCommon</include>
+				<label>On right action</label>
+				<label2>[B]$VAR[OnRightSettingVar.MovieTV][/B]</label2>
+				<onclick>$VAR[OnRightToggleVar.MovieTV]</onclick>
+				<visible>Control.IsVisible(50) + [[Container.Content(movies) + !String.StartsWith(Container.PluginName,plugin.video.the-loop)] | Container.Content(tvshows)]</visible>
+			</control>
+			<control type="button" id="6073">
+				<include>MediaMenuItemsCommon</include>
+				<label>On right action</label>
+				<label2>[B]$VAR[OnRightSettingVar.Other][/B]</label2>
+				<onclick>$VAR[OnRightToggleVar.Other]</onclick>
+				<visible>Control.IsVisible(50) + [Container.Content(seasons) | Container.Content(episodes)]</visible>
+			</control>
+			<control type="button" id="6074">
+				<include>MediaMenuItemsCommon</include>
+				<label>$LOCALIZE[31022]</label>
+				<label2>[B]$INFO[Container.SortMethod][/B]</label2>
+				<visible>Control.IsEnabled(3)</visible>
+				<onclick>SendClick(3)</onclick>
+			</control>
+			<control type="button" id="6075">
+				<include>MediaMenuItemsCommon</include>
+				<label>$LOCALIZE[31032]</label>
+				<label2>[B]$INFO[Container.SortOrder][/B]</label2>
+				<visible>Control.IsEnabled(4)</visible>
+				<onclick>SendClick(4)</onclick>
+			</control>
+			<include condition="Window.IsVisible(Videos) | Window.IsVisible(Music)">MediaMenuSearchButton</include>
+			<control type="button" id="19">
+				<visible>Container.CanFilter + !Container.CanFilterAdvanced</visible>
+				<include>MediaMenuItemsCommon</include>
+				<onclick>right</onclick>
+				<label>$LOCALIZE[587]</label>
+			</control>
+			<control type="button" id="199">
+				<visible>Container.CanFilterAdvanced</visible>
+				<include>MediaMenuItemsCommon</include>
+				<label>$LOCALIZE[587]</label>
+				<onclick>right</onclick>
+				<onclick>Filter</onclick>
+			</control>
+		</definition>
+	</include>
+	<include name="MediaMenuSearchButton">
+		<control type="button" id="8">
+			<include>MediaMenuItemsCommon</include>
+			<label>$LOCALIZE[137]</label>
+		</control>
+	</include>
+	<include name="MediaMenuMouseOverlay">
+		<control type="button" id="6130">
+			<label></label>
+			<left>-50</left>
+			<top>200</top>
+			<bottom>0</bottom>
+			<width>50</width>
+			<texturefocus />
+			<texturenofocus />
+		</control>
+	</include>
+</includes>

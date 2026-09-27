@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window>
+	<onload condition="!String.IsEmpty(Skin.String(ToggleLabel))">Skin.Reset(ToggleLabel)</onload>
+	<controls>
+		<include>PlaybackTimer</include>
+	</controls>
+</window>

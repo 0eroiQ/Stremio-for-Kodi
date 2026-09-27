@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<settings>
+  <category label="Stremio addons">
+    <setting id="manifest" type="text" label="Catalog addon manifest URL" default="https://v3-cinemeta.strem.io/manifest.json" />
+  </category>
+  <category label="Built-in weather">
+    <setting id="weather_location" type="text" label="Weather location" default="" />
+    <setting id="weather_lat" type="text" label="Weather latitude" default="" />
+    <setting id="weather_lon" type="text" label="Weather longitude" default="" />
+  </category>
+  <category label="Home and playback">
+    <setting id="tmdb_api_key" type="text" option="hidden" label="TMDb API key (optional override for trailers)" default="" />
+    <setting type="action" label="Set up Bingie Home (10 rows)" action="RunPlugin(plugin://script.stremioelec/?action=setup_home)" />
+    <setting type="action" label="Stremio subtitles for current video" action="RunPlugin(plugin://script.stremioelec/?action=subtitles)" />
+    <setting type="lsep" label="Languages and automatic subtitle download follow Kodi Player settings." />
+    <setting type="lsep" label="Unverified HDMI: decoded audio; display mode switching off. Decoder defaults retained." />
+  </category>
+</settings>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window>
+	<defaultcontrol always="true">50</defaultcontrol>
+	<backgroundcolor>background</backgroundcolor>
+	<views>50,51,52,54,55,56,500,501</views>
+	<menucontrol>9000</menucontrol>
+	<!-- <onunload condition="!String.IsEmpty(Skin.String(TrailerPlaying))">Skin.Reset(TrailerPlaying)</onunload> -->
+	<controls>
+		<include>DefaultBackground</include>
+		<control type="group">
+			<include>MediaMenuAnimations</include>
+			<visible>[![Player.HasVideo | [Player.HasAudio + Visualisation.Enabled + !String.IsEmpty(Visualisation.Name)]] | !String.IsEmpty(Window(Videos).Property(PlayingBackgroundMedia))]</visible>
+			<control type="image">
+				<include>NetflixScreenDimensions</include>
+				<aspectratio>stretch</aspectratio>
+				<fadetime>500</fadetime>
+				<include>ArtworkAnimations</include>
+				<texture background="true" diffuse="overlays/netflixfanartdiffuse.png" fallback="$VAR[NimbusCustomBackgroundImage]">$VAR[MediaFanartVar]</texture>
+				<visible>
+					![Control.IsVisible(50) | Control.IsVisible(51) | Control.IsVisible(52) | $EXP[infodialog_active]] + 
+					[
+						[!$EXP[isContent] + Skin.HasSetting(Enable.BackgroundBlur) + [Control.IsVisible(54) | Control.IsVisible(56)] + !String.IsEqual(Skin.String(HomeArtworkChoice),1)] | 
+						[[[Container.Content(movies) + String.IsEqual(Skin.String(ArtworkChoice.movies),0)] | 
+						[Container.Content(tvshows) + String.IsEqual(Skin.String(ArtworkChoice.tvshows),0)] | 
+						[Container.Content(seasons) + String.IsEqual(Skin.String(ArtworkChoice.seasons),0)] | 
+						[Container.Content(episodes) + String.IsEqual(Skin.String(ArtworkChoice.episodes),0)]] + 
+						[Control.IsVisible(54) | Control.IsVisible(55) | Control.IsVisible(56)]] | 
+						[!Container.Content(movies) + !Container.Content(tvshows) + !Container.Content(seasons) + !Container.Content(episodes) + 
+						[!Skin.HasSetting(Enable.BackgroundBlur) + String.IsEqual(Skin.String(HomeArtworkChoice),0)]]
+					]
+				</visible>
+			</control>
+			<control type="image">
+				<include>BigLandscapeScreenDimensions</include>
+				<fadetime>500</fadetime>
+				<texture colordiffuse="artwork_dim" diffuse="masks/giant-landscape.png" background="true" fallback="$VAR[NimbusCustomBackgroundImage]">$VAR[FlixLandscapeVar]</texture>
+				<bordersize>1</bordersize>
+				<aspectratio scalediffuse="false">scale</aspectratio>
+				<include>ArtworkAnimations</include>
+				<bordertexture colordiffuse="$VAR[BorderColorVar]" border="17" infill="false">masks/giant-border.png</bordertexture>
+				<visible>
+					!$EXP[infodialog_active] + 
+					[Control.IsVisible(54) | Control.IsVisible(55) | Control.IsVisible(56)] + 
+					[
+							[$EXP[isContent] + [[Container.Content(movies) + String.IsEqual(Skin.String(ArtworkChoice.movies),1)] | 
+							[Container.Content(tvshows) + String.IsEqual(Skin.String(ArtworkChoice.tvshows),1)] | 
+							[Container.Content(seasons) + String.IsEqual(Skin.String(ArtworkChoice.seasons),1)] | 
+							[Container.Content(episodes) + String.IsEqual(Skin.String(ArtworkChoice.episodes),1)]]] | 
+							[!$EXP[isContent] + String.IsEqual(Skin.String(HomeArtworkChoice),1)]
+					]
+				</visible>
+			</control>
+		</control>
+		<control type="group">
+			<control type="group">
+				<include>TrailerPlayingFade</include>
+				<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="$EXP[infodialog_active]">Conditional</animation>
+				<include>View_50_List</include>
+				<include>View_52_IconWall</include>
+				<include>View_54_Flix</include>
+				<include>View_55_FlixScape</include>
+				<include>View_56_FlixList</include>
+				<include>View_500_Wall</include>
+				<include>View_501_WallScape</include>
+				<control type="group">
+					<depth>DepthContentPanel</depth>
+					<include>OpenClose_Left</include>
+					<visible>Control.IsVisible(56)</visible>
+					<include>Visible_Left</include>
+					<include>ListThumbInfoPanel</include>
+				</control>
+				<control type="group">
+					<include>MediaMenuAnimations</include>
+					<include>FlixPanel</include>
+					<depth>DepthContentPanel</depth>
+					<include>OpenClose_Left</include>
+					<visible>Control.IsVisible(50) | Control.IsVisible(54) | Control.IsVisible(55) | [Control.IsVisible(501) + String.IsEqual(Skin.AspectRatio,21:9)]</visible>
+					<include>Visible_Left</include>
+					<!-- <include content="ContentPanel">
+						<param name="width" value="1106" />
+					</include> -->
+					<control type="group">
+						<!-- <width>550</width> -->
+						<control type="group">
+							<left>20</left>
+							<top>245</top>
+							<visible>ListItem.IsCollection + String.IsEmpty(ListItem.Plot)</visible>
+							<include content="InfoList">
+								<param name="bottom" value="108" />
+								<param name="width" value="540" />
+								<param name="sortby" value="year" />
+								<param name="sortorder" value="ascending" />
+								<param name="font" value="font13" />
+							</include>
+						</control>
+					</control>
+				</control>
+			</control>
+			<control type="group">
+				<include>View_51_PosterFlow</include>
+			</control>
+			<include content="TopBar">
+				<param name="breadcrumbs_label" value="$VAR[BreadcrumbsVideoVar]" />
+			</include>
+			<include content="BottomBar">
+				<param name="info_visible" value="false" />
+			</include>
+			<control type="group">
+				<depth>DepthBars</depth>
+				<bottom>0</bottom>
+				<height>70</height>
+				<animation effect="fade" start="0" end="100" time="300" delay="300">WindowOpen</animation>
+				<animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
+				<include condition="!Skin.HasSetting(hide_mediaflags)">MediaFlags</include>
+			</control>
+			<include>CommonScrollbars</include>
+			<include>MediaMenuMouseOverlay</include>
+			<control type="group">
+				<include>MediaMenuCommon</include>
+				<control type="grouplist" id="9000">
+					<top>70</top>
+					<include>MediaMenuListCommon</include>
+					<control type="button" id="10">
+						<description>Watched Toggle</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[20367]</label>
+						<label2>[B]$INFO[Container.NumItems][/B]</label2>
+						<visible>Container.Content(movies) | Container.Content(sets) | Container.Content(tvshows) | Container.content(seasons) | Container.Content(episodes) | Container.Content(MusicVideos)</visible>
+					</control>
+					<control type="label" id="203">
+						<include>MediaMenuLabelCommon</include>
+						<label>$LOCALIZE[31020]</label>
+					</control>
+					<control type="radiobutton" id="16">
+						<description>PartyMode</description>
+						<label>$LOCALIZE[589]</label>
+						<include>MediaMenuItemsCommon</include>
+						<visible>Container.Content(MusicVideos)</visible>
+					</control>
+					<control type="radiobutton" id="11">
+						<description>Unlock Shares</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[20336]</label>
+						<onclick>mastermode</onclick>
+						<selected>system.ismaster</selected>
+						<visible>system.haslocks</visible>
+					</control>
+					<control type="togglebutton" id="619">
+						<description>Update library</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[653]</label>
+						<onclick>UpdateLibrary(video)</onclick>
+						<visible>!Container.Content(addons)+ String.IsEmpty(Container.PluginName)</visible>
+						<altlabel>$LOCALIZE[13353]</altlabel>
+						<usealttexture>library.isscanningvideo</usealttexture>
+					</control>
+					<control type="button" id="612">
+						<description>Go to playlist</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[31056]</label>
+						<onclick>ActivateWindow(videoplaylist)</onclick>
+						<visible>Integer.IsGreater(Playlist.Length(video),0)</visible>
+					</control>
+					<control type="button" id="621">
+						<description>Get more</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[21452]</label>
+						<onclick>ActivateWindow(addonbrowser,addons://more/video/,return)</onclick>
+						<visible>Container.Content(addons)</visible>
+					</control>
+					<control type="button" id="622">
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[31117]</label>
+						<onclick condition="System.AddonIsEnabled(plugin.library.node.editor)">ActivateWindow(programs,plugin://plugin.library.node.editor/?ltype=video,return)</onclick>
+						<onclick condition="System.HasAddon(plugin.library.node.editor) + !System.AddonIsEnabled(plugin.library.node.editor)">EnableAddon(plugin.library.node.editor)</onclick>
+						<onclick condition="!System.HasAddon(plugin.library.node.editor)">InstallAddon(plugin.library.node.editor)</onclick>
+						<visible>Container.Content() + String.IsEmpty(Container.PluginName)</visible>
+					</control>
+					<control type="button" id="623">
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[31009]</label>
+						<onclick>InstallAddon(resource.images.studios.white)</onclick>
+						<visible>Container.Content(studios) + !System.AddonIsEnabled(resource.images.studios.white)</visible>
+					</control>
+					<control type="button" id="624">
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[10140]</label>
+						<onclick>Addon.OpenSettings($INFO[Container.PluginName])</onclick>
+						<visible>!String.IsEmpty(Container.PluginName)</visible>
+					</control>
+					<include>MediaMenuNowPlaying</include>
+				</control>
+			</control>
+		</control>
+	</controls>
+</window>

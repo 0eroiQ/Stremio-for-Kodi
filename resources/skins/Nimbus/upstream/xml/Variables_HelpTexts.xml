@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<includes>
+	
+  <variable name="SkinSettingsHelpTextVar">
+		<!-- MAIN MENU ITEMS SECTION -->
+		<value condition="Container(9000).HasFocus(1)">$LOCALIZE[31130]</value>
+
+		<!-- GENERAL CONFIGURATION SECTION -->
+		<value condition="Container(9000).HasFocus(5)">$LOCALIZE[31129]</value>
+
+		<!-- WIDGET OPTIONS SECTION -->
+		<value condition="Container(9000).HasFocus(9) + !ControlGroup(10000).HasFocus">Widget related options</value>
+		<value condition="Control.HasFocus(64001)">Configure what pressing the back button on the home screen widgets will do. OPEN MAIN MENU will save the current focus postion and then open the main menu. RESET WIDGET will return the focus position back to the first item in the widget. BOTH will simultaneously reset the widget and open the main menu.</value>
+		<value condition="Control.HasFocus(64002)">Configure what pressing the left button on the home screen widgets will do. If the current focus positon is on the first item in the widget, OPEN MAIN MENU will open the main menu, WRAP TO END will set the focus position to the LAST item in the widget.</value>
+		<value condition="Control.HasFocus(64003)">Set the information the landscape widget sublabel will display. Choose between DIRECTOR: movies only, tvshows/seasons will display studio | FULL GENRE: movies/tvshows/seasons | STUDIO: movies/tvshows/seasons | TAGLINE: movies, tvshows, seasons. If the tagline is missing it will fall back to studio.</value>
+		<value condition="Control.HasFocus(64004)">Show item title in the InfoLine. Depending on the type of widget, this will show the movie/tvshow/episode title as well as season and episode numbers.</value>
+		<value condition="Control.HasFocus(64005)">Enabling this option will show navigation arrows next to the InfoLine on the left side of the home screen. Navigation arrows show widget position: Two down arrows: First widget (top of list) | Two up arrows: Last widget (bottom of list) | Up and down arrow: Middle widgets (more above and below)</value>
+		<value condition="Control.HasFocus(64006)">Enabling this option will dim the entire widget section when the main menu gains focus.</value>
+
+		<!-- CUSTOMIZATION SECTION -->
+		<value condition="Container(9000).HasFocus(2) + !ControlGroup(10000).HasFocus">Various skin settings.</value>
+		<value condition="Control.HasFocus(63701)">Configure what the power button in the home screen button menu does. OPEN SHUTDOWN MENU is the default option for Kodi. This will open the shutdown menu when the power button in the home screen button menu is clicked. EXIT will close Kodi with one click. NOTE: The home screen label will change according which option is set.</value>
+		<value condition="Control.HasFocus(63702)">Set the case for main menu items.</value>
+		<value condition="Control.HasFocus(63703)">Set the accent color theme for the selector color in the main menu, list views, and separators in the top bar/InfoLine across the skin. Blur disabled + Accent = selected skin color theme accents. Blur enabled + Adaptive = color changing accents. Color will adapt to current artwork. Disabled = no accents.</value>
+		<value condition="Control.HasFocus(63704)">Set the accent color theme for the focus frames, menus, and rest of the skin. Blur disabled + Accent = selected skin color theme accents. Blur enabled + Adaptive = color changing accents. Color will adapt to current artwork. Disabled = no accents.</value>
+		<value condition="Control.HasFocus(63705)">Set the color theme for the background of all dialog windows. Dark = semi-transparent black background. Blur disabled + Adaptive = semi-transparent color themed background. Blur enabled + Adaptive = semi-transparent color changing background. Color will adapt to current artwork.</value>
+		<value condition="Control.HasFocus(63706)">Enabling this option will show the current time in the InfoLine located right above the widget items. This will show in the home screen, search window, and all video windows.</value>
+		<!-- <value condition="Control.HasFocus(63707)">Enabling this option will show colored studio logos for media content in the FlixPanel.</value> -->
+		<value condition="Control.HasFocus(63707)">Enabling this option will auto end playback after a custom number of minutes [B]IF[/B] playback is paused.</value>
+		<value condition="Control.HasFocus(63708)">Enter custom delay for ending playback.</value>
+		<value condition="Control.HasFocus(63709)">Tracks and color-codes movies based on digital release status: green (digitally released and within expiry window and past recent window), yellow (digitally released and within recent window), red (not yet digitally released), and white (missing digital release info or past expiry window).</value>
+		<value condition="Control.HasFocus(63710)">Set digital release recent window. Any time this value is changed requires clearing the ratings cache and restarting Kodi.</value>
+		<value condition="Control.HasFocus(63711)">Set digital release expiry window. Movies whose digital release date is past this window will display the original release date. Any time this value is changed requires clearing the ratings cache and restarting Kodi.</value>
+
+		<!-- ARTWORK SECTION -->
+		<value condition="Container(9000).HasFocus(6) + !ControlGroup(10000).HasFocus">Artwork settings</value>
+		<value condition="Container(9000).HasFocus(6) + [Control.HasFocus(6014) | Control.HasFocus(6015) | Control.HasFocus(6016) | Control.HasFocus(6017)]">$LOCALIZE[31169]</value>
+		<value condition="Control.HasFocus(6002)">Enabling this option will show clearlogos for media content. Disabling this option will use a default text title.</value>
+		<value condition="Control.HasFocus(6003)">Choose your preferred font style for text titles.</value>
+		<value condition="Control.HasFocus(6004)">Click to set a custom background image.</value>
+		<value condition="Control.HasFocus(6005)">Click to restore background image to default.</value>
+		<value condition="Control.HasFocus(6006)">Enabling this option will blur the background. Disabling this option will use either a black background, or the color theme depending on the artwork configured. (Landscape = color theme, Fanart = Solid black background)</value>
+		<value condition="Control.HasFocus(6007)">This option sets the intensity of the background blur. Higher values will wash out more detail. Lower values will keep more detail. RECOMMENDED VALUES: 2-40. DEFAULT VALUE: 30</value>
+		<value condition="Control.HasFocus(6008)">This option sets the color intensity of the background blur. Higher values will create more saturated intense colors. Lower values will create less intense, more neutral colors. DEFAULT VALUE: 1.5</value>
+		<value condition="Control.HasFocus(6009)">Set the main artwork style for the home screen. NOTE: This setting will also impact artwork in non-content windows accross the skin.</value>
+		<value condition="Control.HasFocus(6010)">Choose the artwork type to display for movies/tvshows/seasons when using landscape style artwork. Default = Landscape. Fanart = Fanart.</value>
+		<value condition="Control.HasFocus(6011)">Choose the artwork type to display for episodes when using landscape style artwork. Default = Landscape. Fanart = Fanart. NOTE: When using a landscape widget, only Fanart and Landscape are available. When using a poster widget, only Default and Landscape are available.</value>
+		<value condition="Control.HasFocus(6012)">Choose the landscape widget artwork type to display for movies/tvshows/seasons. Default = Landscape. Fanart = Fanart.</value>
+		<value condition="Control.HasFocus(6013)">This option enables the 'saving' of the home screen artwork when widgets lose focus. It will save the current landscape/fanart while scrolling the main menu etc. Disbaling this option will reset the artwork to the custom background image when widgets lose focus.</value>
+
+		<!-- RATINGS SECTION -->
+		<value condition="Container(9000).HasFocus(4) + !ControlGroup(10000).HasFocus">Ratings settings</value>
+		<value condition="Control.HasFocus(6480) + String.IsEmpty(Skin.String(mdblist_api_key))">Click to enter your API key to activate ratings and an optional trailer source. If you do not have an API key, please go to https://mdblist.com to sign up for a free one.</value>
+		<value condition="Control.HasFocus(6480) + !String.IsEmpty(Skin.String(mdblist_api_key))">Click to change your API key. If you would like to completely clear it, enter an empty API key.</value>
+		<value condition="Control.HasFocus(6481)">Click to reset all rating slots. This is equivalent to hiding all ratings. If you'd like to completely remove ratings, enter an empty API key above.</value>
+		<value condition="Control.HasFocus(6482) | Control.HasFocus(6483) | Control.HasFocus(6484) | Control.HasFocus(6485) | Control.HasFocus(6486) | Control.HasFocus(6487)">Click to set rating for each rating slot. Choose between Metacritic, Trakt, Letterboxd, MDbList, Rotten Tomatoes (Critic), Rotten Tomatoes (Audience), IMDb, IMDb Popular, and TMDb.</value>
+
+		<!-- TRAILER SECTION -->
+		<value condition="Container(9000).HasFocus(8) + !ControlGroup(10000).HasFocus">Trailer settings</value>
+		<value condition="Control.HasFocus(6301)">Toggle trailer viewing options. OFF: Disable all skin trailer functions. ONE-CLICK: Trailers are played by pressing a custom mapped button. AUTO: Trailers are automatically played after an item has been focused and the delay time has passed.</value>
+		<value condition="Control.HasFocus(6302)">Choose where to play trailers from. Default will use Kodi's built-in trailer method. MDbList will play trailers from the MDbList API. [B]NOTE:[/B] Default option does not require an API key whereas MDbList does.</value>
+		<value condition="Control.HasFocus(6303)">Click this to begin key mapping for one-click access to trailers. Follow the instructions provided in the notification window to map custom key.</value>
+		<value condition="Control.HasFocus(6304)">Set the amount of time to wait before playing the trailer.</value>
+		<value condition="Control.HasFocus(6305)">Enabling this option will show a small play icon at the beginning of the InfoLine. This icon works as a visual indication of when a trailer is loaded and ready to be played.</value>
+
+		<!-- SEARCH SECTION -->
+		<value condition="Container(9000).HasFocus(3) + !ControlGroup(10000).HasFocus">Search settings</value>
+		<value condition="Control.HasFocus(64700)">Set your desired search provider. This will use the selected addon for searches in the search window and default search dialog. This setting can be changed on the fly in the search window button menu.</value>
+		<value condition="Control.HasFocus(64701)">Set the search icon behavior. OPEN SEARCH WINDOW will open the search window where you can see your search history, view TRAKT lists, etc. OPEN SEARCH DIALOG will open a simple dialog with addon search paths. The advantage to using the search window is that you can see results for multiple media types all at once (movies, tvshows, etc).</value>
+		<value condition="Control.HasFocus(64702) | Control.HasFocus(64703) | Control.HasFocus(64704) | Control.HasFocus(64705) | Control.HasFocus(64706) | Control.HasFocus(64707) | Control.HasFocus(64708) | Control.HasFocus(64709) | Control.HasFocus(64710) | Control.HasFocus(64711) | Control.HasFocus(64712) | Control.HasFocus(64713)">Enabling or disable the showing of specific search widgets.</value>
+
+		<!-- OSD SECTION -->
+		<value condition="Container(9000).HasFocus(7) + !ControlGroup(10000).HasFocus">$LOCALIZE[31171]</value>
+		<value condition="Container(9000).HasFocus(7) + [Control.HasFocus(62200) | Control.HasFocus(62201) | Control.HasFocus(62202) | Control.HasFocus(62203) | Control.HasFocus(62204)]">$LOCALIZE[31171]</value>
+		<value condition="Control.HasFocus(62205)">Choose OSD style. Default is a simple small text-based OSD. Modular can customized with different OSD elements. Choose which elements to show/hide below. You can quickly change the OSD style during playback by clicking the Info icon in the OSD.</value>
+		<value condition="Control.HasFocus(62206)">When this option is enabled, the label will automatically switch back and forth from movie/episode info to resolution/codec/audio channels info during movie/episode playback. Disabling this option will consistently show movie/episode info.</value>
+		<value condition="Control.HasFocus(62207)">When this option is enabled, the label will automatically switch back and forth from channel/program info to resolution/codec/audio channels info during live tv playback. Disabling this option will consistently show channel/program info.</value>
+		<value condition="Control.HasFocus(62208)">When this option is enabled, the label will show the full filename of the file that is currently playing.</value>
+		<value condition="Control.HasFocus(62209)">Click to show all modular OSD elements.</value>
+		<value condition="Control.HasFocus(62210)">Click to hide all modular OSD elements.</value>
+		<value condition="Control.HasFocus(62211) | Control.HasFocus(62212) | Control.HasFocus(62213) | Control.HasFocus(62214) | Control.HasFocus(62215) | Control.HasFocus(62216) | Control.HasFocus(62217) | Control.HasFocus(62218) | Control.HasFocus(62219) | Control.HasFocus(62220) | Control.HasFocus(62221)">Enable or disable the showing of specific OSD elements.</value>
+
+		<!-- EXTRAS SECTION -->
+		<value condition="Container(9000).HasFocus(10) + !ControlGroup(10000).HasFocus">Extras and cache related options</value>
+		<value condition="Control.HasFocus(64101)">Click to view the changelog. The changelog will also let you know if the helper is up to date.</value>
+		<value condition="Control.HasFocus(64102)">Click to view welcome screen.</value>
+		<value condition="Control.HasFocus(64103)">Click to unlock all views that have previously been locked. You can always re-lock a view in the View options of any window.</value>
+		<value condition="Control.HasFocus(64104)">Click to clear the blur cache. You can see the cache size in megabytes on the right. NOTE: The cache does not need to be cleared when changing the blur radius or saturation values in order for the changes to take effect.</value>
+		<value condition="Control.HasFocus(64105)">Clear the ratings cache. This will remove all stored ratings in the database and fetch brand new ones when an item is focused. It is not recommended to use this often as retrieving new ratings is slower and involves more API calls.</value>
+		<value condition="Control.HasFocus(64106)">Click to clear the search history. The search history can also be cleared via the top-left buttons in the search window.</value>
+	</variable>
+
+  <variable name="PVRGuideControlsHelpTextVar">
+		<value condition="Control.HasFocus(600)">$LOCALIZE[19063]</value>
+		<value condition="Control.HasFocus(601)">$LOCALIZE[19317]</value>
+		<value condition="Control.HasFocus(602)">$LOCALIZE[19070]</value>
+		<value condition="Control.HasFocus(603)">$LOCALIZE[19318]</value>
+		<value condition="Control.HasFocus(604)">$LOCALIZE[19064]</value>
+		<value condition="Control.HasFocus(605)">$LOCALIZE[19288]</value>
+		<value condition="Control.HasFocus(70040)">$LOCALIZE[19322]</value>
+		<value condition="Control.HasFocus(70041)">$LOCALIZE[19323]</value>
+		<value condition="Control.HasFocus(70042)">$LOCALIZE[19324]</value>
+		<value condition="Control.HasFocus(70043)">$LOCALIZE[19319]</value>
+		<value condition="Control.HasFocus(70044)">$LOCALIZE[19320]</value>
+		<value condition="Control.HasFocus(70045)">$LOCALIZE[19321]</value>
+	</variable>
+
+	<variable name="OSDHelpTextVar">
+		<value condition="Control.HasFocus(87) + !Player.Paused">$LOCALIZE[31054]</value>
+		<value condition="Control.HasFocus(87) + [Player.Paused + Window.IsVisible(videoosd)]">$LOCALIZE[31055]</value>
+		<value condition="Control.HasFocus(608)+ PVR.IsRecordingPlayingChannel">$LOCALIZE[19059]</value>
+		<value condition="Control.HasFocus(608)">$LOCALIZE[264]</value>
+		<value condition="Control.HasFocus(804)">$LOCALIZE[33061]</value>
+		<value condition="Control.HasFocus(70040)">$LOCALIZE[19019]</value>
+		<value condition="Control.HasFocus(70041)">$LOCALIZE[19069]</value>
+		<value condition="Control.HasFocus(70042)">$LOCALIZE[31065]</value>
+		<value condition="Control.HasFocus(70043)">$LOCALIZE[19033]</value>
+		<value condition="Control.HasFocus(70044)">$LOCALIZE[298]</value>
+		<value condition="Control.HasFocus(70045)">$LOCALIZE[31106]</value>
+		<value condition="Control.HasFocus(70046)">$LOCALIZE[24012]</value>
+		<value condition="Control.HasFocus(70047)">$LOCALIZE[36501]</value>
+		<value condition="Control.HasFocus(70048)">$LOCALIZE[5]</value>
+		<value condition="Control.HasFocus(70050)">$LOCALIZE[29900]</value>
+		<value condition="Control.HasFocus(70051)">$LOCALIZE[31066]</value>
+		<value condition="Control.HasFocus(70052)">$LOCALIZE[31033]$INFO[MusicPlayer.UserRating, : ]</value>
+		<value condition="Control.HasFocus(70053)">$LOCALIZE[486]$INFO[Playlist.Repeat, : ]</value>
+		<value condition="Control.HasFocus(70054) + Playlist.IsRandom">$LOCALIZE[590]: $LOCALIZE[16041]</value>
+		<value condition="Control.HasFocus(70054)">$LOCALIZE[590]: $LOCALIZE[16039]</value>
+		<value condition="Control.HasFocus(70055)">$LOCALIZE[24013]</value>
+	</variable>
+
+</includes>

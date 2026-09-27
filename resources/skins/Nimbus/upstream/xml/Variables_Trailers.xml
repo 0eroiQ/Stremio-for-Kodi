@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<includes>
+  <variable name="TrailerSettingVar">
+    <value condition="String.IsEqual(Skin.String(trailerSetting),0)">Off</value>
+    <value condition="String.IsEqual(Skin.String(trailerSetting),1)">One-click</value>
+    <value condition="String.IsEqual(Skin.String(trailerSetting),2)">Auto</value>
+		<value>Off</value>
+	</variable>
+
+	<variable name="TrailerDelayTimeVar">
+    <value condition="!String.IsEmpty(Skin.String(TrailerDelaySecs))">$INFO[Skin.String(TrailerDelaySecs)]</value>
+    <value condition="String.IsEmpty(Skin.String(TrailerDelaySecs))">5</value> <!-- Default value -->
+	</variable>
+
+	<variable name="TrailerSettingToggleVar">
+		<value condition="String.IsEqual(Skin.String(trailerSetting),0)">Skin.SetString(trailerSetting,1)</value>
+		<value condition="String.IsEqual(Skin.String(trailerSetting),1)">Skin.SetString(trailerSetting,2)</value>
+		<value condition="String.IsEqual(Skin.String(trailerSetting),2)">Skin.SetString(trailerSetting,0)</value>
+		<value>Skin.SetString(trailerSetting,0)</value>
+	</variable>
+
+	<variable name="TrailerSourceToggleVar">
+		<value condition="String.IsEqual(Skin.String(TrailerSource),0) + !String.IsEmpty(Skin.String(valid_api_key))">Skin.SetString(TrailerSource,1)</value>
+		<value condition="String.IsEqual(Skin.String(TrailerSource),1)">Skin.SetString(TrailerSource,0)</value>
+		<value>Skin.SetString(TrailerSource,0)</value>
+	</variable>
+
+	<variable name="TrailerSourceSettingVar">
+		<value condition="String.IsEqual(Skin.String(TrailerSource),0)">Default</value>
+		<value condition="String.IsEqual(Skin.String(TrailerSource),1)">MDbList</value>
+		<value>Default</value>
+	</variable>
+
+	<variable name="AutoplayTrailerSource">
+		<value condition="$EXP[isEpisode] | $EXP[isSeason]"></value>
+		<value condition="![Control.IsVisible(50) | Control.IsVisible(51)] + String.IsEqual(Skin.String(TrailerSource),0)">PlayMedia($INFO[ListItem.Trailer],1,noresume)</value>
+		<value condition="![Control.IsVisible(50) | Control.IsVisible(51)] + String.IsEqual(Skin.String(TrailerSource),1)">PlayMedia($INFO[Skin.String(TrailerPlaybackURL)],1,noresume)</value>
+		<value condition="[Control.IsVisible(50) | Control.IsVisible(51) | Window.IsVisible(movieinformation)] + String.IsEqual(Skin.String(TrailerSource),0)">PlayMedia($INFO[ListItem.Trailer],0,noresume)</value>
+		<value condition="[Control.IsVisible(50) | Control.IsVisible(51) | Window.IsVisible(movieinformation)] + String.IsEqual(Skin.String(TrailerSource),1)">PlayMedia($INFO[Skin.String(TrailerPlaybackURL)],0,noresume)</value>
+		<value>PlayMedia($INFO[ListItem.Trailer],1,noresume)</value>
+	</variable>
+
+</includes>

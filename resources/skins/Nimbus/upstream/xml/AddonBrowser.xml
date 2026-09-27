@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window>
+	<defaultcontrol always="true">50</defaultcontrol>
+	<onload>ClearProperty(nimbus_fanart_art, home)</onload>
+	<onload>ClearProperty(nimbus_fanart_prop, home)</onload>
+	<backgroundcolor>background</backgroundcolor>
+	<views>50,52,56</views>
+	<menucontrol>9000</menucontrol>
+	<controls>
+		<include>DefaultBackground</include>
+		<control type="group">
+			<include>MediaMenuAnimations</include>
+			<visible>[![Player.HasVideo | [Player.HasAudio + Visualisation.Enabled + !String.IsEmpty(Visualisation.Name)]] | !String.IsEmpty(Window(Videos).Property(PlayingBackgroundMedia))]</visible>
+			<animation effect="fade" start="0" end="100" time="500">WindowOpen</animation>
+			<animation effect="fade" start="100" end="0" time="500">WindowClose</animation>
+			<animation effect="fade" time="400">VisibleChange</animation>
+			<control type="image">
+				<include>NetflixScreenDimensions</include>
+				<aspectratio>stretch</aspectratio>
+				<fadetime>500</fadetime>
+				<texture background="true" diffuse="overlays/netflixfanartdiffuse.png" fallback="$VAR[NimbusCustomBackgroundImage]">$VAR[AddonsFanartVar]</texture>
+				<visible>!String.IsEqual(Skin.String(HomeArtworkChoice),1) + ![Window.IsVisible(addoninformation) | Control.IsVisible(52) | Control.IsVisible(50)]</visible>
+			</control>
+			<control type="image">
+				<include>BigLandscapeScreenDimensions</include>
+				<fadetime>500</fadetime>
+				<texture colordiffuse="artwork_dim" diffuse="masks/giant-landscape.png" background="true" fallback="$VAR[NimbusCustomBackgroundImage]">$VAR[AddonsFanartVar]</texture>
+				<bordersize>1</bordersize>
+				<aspectratio scalediffuse="false">scale</aspectratio>
+				<bordertexture colordiffuse="$VAR[BorderColorVar]" border="17" infill="false">masks/giant-border.png</bordertexture>
+				<visible>String.IsEqual(Skin.String(HomeArtworkChoice),1) + ![Window.IsVisible(addoninformation) | Control.IsVisible(52) | Control.IsVisible(50)]</visible>
+			</control>
+		</control>
+		<control type="group">
+			<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="$EXP[infodialog_active]">Conditional</animation>
+			<include>View_50_List</include>
+			<include>View_52_IconWall</include>
+			<include content="View_56_FlixList">
+				<param name="bottom_offset">list_bottom</param>
+			</include>
+			<include content="CommonScrollbars">
+				<param name="bottom_offset">list_bottom</param>
+			</include>
+			<control type="group">
+				<include>OpenClose_Left</include>
+				<visible>Control.IsVisible(56)</visible>
+				<visible>Container.Content(addons) | Container.Content()</visible>
+				<include>Visible_Left</include>
+				<include content="ListThumbInfoPanel">
+					<param name="fallback_image" value="DefaultAddon.png" />
+				</include>
+				<control type="group">
+					<visible>String.IsEqual(ListItem.AddonLifecycleType,$LOCALIZE[24170]) | String.IsEqual(ListItem.AddonLifecycleType,$LOCALIZE[24171])</visible>
+					<control type="image">
+						<left>64</left>
+						<top>109</top>
+						<width>472</width>
+						<height>472</height>
+						<texture colordiffuse="AAFFFFFF">colors/black.png</texture>
+					</control>
+					<control type="textbox">
+						<left>75</left>
+						<top>110</top>
+						<width>450</width>
+						<height>470</height>
+						<align>center</align>
+						<aligny>center</aligny>
+						<label>$VAR[AddonLifecycleType]</label>
+						<font>font32_title</font>
+					</control>
+				</control>
+			</control>
+			<include content="TopBar">
+				<param name="breadcrumbs_label" value="[COLOR unfocused_text]$LOCALIZE[24001][/COLOR]" />
+			</include>
+			<include content="BottomBar">
+				<param name="info_visible" value="true" />
+			</include>
+			<include>MediaMenuMouseOverlay</include>
+			<control type="group">
+				<include>MediaMenuCommon</include>
+				<control type="grouplist" id="9000">
+					<top>50</top>
+					<include>MediaMenuListCommon</include>
+					<control type="label" id="201">
+						<include>MediaMenuLabelCommon</include>
+						<label>$LOCALIZE[31021]</label>
+					</control>
+					<control type="radiobutton" id="7">
+						<description>Hide foreign</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[25001]</label>
+						<visible>Control.IsEnabled(7)</visible>
+					</control>
+					<control type="radiobutton" id="8">
+						<description>Hide incompatible</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[24999]</label>
+						<visible>Control.IsEnabled(8)</visible>
+					</control>
+					<control type="button" id="9">
+						<description>Check for repository updates</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[24034]</label>
+					</control>
+					<control type="button" id="5">
+						<description>Addon settings</description>
+						<include>MediaMenuItemsCommon</include>
+						<label>$LOCALIZE[10004]</label>
+					</control>
+					<include>MediaMenuNowPlaying</include>
+				</control>
+			</control>
+			<control type="group">
+				<left>20</left>
+				<height>78</height>
+				<bottom>50</bottom>
+				<visible>$EXP[sidebar_visible]</visible>
+				<animation effect="fade" time="300">VisibleChange</animation>
+				<include content="LeftAlignedInfo">
+					<!-- <param name="main_label" value="[B]$INFO[Window(AddonBrowser).Property(Updated)][/B]" /> -->
+					<param name="sub_label" value="[UPPERCASE][B]$LOCALIZE[31069][CR][/UPPERCASE][COLOR unfocused_text]$INFO[Window(AddonBrowser).Property(Updated)][/B][/COLOR]" />
+				</include>
+			</control>
+		</control>
+	</controls>
+</window>

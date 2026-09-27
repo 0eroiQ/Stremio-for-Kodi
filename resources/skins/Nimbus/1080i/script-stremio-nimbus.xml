@@ -1,0 +1,976 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window>
+  <defaultcontrol always="true">9000</defaultcontrol>
+  <controls>
+    <control type="image">
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
+      <texture colordiffuse="FF0F1017">colors/white.png</texture>
+    </control>
+    <control type="image">
+      <left>623</left>
+      <top>-3</top>
+      <width>1300</width>
+      <height>731</height>
+      <aspectratio>stretch</aspectratio>
+      <fadetime>350</fadetime>
+      <texture background="true" diffuse="overlays/netflixfanartdiffuse.png">$INFO[Window.Property(fanart)]</texture>
+    </control>
+    <control type="group">
+      <top>28</top>
+      <width>815</width>
+      <height>500</height>
+      <animation type="WindowOpen">
+        <effect type="fade" start="0" end="100" time="300" />
+      </animation>
+      <control type="image">
+        <left>0</left>
+        <top>0</top>
+        <width>522</width>
+        <height>180</height>
+        <aspectratio align="center">keep</aspectratio>
+        <visible>!String.IsEmpty(Window.Property(logo))</visible>
+        <texture>$INFO[Window.Property(logo)]</texture>
+      </control>
+      <control type="textbox">
+        <left>0</left>
+        <top>0</top>
+        <width>760</width>
+        <height>180</height>
+        <aligny>center</aligny>
+        <font>font52_title</font>
+        <textcolor>FFE5E5E7</textcolor>
+        <label>$INFO[Window.Property(title)]</label>
+        <visible>String.IsEmpty(Window.Property(logo))</visible>
+      </control>
+      <control type="label">
+        <left>0</left>
+        <top>190</top>
+        <width>790</width>
+        <height>42</height>
+        <font>font27</font>
+        <textcolor>FFE5E5E7</textcolor>
+        <aligny>center</aligny>
+        <label>$INFO[Window.Property(facts)]</label>
+      </control>
+      <control type="label">
+        <left>0</left>
+        <top>237</top>
+        <width>790</width>
+        <height>40</height>
+        <font>font23</font>
+        <textcolor>FFE5E5E7</textcolor>
+        <aligny>center</aligny>
+        <label>$INFO[Window.Property(genres)]</label>
+      </control>
+      <control type="textbox">
+        <left>0</left>
+        <top>282</top>
+        <width>760</width>
+        <height>135</height>
+        <font>font27</font>
+        <textcolor>FFADACB5</textcolor>
+        <label>$INFO[Window.Property(plot)]</label>
+      </control>
+      <left>50</left>
+      <animation type="Conditional" condition="Control.HasFocus(9000)" reversible="true">
+        <effect type="slide" start="0,0" end="0,-540" time="500" tween="cubic" easing="inout" />
+        <effect type="fade" start="100" end="0" time="650" tween="cubic" easing="in" />
+      </animation>
+    </control>
+    <control type="grouplist" id="2000">
+      <left>0</left>
+      <top>510</top>
+      <width>1920</width>
+      <height>570</height>
+      <orientation>vertical</orientation>
+      <itemgap>0</itemgap>
+      <scrolltime>500</scrolltime>
+      <animation effect="slide" end="490,0" time="500" tween="cubic" easing="inout" condition="Control.HasFocus(9000)">Conditional</animation>
+      <control type="group">
+        <height>440</height>
+        <visible>!String.IsEmpty(Window.Property(has400))</visible>
+        <control type="group" id="400665">
+          <animation condition="!Control.HasFocus(400) + ControlGroup(2000).HasFocus" reversible="true">
+            <effect type="faded" start="100" end="80" time="300" />
+            <effect type="fadediffuse" start="FFE9E9E9" end="FFBABABA" time="300" />
+          </animation>
+          <left>50</left>
+          <height>40</height>
+          <width>1815</width>
+          <visible>Integer.IsGreater(Container(400).NumItems,0) | [Container(400).IsUpdating + Integer.IsEqual(Container(400).NumItems,0)]</visible>
+          <visible>true</visible>
+          <control type="label">
+            <font>font23</font>
+            <textcolor>FFE5E5E5</textcolor>
+            <shadowcolor>66000000</shadowcolor>
+            <scroll>true</scroll>
+            <scrollspeed>100</scrollspeed>
+            <label>$INFO[Window.Property(row400)]</label>
+            <width>1815</width>
+            <height>40</height>
+            <top>0</top>
+          </control>
+          <top>120</top>
+        </control>
+        <control type="fixedlist" id="400">
+          <orientation>horizontal</orientation>
+          <movement>7</movement>
+          <right>0</right>
+          <height>346</height>
+          <itemlayout width="230.5" height="393">
+            <control type="group">
+              <left>33</left>
+              <top>15</top>
+              <control type="group">
+                <visible>String.IsEmpty(ListItem.Art(fanart)) + String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <visible>[[false + Control.HasFocus(400)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[false + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
+                  <visible>!Container(400).IsUpdating</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFFFFFFF</textcolor>
+                  <autoscroll time="2000" delay="1000" repeat="2000">false + Control.HasFocus(400)</autoscroll>
+                  <visible>!ListItem.IsParentFolder + [false + Control.HasFocus(400)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFE5E5E5</textcolor>
+                  <visible>!ListItem.IsParentFolder + [!false | [!Control.HasFocus(400) + ![Control.IsVisible(54) | Control.IsVisible(500)]]]</visible>
+                </control>
+                <control type="image">
+                  <left>1</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + false + Control.HasFocus(400)</visible>
+                </control>
+                <control type="image">
+                  <left>2.5</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + ![false + Control.HasFocus(400)]</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>!String.IsEmpty(ListItem.Art(fanart)) | !String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>10</top>
+                  <width>201</width>
+                  <height>303</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <bordersize>-20</bordersize>
+                  <visible>[false + Control.HasFocus(400)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <animation type="Conditional" condition="true" pulse="true">
+                    <effect type="zoom" time="1733" start="97" end="100" center="100.5,150.5" tween="cubic" easing="in" />
+                  </animation>
+                </control>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <bordersize>1</bordersize>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>230</top>
+                  <width>80</width>
+                  <height>80</height>
+                  <texture>overlays/overlaybg-widget.png</texture>
+                  <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation condition="       [[false + Control.HasFocus(400)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>270</top>
+                  <width>198</width>
+                  <height>40</height>
+                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
+                  <visible>
+						[
+							[false + Control.HasFocus(400)] | 
+							false + [Control.IsVisible(54) | Control.IsVisible(500)]
+						] + 
+						[
+							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
+						] | 
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+							!Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress), 0)
+							]
+						]
+					</visible>
+                </control>
+                <control type="label">
+                  <left>-70</left>
+                  <top>276</top>
+                  <width>280</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(WatchedProgress)]% watched[/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[[false + Control.HasFocus(400)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] + [String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
+                <top>265</top>
+                <control type="label">
+                  <left>41</left>
+                  <top>9</top>
+                  <width>169</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(UnwatchedEpisodes),, remaining][/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[false + Control.HasFocus(400)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <visible>
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
+					</visible>
+                </control>
+              </control>
+              <control type="image">
+                <left>31</left>
+                <top>280</top>
+                <width>19</width>
+                <height>19</height>
+                <texture />
+              </control>
+            </control>
+          </itemlayout>
+          <focusedlayout width="230.5" height="393">
+            <control type="group">
+              <depth>0</depth>
+              <left>33</left>
+              <top>15</top>
+              <control type="group">
+                <visible>String.IsEmpty(ListItem.Art(fanart)) + String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <visible>[[true + Control.HasFocus(400)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[true + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
+                  <visible>!Container(400).IsUpdating</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFFFFFFF</textcolor>
+                  <autoscroll time="2000" delay="1000" repeat="2000">true + Control.HasFocus(400)</autoscroll>
+                  <visible>!ListItem.IsParentFolder + [true + Control.HasFocus(400)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFE5E5E5</textcolor>
+                  <visible>!ListItem.IsParentFolder + [!true | [!Control.HasFocus(400) + ![Control.IsVisible(54) | Control.IsVisible(500)]]]</visible>
+                </control>
+                <control type="image">
+                  <left>1</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + true + Control.HasFocus(400)</visible>
+                </control>
+                <control type="image">
+                  <left>2.5</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + ![true + Control.HasFocus(400)]</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>!String.IsEmpty(ListItem.Art(fanart)) | !String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>10</top>
+                  <width>201</width>
+                  <height>303</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <bordersize>-20</bordersize>
+                  <visible>[true + Control.HasFocus(400)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                  <animation type="Conditional" condition="true" pulse="true">
+                    <effect type="zoom" time="1733" start="97" end="100" center="100.5,150.5" tween="cubic" easing="in" />
+                  </animation>
+                </control>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <bordersize>1</bordersize>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>230</top>
+                  <width>80</width>
+                  <height>80</height>
+                  <texture>overlays/overlaybg-widget.png</texture>
+                  <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation condition="       [[true + Control.HasFocus(400)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>270</top>
+                  <width>198</width>
+                  <height>40</height>
+                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
+                  <visible>
+						[
+							[true + Control.HasFocus(400)] | 
+							true + [Control.IsVisible(54) | Control.IsVisible(500)]
+						] + 
+						[
+							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
+						] | 
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+							!Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress), 0)
+							]
+						]
+					</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+                <control type="label">
+                  <left>-70</left>
+                  <top>276</top>
+                  <width>280</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(WatchedProgress)]% watched[/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[[true + Control.HasFocus(400)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] + [String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+              </control>
+              <control type="group">
+                <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
+                <top>265</top>
+                <control type="label">
+                  <left>41</left>
+                  <top>9</top>
+                  <width>169</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(UnwatchedEpisodes),, remaining][/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[true + Control.HasFocus(400)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <visible>
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
+					</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+              </control>
+              <control type="image">
+                <left>31</left>
+                <top>280</top>
+                <width>19</width>
+                <height>19</height>
+                <texture />
+              </control>
+            </control>
+          </focusedlayout>
+          <top>142</top>
+          <onleft>9000</onleft>
+          <onback>9000</onback>
+          <onup>9000</onup>
+          <ondown>401</ondown>
+          <onright>400</onright>
+          <scrolltime tween="cubic" easing="out">700</scrolltime>
+        </control>
+      </control>
+      <control type="group">
+        <height>440</height>
+        <visible>!String.IsEmpty(Window.Property(has401))</visible>
+        <control type="group" id="401665">
+          <animation condition="!Control.HasFocus(401) + ControlGroup(2000).HasFocus" reversible="true">
+            <effect type="faded" start="100" end="80" time="300" />
+            <effect type="fadediffuse" start="FFE9E9E9" end="FFBABABA" time="300" />
+          </animation>
+          <left>50</left>
+          <top>80</top>
+          <height>40</height>
+          <width>1815</width>
+          <visible>Integer.IsGreater(Container(401).NumItems,0) | [Container(401).IsUpdating + Integer.IsEqual(Container(401).NumItems,0)]</visible>
+          <visible>true</visible>
+          <control type="label">
+            <font>font23</font>
+            <textcolor>FFE5E5E5</textcolor>
+            <shadowcolor>66000000</shadowcolor>
+            <scroll>true</scroll>
+            <scrollspeed>100</scrollspeed>
+            <label>$INFO[Window.Property(row401)]</label>
+            <width>1815</width>
+            <height>40</height>
+            <top>0</top>
+          </control>
+        </control>
+        <control type="fixedlist" id="401">
+          <orientation>horizontal</orientation>
+          <movement>7</movement>
+          <right>0</right>
+          <height>346</height>
+          <itemlayout width="230.5" height="393">
+            <control type="group">
+              <left>33</left>
+              <top>15</top>
+              <control type="group">
+                <visible>String.IsEmpty(ListItem.Art(fanart)) + String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <visible>[[false + Control.HasFocus(401)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[false + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
+                  <visible>!Container(401).IsUpdating</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFFFFFFF</textcolor>
+                  <autoscroll time="2000" delay="1000" repeat="2000">false + Control.HasFocus(401)</autoscroll>
+                  <visible>!ListItem.IsParentFolder + [false + Control.HasFocus(401)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFE5E5E5</textcolor>
+                  <visible>!ListItem.IsParentFolder + [!false | [!Control.HasFocus(401) + ![Control.IsVisible(54) | Control.IsVisible(500)]]]</visible>
+                </control>
+                <control type="image">
+                  <left>1</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + false + Control.HasFocus(401)</visible>
+                </control>
+                <control type="image">
+                  <left>2.5</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + ![false + Control.HasFocus(401)]</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>!String.IsEmpty(ListItem.Art(fanart)) | !String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>10</top>
+                  <width>201</width>
+                  <height>303</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <bordersize>-20</bordersize>
+                  <visible>[false + Control.HasFocus(401)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <animation type="Conditional" condition="true" pulse="true">
+                    <effect type="zoom" time="1733" start="97" end="100" center="100.5,150.5" tween="cubic" easing="in" />
+                  </animation>
+                </control>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <bordersize>1</bordersize>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>230</top>
+                  <width>80</width>
+                  <height>80</height>
+                  <texture>overlays/overlaybg-widget.png</texture>
+                  <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation condition="       [[false + Control.HasFocus(401)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>270</top>
+                  <width>198</width>
+                  <height>40</height>
+                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
+                  <visible>
+						[
+							[false + Control.HasFocus(401)] | 
+							false + [Control.IsVisible(54) | Control.IsVisible(500)]
+						] + 
+						[
+							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
+						] | 
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+							!Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress), 0)
+							]
+						]
+					</visible>
+                </control>
+                <control type="label">
+                  <left>-70</left>
+                  <top>276</top>
+                  <width>280</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(WatchedProgress)]% watched[/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[[false + Control.HasFocus(401)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] + [String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
+                <top>265</top>
+                <control type="label">
+                  <left>41</left>
+                  <top>9</top>
+                  <width>169</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(UnwatchedEpisodes),, remaining][/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[false + Control.HasFocus(401)] | [false + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <visible>
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
+					</visible>
+                </control>
+              </control>
+              <control type="image">
+                <left>31</left>
+                <top>280</top>
+                <width>19</width>
+                <height>19</height>
+                <texture />
+              </control>
+            </control>
+          </itemlayout>
+          <focusedlayout width="230.5" height="393">
+            <control type="group">
+              <depth>0</depth>
+              <left>33</left>
+              <top>15</top>
+              <control type="group">
+                <visible>String.IsEmpty(ListItem.Art(fanart)) + String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster.png</texture>
+                  <visible>[[true + Control.HasFocus(401)] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))] | [[true + [Control.IsVisible(54) | Control.IsVisible(500)]] + !Player.HasMedia + String.IsEmpty(Skin.String(TrailerPlaying))]</visible>
+                  <visible>!Container(401).IsUpdating</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFFFFFFF</textcolor>
+                  <autoscroll time="2000" delay="1000" repeat="2000">true + Control.HasFocus(401)</autoscroll>
+                  <visible>!ListItem.IsParentFolder + [true + Control.HasFocus(401)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                </control>
+                <control type="textbox">
+                  <left>27</left>
+                  <top>237</top>
+                  <width>222</width>
+                  <height>120</height>
+                  <font>font25</font>
+                  <align>center</align>
+                  <aligny>center</aligny>
+                  <label>$INFO[ListItem.Label]</label>
+                  <textcolor>FFE5E5E5</textcolor>
+                  <visible>!ListItem.IsParentFolder + [!true | [!Control.HasFocus(401) + ![Control.IsVisible(54) | Control.IsVisible(500)]]]</visible>
+                </control>
+                <control type="image">
+                  <left>1</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + true + Control.HasFocus(401)</visible>
+                </control>
+                <control type="image">
+                  <left>2.5</left>
+                  <top>-7</top>
+                  <width>270</width>
+                  <height>270</height>
+                  <texture diffuse="masks/addons.png" colordiffuse="FFE5E5E5" fallback="DefaultMovies.png" background="true">$INFO[ListItem.Art(thumb)]</texture>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordersize>20</bordersize>
+                  <visible>!ListItem.IsParentFolder + ![true + Control.HasFocus(401)]</visible>
+                </control>
+              </control>
+              <control type="group">
+                <visible>!String.IsEmpty(ListItem.Art(fanart)) | !String.IsEmpty(ListItem.Art(poster))</visible>
+                <control type="image">
+                  <left>20</left>
+                  <top>10</top>
+                  <width>201</width>
+                  <height>303</height>
+                  <texture colordiffuse="FFFFFFFF">masks/poster-glow-widget.png</texture>
+                  <bordersize>-20</bordersize>
+                  <visible>[true + Control.HasFocus(401)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                  <animation type="Conditional" condition="true" pulse="true">
+                    <effect type="zoom" time="1733" start="97" end="100" center="100.5,150.5" tween="cubic" easing="in" />
+                  </animation>
+                </control>
+                <control type="image">
+                  <left>20</left>
+                  <top>11</top>
+                  <width>200</width>
+                  <height>300</height>
+                  <texture colordiffuse="FFFFFFFF" diffuse="masks/poster-widget.png" background="true">$INFO[ListItem.Art(poster)]</texture>
+                  <bordersize>1</bordersize>
+                  <aspectratio scalediffuse="false">scale</aspectratio>
+                  <bordertexture colordiffuse="88FFFFFF" border="15" infill="false">masks/poster-border-widget.png</bordertexture>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>230</top>
+                  <width>80</width>
+                  <height>80</height>
+                  <texture>overlays/overlaybg-widget.png</texture>
+                  <visible>Listitem.IsCollection | ListItem.IsPlaying | Integer.IsGreater(ListItem.Playcount,0) | !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation condition="       [[true + Control.HasFocus(401)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] +        [         [String.IsEqual(ListItem.Property(type),movie) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |          [[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsGreater(ListItem.Playcount,0) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)] |         [!String.IsEqual(ListItem.Property(type),movie) + !String.IsEqual(ListItem.Property(type),series) + !String.IsEqual(ListItem.Property(type),season) + !String.IsEqual(ListItem.Property(type),episode) + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)]       ]       " effect="fade" time="0" start="100" end="0">Conditional</animation>
+                </control>
+                <control type="image">
+                  <left>21</left>
+                  <top>270</top>
+                  <width>198</width>
+                  <height>40</height>
+                  <texture colordiffuse="CCFFFFFF">overlays/overlayfade8-widget.png</texture>
+                  <visible>!String.IsEmpty(ListItem.Art(poster))</visible>
+                  <visible>
+						[
+							[true + Control.HasFocus(401)] | 
+							true + [Control.IsVisible(54) | Control.IsVisible(500)]
+						] + 
+						[
+							[[String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)] +
+							Integer.IsGreater(ListItem.Property(WatchedEpisodes), 0) + 
+							!String.IsEqual(ListItem.Property(WatchedEpisodes), ListItem.Property(TotalEpisodes)) + 
+							!Integer.IsLess(ListItem.Property(UnWatchedEpisodes),0)
+						] | 
+							[[String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + 
+							!Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress), 0)
+							]
+						]
+					</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+                <control type="label">
+                  <left>-70</left>
+                  <top>276</top>
+                  <width>280</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(WatchedProgress)]% watched[/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[[true + Control.HasFocus(401)] | true + [Control.IsVisible(54) | Control.IsVisible(500)]] + [String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsEqual(Container(401).ListItem.Property(WatchedProgress),0)</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+              </control>
+              <control type="group">
+                <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
+                <top>265</top>
+                <control type="label">
+                  <left>41</left>
+                  <top>9</top>
+                  <width>169</width>
+                  <label>[LIGHT]$INFO[ListItem.Property(UnwatchedEpisodes),, remaining][/LIGHT]</label>
+                  <font>font18_title</font>
+                  <shadowcolor>66000000</shadowcolor>
+                  <align>right</align>
+                  <visible>[true + Control.HasFocus(401)] | [true + [Control.IsVisible(54) | Control.IsVisible(500)]]</visible>
+                  <visible>
+						Integer.IsGreater(ListItem.Property(WatchedEpisodes),0) + 
+						!String.IsEqual(ListItem.Property(WatchedEpisodes),ListItem.Property(TotalEpisodes)) + 
+						!String.IsEqual(ListItem.Property(UnWatchedEpisodes),-1)
+					</visible>
+                  <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+                  <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+                </control>
+              </control>
+              <control type="image">
+                <left>31</left>
+                <top>280</top>
+                <width>19</width>
+                <height>19</height>
+                <texture />
+              </control>
+            </control>
+          </focusedlayout>
+          <top>122</top>
+          <onleft>9000</onleft>
+          <onback>9000</onback>
+          <onup>400</onup>
+          <ondown>9000</ondown>
+          <onright>401</onright>
+          <scrolltime tween="cubic" easing="out">700</scrolltime>
+        </control>
+      </control>
+    </control>
+    <control type="group">
+      <left>-540</left>
+      <animation type="Conditional" condition="Control.HasFocus(9000)" reversible="true">
+        <effect type="slide" start="0" end="540" time="500" tween="cubic" easing="inout" />
+      </animation>
+      <control type="image">
+        <texture flipx="false" colordiffuse="FF121212">colors/white.png</texture>
+        <bordersize>40</bordersize>
+        <width>549</width>
+        <left>-40</left>
+        <right />
+        <top>-40</top>
+        <height>1160</height>
+      </control>
+      <control type="fixedlist" id="9000">
+        <left>25</left>
+        <top>215</top>
+        <width>825</width>
+        <height>605</height>
+        <movement>7</movement>
+        <focusposition>0</focusposition>
+        <scrolltime tween="cubic" easing="out">500</scrolltime>
+        <onright>400</onright>
+        <onup>9000</onup>
+        <ondown>9000</ondown>
+        <focusedlayout height="75" infoupdate="300">
+          <control type="group">
+            <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
+          </control>
+          <control type="group">
+            <control type="image">
+              <top>0</top>
+              <bottom>7</bottom>
+              <width>5</width>
+              <left>47</left>
+              <texture colordiffuse="FFFFFFFF">colors/white.png</texture>
+              <visible>Control.HasFocus(9000) + true</visible>
+            </control>
+            <control type="group">
+              <control type="label">
+                <left>65</left>
+                <top>0</top>
+                <height>70</height>
+                <width>380</width>
+                <aligny>center</aligny>
+                <font>font37</font>
+                <textcolor>FFAAAAAA</textcolor>
+                <label>$INFO[ListItem.Label]</label>
+                <shadowcolor>66000000</shadowcolor>
+                <visible>!Control.HasFocus(9000) | !true</visible>
+              </control>
+              <control type="label">
+                <left>65</left>
+                <top>0</top>
+                <height>70</height>
+                <width>380</width>
+                <aligny>center</aligny>
+                <font>font52_title</font>
+                <label>$INFO[ListItem.Label]</label>
+                <textcolor>FFE5E5E5</textcolor>
+                <shadowcolor>66000000</shadowcolor>
+                <visible>Control.HasFocus(9000) + true</visible>
+                <scrollspeed>150</scrollspeed>
+                <scroll>true</scroll>
+              </control>
+              <control type="label">
+                <left>65</left>
+                <top>0</top>
+                <height>70</height>
+                <width>380</width>
+                <aligny>center</aligny>
+                <font>font37</font>
+                <textcolor>FFAAAAAA</textcolor>
+                <label>$INFO[ListItem.Label]</label>
+                <shadowcolor>66000000</shadowcolor>
+                <visible>!Control.HasFocus(9000) | !true</visible>
+              </control>
+            </control>
+          </control>
+        </focusedlayout>
+        <itemlayout height="75">
+          <control type="group">
+            <control type="image">
+              <top>0</top>
+              <bottom>7</bottom>
+              <width>5</width>
+              <left>47</left>
+              <texture colordiffuse="FFFFFFFF">colors/white.png</texture>
+              <visible>Control.HasFocus(9000) + false</visible>
+            </control>
+            <control type="group">
+              <control type="label">
+                <left>65</left>
+                <top>0</top>
+                <height>70</height>
+                <width>380</width>
+                <aligny>center</aligny>
+                <font>font37</font>
+                <textcolor>FFAAAAAA</textcolor>
+                <label>$INFO[ListItem.Label]</label>
+                <shadowcolor>66000000</shadowcolor>
+                <visible>!Control.HasFocus(9000) | !false</visible>
+              </control>
+              <control type="label">
+                <left>65</left>
+                <top>0</top>
+                <height>70</height>
+                <width>380</width>
+                <aligny>center</aligny>
+                <font>font52_title</font>
+                <label>$INFO[ListItem.Label]</label>
+                <textcolor>FFE5E5E5</textcolor>
+                <shadowcolor>66000000</shadowcolor>
+                <visible>Control.HasFocus(9000) + false</visible>
+                <scrollspeed>150</scrollspeed>
+                <scroll>false</scroll>
+              </control>
+              <control type="label">
+                <left>65</left>
+                <top>0</top>
+                <height>70</height>
+                <width>380</width>
+                <aligny>center</aligny>
+                <font>font37</font>
+                <textcolor>FFAAAAAA</textcolor>
+                <label>$INFO[ListItem.Label]</label>
+                <shadowcolor>66000000</shadowcolor>
+                <visible>!Control.HasFocus(9000) | !false</visible>
+              </control>
+            </control>
+          </control>
+        </itemlayout>
+      </control>
+      <control type="label">
+        <left>90</left>
+        <top>900</top>
+        <width>380</width>
+        <height>55</height>
+        <font>font37</font>
+        <textcolor>FFE5E5E5</textcolor>
+        <label>$INFO[System.Time]</label>
+      </control>
+      <control type="label">
+        <left>90</left>
+        <top>950</top>
+        <width>400</width>
+        <height>40</height>
+        <font>font23</font>
+        <textcolor>FFAAAAAA</textcolor>
+        <label>$INFO[System.Date]</label>
+      </control>
+    </control>
+  </controls>
+</window>
