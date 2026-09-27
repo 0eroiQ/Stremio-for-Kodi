@@ -4,7 +4,7 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 ## Install
 
-Download `script.stremioelec-1.0.6.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+Download `script.stremioelec-1.0.7.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
@@ -36,3 +36,9 @@ GPL-2.0-or-later; see `LICENSE`. Nimbus layouts, artwork and fonts are by Ivar B
 ## Account setup
 
 Signed-out users see a Stremio QR linking screen before Home. Scan the code or open the official link, then complete sign-in on your phone. Request a new link if needed. Exiting leaves the addon signed out. Language and location are available under Add-on settings.
+
+## Account Home rows
+
+Home syncs your account add-on collection on launch and follows its add-on and catalog order. Catalogs requiring search/filter input are excluded from Home, as in the [Stremio catalog protocol](https://stremio.github.io/stremio-addon-sdk/api/). Continue Watching comes from your account library when available. Empty or unavailable catalogs are skipped during navigation; if account sync is unavailable, the saved account collection is used. Home does not inject fixed Cinemeta rows or local-only add-ons.
+
+The number of rows is generated from the account collection. Each selected row stays at the same screen position, with the next available row title below. Up to 100 returned titles are shown per catalog. Initial loading time depends on the installed catalog providers. Reopen the addon after changing the account collection to sync it again.

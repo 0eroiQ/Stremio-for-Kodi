@@ -64,11 +64,16 @@ class NimbusWindow(xbmcgui.WindowXML):
 
 
 class HomeWindow(NimbusWindow):
+    def __init__(self, *args, **kwargs):
+        self.account_rows = kwargs.pop('account_rows', [])
+        self.row_count = kwargs.pop('row_count', 2)
+        super().__init__(*args, **kwargs)
+
     def onInit(self):
         if getattr(self, 'initialized', False):
             return
         self.initialized = True
-        self.rows = {400: [], 401: []}
+        self.rows = {400+i: [] for i in range(self.row_count)}
         self.hero_key = None
         self.getControl(9000).addItems([xbmcgui.ListItem(label) for label in
                                       ('Home', 'Search', 'Discover', 'Library', 'Addons', 'Settings')])
@@ -76,25 +81,37 @@ class HomeWindow(NimbusWindow):
         self.setFocusId(9000)
 
     def load_home(self):
-        def load():
-            with ThreadPoolExecutor(max_workers=2) as pool:
-                return list(pool.map(api.catalog, ('movie', 'series')))
-        result = self.busy('Loading Cinemeta', load)
-        self.populate('Home', *(result or ([], [])), labels=('Popular Movies', 'Popular Series'))
+        self.populate_rows('Home', self.account_rows)
 
     def populate(self, section, first, second=(), labels=('Movies', 'Series')):
+        self.populate_rows(section, [{'label': labels[0], 'items': first},
+                                     {'label': labels[1], 'items': second}])
+
+    def populate_rows(self, section, catalogs):
         self.setProperty('page', section)
-        for cid, rows, label in ((400, first, labels[0]), (401, second, labels[1])):
-            self.rows[cid] = list(rows)
+        self.hero_key = None
+        self.row_labels = {}
+        for index, cid in enumerate(self.rows):
+            catalog = catalogs[index] if index < len(catalogs) else {}
+            rows = list(catalog.get('items', []))
+            self.rows[cid] = rows
+            self.row_labels[cid] = catalog.get('label', '')
             listing = self.getControl(cid)
             listing.reset()
             listing.addItems([item(row) for row in rows])
-            self.setProperty('row' + str(cid), label if rows else '')
-            self.setProperty('has' + str(cid), 'true' if rows else '')
-        self.report('' if first or second else 'No titles available in this section.')
-        if first or second:
-            self.set_hero((first or second)[0])
-        selected = 400 if first else 401 if second else 9000
+            self.setProperty('row'+str(cid), self.row_labels[cid])
+            self.setProperty('has'+str(cid), 'true' if rows else '')
+        available = [cid for cid, rows in self.rows.items() if rows]
+        for index, cid in enumerate(available):
+            up = available[index-1] if index else 9000
+            down = available[index+1] if index+1 < len(available) else cid
+            self.getControl(cid).setNavigation(self.getControl(up), self.getControl(down),
+                                               self.getControl(9000), self.getControl(cid))
+        self.setProperty('first_row', str(available[0] if available else 9000))
+        failed = sum(bool(c.get('failed')) for c in catalogs)
+        self.report(('Some account catalogs could not load. Reopen the addon to retry.' if failed else '')
+                    if available else 'No account catalogs available. Check your Stremio add-ons and connection.')
+        selected = available[0] if available else 9000
         self.setFocusId(selected)
         self.update_hero()
 
@@ -102,6 +119,8 @@ class HomeWindow(NimbusWindow):
         cid = self.getFocusId()
         if cid not in self.rows:
             return
+        following = next((key for key in self.rows if key > cid and self.rows[key]), None)
+        self.setProperty('next_row', self.row_labels.get(following, ''))
         pos = self.getControl(cid).getSelectedPosition()
         if 0 <= pos < len(self.rows[cid]):
             row = self.rows[cid][pos]
@@ -116,7 +135,7 @@ class HomeWindow(NimbusWindow):
 
     def onAction(self, action):
         if action.getId() in BACK:
-            if self.getFocusId() in (400, 401):
+            if self.getFocusId() in self.rows:
                 self.setFocusId(9000)
             else:
                 self.close()

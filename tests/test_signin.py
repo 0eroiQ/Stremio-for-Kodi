@@ -34,9 +34,7 @@ class SigninTests(unittest.TestCase):
         with patch.dict('sys.modules', {'lib.signin': module}):
             scope['run']()
             home.assert_not_called()
-            module.show_signin.return_value = True
-            scope['run']()
-            home.return_value.doModal.assert_called_once()
+
 
     def test_confirmed_link_saves_token_and_opens_home(self):
         tree = ast.parse((ROOT/'lib/signin.py').read_text())

@@ -1,3 +1,8 @@
+1.0.7
+- Build Home rows from the signed-in account catalog collection and order instead of two fixed Cinemeta rows.
+- Add account Continue Watching and support a dynamic number of rows.
+- Skip filtered-only catalogs and isolate unavailable providers; retain row alignment and next-row titles.
+
 1.0.6
 - Show the next available row title below the focused Home row.
 

@@ -109,3 +109,32 @@ def play(meta, identity, stream, resume_ms=0):
     state.save(cache)
     url = 'plugin://script.stremioelec/?' + urlencode({'action': 'play', 'key': key})
     xbmc.executebuiltin('PlayMedia(' + url + ')')
+
+
+def account_home():
+    from account import pull_addons, pull_library
+    from addons_core import merge_account
+    from lib.home_catalogs import load_rows
+    state = STORE.load()
+    if not state.get('token'):
+        return []
+    try:
+        remote, _ = pull_addons(state['token'])
+        state['addons'] = merge_account(state, remote)
+        STORE.save(state)
+    except Exception:
+        xbmc.log('Stremio for Kodi: using saved account catalog order; sync unavailable', xbmc.LOGWARNING)
+    # Home follows the account collection, including account order; local-only
+    # installations and Kodi-specific enable toggles do not rewrite that collection.
+    remote = [a for a in state.get('addons', []) if a.get('account') is True]
+    rows = load_rows(remote, fetch, resource_url)
+    try:
+        state['library'] = pull_library(state['token'])
+        STORE.save(state)
+    except Exception:
+        pass
+    continuing = [dict(row, id=row.get('_id') or row.get('id'))
+                  for row in library_rows(state.get('library', []), True)]
+    if continuing:
+        rows.insert(0, {'label': 'Continue Watching', 'items': continuing, 'failed': False})
+    return rows
