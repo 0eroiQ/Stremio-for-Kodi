@@ -24,10 +24,13 @@ def direct_url(stream):
         return False
     parsed = urlsplit(url)
     hints = stream.get('behaviorHints') or {}
+    # A playable direct URL remains valid even when a Stremio provider also
+    # includes infoHash/externalUrl metadata. Some debrid providers do this
+    # (for example Torrentio-style responses). Only reject URLs that Kodi
+    # cannot safely play without extra proxy/header handling.
     return (parsed.scheme in ('http', 'https') and bool(parsed.netloc)
             and not parsed.username and not parsed.password
-            and isinstance(hints, dict) and not hints.get('proxyHeaders')
-            and not stream.get('externalUrl') and not stream.get('infoHash'))
+            and isinstance(hints, dict) and not hints.get('proxyHeaders'))
 
 
 def collect(providers, kind, identity, fetcher=fetch):
