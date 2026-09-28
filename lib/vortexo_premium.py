@@ -323,3 +323,114 @@ def show_status():
             "Stremio for Kodi Premium",
             "This Stremio account is currently on the free plan. Premium checkout will be enabled separately on vortexo.app."
         )
+
+
+
+def _purchase_window_class():
+    import xbmcgui
+    from addon_state import get_addon
+
+    class PremiumPurchaseWindow(xbmcgui.WindowXMLDialog):
+        store = None
+        purchase = None
+        qr_path = ""
+
+        def onInit(self):
+            checkout_url = self.purchase["purchase_session"]["checkout_url"]
+            self.getControl(120).setImage(self.qr_path or "")
+            self.getControl(110).setLabel(checkout_url)
+            self.getControl(112).setText(
+                "Scan the QR code with your phone, sign in to the same Vortexo customer, "
+                "and complete Premium checkout on vortexo.app."
+            )
+            self.getControl(111).setLabel("Waiting for Premium activation…")
+            self.setFocusId(103)
+
+        def onClick(self, control_id):
+            if control_id == 103:
+                self.getControl(111).setLabel("Checking Premium status…")
+                try:
+                    result = refresh(self.store)
+                    if result["premium"]:
+                        self.getControl(111).setLabel("Premium is active.")
+                        xbmcgui.Dialog().notification(
+                            "Stremio for Kodi Premium",
+                            "Premium activated.",
+                            time=5000
+                        )
+                        self.close()
+                    else:
+                        self.getControl(111).setLabel("Not active yet. Finish checkout, then refresh.")
+                except PremiumError:
+                    self.getControl(111).setLabel("Could not check status. Free features still work.")
+            elif control_id == 104:
+                self.close()
+
+        def onAction(self, action):
+            if action.getId() in (10, 92, 216, 247):
+                self.close()
+
+    return PremiumPurchaseWindow, get_addon
+
+
+def show_purchase():
+    import xbmcgui
+    from lib.signin import account_store
+
+    store = account_store()
+    state = store.load()
+    auth_key = state.get("token")
+    if not isinstance(auth_key, str) or not auth_key.strip():
+        xbmcgui.Dialog().ok(
+            "Stremio for Kodi Premium",
+            "Connect a Stremio account first. Premium uses the same verified Stremio identity."
+        )
+        return False
+
+    try:
+        result = prepare_purchase(store)
+    except PremiumError:
+        xbmcgui.Dialog().ok(
+            "Stremio for Kodi Premium",
+            "Premium checkout is not available yet. Your free Stremio for Kodi features continue to work."
+        )
+        return False
+
+    if result["already_owned"] or result["entitlement"]["premium"]:
+        xbmcgui.Dialog().ok("Stremio for Kodi Premium", "Premium is already active for this Stremio account.")
+        return True
+
+    checkout_url = result["purchase_session"]["checkout_url"]
+    qr_path = ""
+    try:
+        import qrcode
+        import xbmcvfs
+        from pathlib import Path
+        from addon_state import get_addon
+        profile = Path(xbmcvfs.translatePath(get_addon().getAddonInfo("profile")))
+        profile.mkdir(parents=True, exist_ok=True)
+        qr_file = profile / "vortexo-premium-checkout-qr.png"
+        qrcode.make(checkout_url).save(str(qr_file))
+        qr_path = str(qr_file)
+    except Exception:
+        pass
+
+    try:
+        PremiumPurchaseWindow, get_addon = _purchase_window_class()
+        window = PremiumPurchaseWindow(
+            "script-vortexo-premium.xml",
+            get_addon().getAddonInfo("path"),
+            "Main",
+            "1080i"
+        )
+        window.store = store
+        window.purchase = result
+        window.qr_path = qr_path
+        window.doModal()
+        return True
+    except Exception:
+        xbmcgui.Dialog().ok(
+            "Stremio for Kodi Premium",
+            "Open this address on your phone or computer:\n\n" + checkout_url
+        )
+        return True
