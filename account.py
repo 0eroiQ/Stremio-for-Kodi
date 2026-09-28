@@ -45,7 +45,8 @@ def create_link():
 
 
 def create_link_details():
-    data = request('https://link.stremio.com/api/create?type=Create').get('result')
+    response = request('https://link.stremio.com/api/create?type=Create')
+    data = response.get('result') if isinstance(response.get('result'), dict) else response
     if not isinstance(data, dict) or not isinstance(data.get('code'), str):
         raise AccountError('Unable to create a sign-in link.')
     link = data.get('link', '')
@@ -61,9 +62,15 @@ def create_link_details():
 
 def read_link(code):
     data = request('https://link.stremio.com/api/read?' + urlencode({'type': 'Read', 'code': code}))
-    result = data.get('result')
-    if isinstance(result, dict) and isinstance(result.get('authKey'), str) and result['authKey']:
-        return result['authKey']
+    candidates = []
+    if isinstance(data.get('result'), dict):
+        candidates.append(data['result'])
+    candidates.append(data)
+    for result in candidates:
+        for key in ('authKey', 'auth_key'):
+            token = result.get(key)
+            if isinstance(token, str) and token.strip():
+                return token.strip()
     return None
 
 
