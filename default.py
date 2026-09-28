@@ -22,6 +22,9 @@ def main():
     elif 'premium_status' in sys.argv[1:]:
         from lib.vortexo_premium import show_status
         show_status()
+    elif 'premium_buy' in sys.argv[1:]:
+        from lib.vortexo_premium import show_purchase
+        show_purchase()
     else:
         from lib.app import run
         run()
