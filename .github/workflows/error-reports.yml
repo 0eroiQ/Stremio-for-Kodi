@@ -1,0 +1,30 @@
+name: Sync anonymous error reports
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: stremio-kodi-error-reports
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Create or update aggregated error issues
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          REPORTS_ENDPOINT: https://vortexo.app/api/stremio-kodi/v1/reports
+        run: python3 tools/sync-error-reports.py
