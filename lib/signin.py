@@ -5,7 +5,7 @@ import xbmc
 import xbmcgui
 import xbmcvfs
 from addon_state import get_addon
-from account import Store, create_link_details, read_link, pull_addons, pull_library
+from account import Store, create_link_details, read_link, pull_user_id, pull_addons, pull_library
 from addons_core import merge_account
 
 
@@ -79,14 +79,18 @@ class WelcomeWindow(xbmcgui.WindowXML):
                         store.save(state)
                         self.label(111, 'Connected. Importing your library and add-ons…')
                         try:
+                            # The UID is the only Stremio profile field we persist. Premium will
+                            # later use the same verified identity on Kodi and the website.
+                            state['uid'] = pull_user_id(token)
+                            store.save(state)
                             addons, _ = pull_addons(token)
                             state['addons'] = merge_account(state, addons)
                             store.save(state)
                             state['library'] = pull_library(token)
                             store.save(state)
                         except Exception:
-                            # Authentication succeeded; a failed sync must not invent a logout.
-                            xbmc.log('Stremio for Kodi: account linked; initial sync incomplete', xbmc.LOGWARNING)
+                            # Authentication succeeded; identity/sync failures must not invent a logout.
+                            xbmc.log('Stremio for Kodi: account linked; initial identity/sync incomplete', xbmc.LOGWARNING)
                         if not self.cancel.is_set():
                             self.authenticated = True
                             self.close()
