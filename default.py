@@ -16,6 +16,9 @@ def main():
     elif 'locale' in sys.argv[1:]:
         from lib.settings import locale_menu
         locale_menu()
+    elif 'premium' in sys.argv[1:]:
+        from lib.premium import show_status
+        show_status()
     elif 'report_issue' in sys.argv[1:]:
         from lib.error_report import manual_report
         manual_report()
