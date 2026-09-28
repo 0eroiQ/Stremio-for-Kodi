@@ -78,6 +78,22 @@ def entitlement_payload(*, premium=False):
         }
     }
 
+def purchase_payload(*, already_owned=False):
+    return {
+        "alreadyOwned": already_owned,
+        "purchaseSession": None if already_owned else {
+            "id": "purchase-session-123",
+            "product": "stremio_for_kodi_premium",
+            "status": "pending",
+            "expiresAt": int(time.time()) + 900,
+            "completedAt": None,
+            "createdAt": int(time.time()),
+            "checkoutPath": "/account.html?section=shop&kodiPurchase=purchase-session-123"
+        },
+        "entitlement": entitlement_payload(premium=already_owned)
+    }
+
+
 
 class PremiumTests(unittest.TestCase):
     def test_stremio_auth_is_used_only_to_issue_short_lived_vortexo_token(self):
@@ -181,6 +197,51 @@ class PremiumTests(unittest.TestCase):
             opener.requests[1].headers.get("Authorization"),
             "Bearer signed.vortexo.token"
         )
+
+    def test_purchase_session_uses_only_vortexo_bearer_token(self):
+        module = load_module()
+        opener = Opener([purchase_payload()])
+        result = module.create_purchase_session("signed.vortexo.token", opener=opener)
+        self.assertFalse(result["already_owned"])
+        self.assertEqual(
+            result["purchase_session"]["checkout_url"],
+            "https://vortexo.app/account.html?section=shop&kodiPurchase=purchase-session-123"
+        )
+        request = opener.requests[0]
+        self.assertEqual(request.data, b"")
+        self.assertEqual(
+            request.full_url,
+            "https://vortexo.app/api/stremio-for-kodi/v1/purchase-sessions"
+        )
+        self.assertEqual(request.headers.get("Authorization"), "Bearer signed.vortexo.token")
+        self.assertNotIn("authKey", (request.data or b"").decode("utf-8"))
+
+    def test_purchase_session_rejects_untrusted_checkout_host_or_shape(self):
+        module = load_module()
+        bad = purchase_payload()
+        bad["purchaseSession"]["checkoutPath"] = "https://evil.example/account.html?section=shop&kodiPurchase=x"
+        opener = Opener([bad])
+        with self.assertRaises(module.PremiumError):
+            module.create_purchase_session("signed.vortexo.token", opener=opener)
+
+    def test_prepare_purchase_reuses_or_refreshes_short_lived_session_without_exposing_stremio_identity(self):
+        module = load_module()
+        store = Store({
+            "token": "test-only-auth",
+            "vortexo_premium_session": {
+                "access_token": "cached.vortexo.token",
+                "expires_at": int(time.time()) + 300
+            }
+        })
+        opener = Opener([purchase_payload()])
+        result = module.prepare_purchase(store, opener=opener)
+        self.assertFalse(result["already_owned"])
+        self.assertEqual(len(opener.requests), 1)
+        self.assertEqual(opener.requests[0].headers.get("Authorization"), "Bearer cached.vortexo.token")
+        serialized = json.dumps(result)
+        self.assertNotIn("test-only-auth", serialized)
+        self.assertNotIn("stremioUid", serialized)
+        self.assertNotIn("customerId", serialized)
 
     def test_cached_state_rejects_unknown_grant(self):
         module = load_module()
