@@ -1,3 +1,12 @@
+1.0.40
+- Fix Windows sign-in crashes on Python builds without os.fchmod.
+- Keep account-state permission hardening best-effort and convert persistent write failures into a stable account error.
+- Strengthen retry handling for transient Windows file locks while saving Stremio account state.
+- Fall back to sequential Home catalog loading when Kodi cannot create worker threads.
+- Reduce Home catalog worker count on constrained devices.
+- Show SxxExx episode numbers and episode titles directly under episode thumbnails.
+- Add regression tests for GitHub issues #11, #14, #15, #16 and #17.
+
 1.0.36
 - Add optional Kodi-start autolaunch using a service addon, with immediate/1/2/3/5 second delay choices.
 - Launch Stremio for Kodi at the earliest supported Kodi service point while keeping the public setting off by default.
