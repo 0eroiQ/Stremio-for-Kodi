@@ -2,6 +2,36 @@
 
 A single Kodi Program add-on combining the StremioELEC program interface and media backend. The embedded Nimbus interface retains its existing home, search, discover, library, add-ons, settings and media detail windows.
 
+<p align="center">
+  <img src="docs/screenshots/home-brothers.png" alt="Stremio for Kodi Home — Brothers" width="100%">
+</p>
+
+## Screenshots
+
+### Home — New & Latest
+
+Remote-friendly Home browsing with poster badges, cinematic artwork and clear focus states.
+
+![Stremio for Kodi Home — The Deputy](docs/screenshots/home-deputy.png)
+
+### Library
+
+Browse your library with type filters, sorting and refresh controls while keeping the same hero-driven interface.
+
+![Stremio for Kodi Library](docs/screenshots/library.png)
+
+### Addons
+
+Manage installed Stremio addons directly from the interface, including Configure, Disable, Remove and Add addon actions.
+
+![Stremio for Kodi Addons](docs/screenshots/addons.png)
+
+### Episodes
+
+Browse seasons and episodes with watched-state checkmarks and TV-friendly horizontal navigation.
+
+![Stremio for Kodi Episodes](docs/screenshots/episodes.png)
+
 ## Install
 
 For installation and automatic updates, download [repository.stremioforkodi-1.0.0.zip](https://github.com/0eroiQ/Stremio-for-Kodi/releases/latest/download/repository.stremioforkodi-1.0.0.zip). In Kodi, choose **Add-ons → Install from zip file**, select that ZIP, then **Install from repository → Stremio for Kodi Repository → Program add-ons → Stremio for Kodi**. Enable automatic updates for the addon if desired.
