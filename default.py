@@ -19,6 +19,9 @@ def main():
     elif 'report_issue' in sys.argv[1:]:
         from lib.error_report import manual_report
         manual_report()
+    elif 'premium_status' in sys.argv[1:]:
+        from lib.vortexo_premium import show_status
+        show_status()
     else:
         from lib.app import run
         run()
