@@ -35,8 +35,7 @@ class SigninTests(unittest.TestCase):
             scope['run']()
             home.assert_not_called()
 
-
-    def test_confirmed_link_saves_token_and_opens_home(self):
+    def test_confirmed_link_saves_token_uid_and_opens_home(self):
         tree = ast.parse((ROOT/'lib/signin.py').read_text())
         cls = next(n for n in tree.body if isinstance(n, ast.ClassDef))
         fn = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == 'link_account')
@@ -48,6 +47,7 @@ class SigninTests(unittest.TestCase):
         window.authenticated = False
         scope = {'create_link_details': lambda: ('test', 'https://link.stremio.com/test', ''),
                  'read_link': lambda code: 'test-only-token', 'account_store': lambda: store,
+                 'pull_user_id': lambda token: 'stremio-user-id',
                  'pull_addons': lambda token: ([], 0), 'merge_account': lambda state, addons: addons,
                  'pull_library': lambda token: [], 'time': __import__('time'),
                  'xbmc': Mock(), 'threading': threading}
@@ -55,7 +55,34 @@ class SigninTests(unittest.TestCase):
         exec(compile(ast.Module(body=[fn], type_ignores=[]), '<link>', 'exec'), scope)
         scope['link_account'](window)
         self.assertTrue(window.authenticated)
-        self.assertEqual(store.save.call_args.args[0]['token'], 'test-only-token')
+        saved_states = [call.args[0] for call in store.save.call_args_list]
+        self.assertTrue(any(state.get('token') == 'test-only-token' for state in saved_states))
+        self.assertTrue(any(state.get('uid') == 'stremio-user-id' for state in saved_states))
+        window.close.assert_called_once()
+
+    def test_uid_failure_does_not_cancel_confirmed_login(self):
+        tree = ast.parse((ROOT/'lib/signin.py').read_text())
+        cls = next(n for n in tree.body if isinstance(n, ast.ClassDef))
+        fn = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == 'link_account')
+        store = Mock()
+        store.load.return_value = {}
+        window = Mock()
+        window.cancel = threading.Event()
+        window.refresh = threading.Event()
+        window.authenticated = False
+        def uid_failure(token):
+            raise RuntimeError('test-only')
+        scope = {'create_link_details': lambda: ('test', 'https://link.stremio.com/test', ''),
+                 'read_link': lambda code: 'test-only-token', 'account_store': lambda: store,
+                 'pull_user_id': uid_failure,
+                 'pull_addons': lambda token: ([], 0), 'merge_account': lambda state, addons: addons,
+                 'pull_library': lambda token: [], 'time': __import__('time'),
+                 'xbmc': Mock(), 'threading': threading}
+        scope['xbmc'].Monitor.return_value.abortRequested.return_value = False
+        exec(compile(ast.Module(body=[fn], type_ignores=[]), '<link>', 'exec'), scope)
+        scope['link_account'](window)
+        self.assertTrue(window.authenticated)
+        self.assertTrue(any(call.args[0].get('token') == 'test-only-token' for call in store.save.call_args_list))
         window.close.assert_called_once()
 
     def test_pending_link_does_not_save_login(self):
