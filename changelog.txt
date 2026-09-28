@@ -1,4 +1,7 @@
 1.0.34
+- Make the GitHub source and Kodi repository distribution public-ready while keeping Premium authority server-side on vortexo.app.
+- Add Vortexo Premium status and entitlement checks using the existing verified Stremio session; no second Vortexo login is required.
+- Keep free functionality available if the Premium service is unavailable, and reject client-supplied UID/payment/grant claims.
 - Add in-skin one-click error reporting with no browser or GitHub form.
 - Enable anonymous automatic crash reporting by default with an opt-out under Settings > Support.
 - Show a one-time notice that automatic anonymous reporting is enabled.
