@@ -158,7 +158,7 @@ def _report_window_class():
             self.getControl(101).setLabel('Something went wrong')
             self.getControl(102).setText(self.summary)
             self.getControl(103).setLabel('Error ID: ' + self.payload['fingerprint'])
-            self.getControl(104).setLabel(
+            self.getControl(104).setText(
                 'Only anonymous technical diagnostics are sent. '
                 'No tokens, addon URLs, API keys, media URLs, account details or local paths.')
             self.setFocusId(201)
