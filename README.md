@@ -6,7 +6,7 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 For installation and automatic updates, download [repository.stremioforkodi-1.0.0.zip](https://github.com/0eroiQ/Stremio-for-Kodi/releases/latest/download/repository.stremioforkodi-1.0.0.zip). In Kodi, choose **Add-ons → Install from zip file**, select that ZIP, then **Install from repository → Stremio for Kodi Repository → Program add-ons → Stremio for Kodi**. Enable automatic updates for the addon if desired.
 
-For a standalone installation, download `script.stremioelec-1.0.33.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+For a standalone installation, download `script.stremioelec-1.0.34.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
@@ -14,7 +14,11 @@ Requires Kodi with the Python 3 add-on API. QR code support is optional. The add
 
 ## Support and error reports
 
-Unexpected fatal errors can offer to open a pre-filled GitHub issue. The generated diagnostics are intentionally privacy-safe: they include the addon version, Kodi version, platform, error type, an error ID and sanitized file/function/line stack frames only. Stremio tokens, addon/provider URLs, API keys, media URLs, account details and raw exception messages are never added automatically. You can also open **Settings → Support → Report a problem on GitHub** at any time.
+Anonymous automatic error reporting is enabled by default and can be disabled under **Settings → Support → Automatically send anonymous error reports**. The first launch shows a one-time notice explaining this preference. When an unexpected fatal error is captured, the addon sends a small sanitized report and shows a Kodi notification such as **Error reported · <Error ID>**. If automatic reporting is disabled or a send fails, an addon-owned Nimbus-style dialog offers **Report issue** or **Dismiss** without opening a browser.
+
+Reports contain only the Stremio for Kodi version, Kodi/Python versions, broad platform, error type, Error ID and sanitized basename/function/line stack frames. They exclude Stremio tokens, addon/provider URLs, API keys, media URLs, account details, device identifiers, local filesystem paths and raw exception messages. Matching reports are aggregated by Error ID. A scheduled GitHub Action in this repository turns those aggregates into GitHub issues using the repository's short-lived GitHub Actions token; no GitHub credential is shipped in the Kodi addon.
+
+You can also use **Settings → Support → Report a problem now** at any time.
 
 ## Project layout
 

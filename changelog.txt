@@ -1,3 +1,11 @@
+1.0.34
+- Add in-skin one-click error reporting with no browser or GitHub form.
+- Enable anonymous automatic crash reporting by default with an opt-out under Settings > Support.
+- Show a one-time notice that automatic anonymous reporting is enabled.
+- Send only addon/Kodi/Python versions, broad platform, error type, Error ID and sanitized basename/function/line stack frames.
+- Exclude tokens, addon/provider URLs, API keys, media URLs, account details, device IDs, local paths and raw exception messages.
+- Aggregate matching reports and sync them into GitHub issues without putting GitHub credentials in the Kodi addon.
+
 1.0.33
 - Add privacy-preserving GitHub issue drafts for unexpected sign-in, program and plugin errors.
 - Add Settings > Support > Report a problem on GitHub.

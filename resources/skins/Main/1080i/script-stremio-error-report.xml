@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog">
+  <defaultcontrol always="true">201</defaultcontrol>
+  <coordinates>
+    <system>1</system>
+  </coordinates>
+  <controls>
+    <control type="image">
+      <left>0</left><top>0</top><width>1920</width><height>1080</height>
+      <texture colordiffuse="99000000">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texture>
+    </control>
+    <control type="image">
+      <left>450</left><top>260</top><width>1020</width><height>560</height>
+      <texture colordiffuse="FF17151F">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texture>
+    </control>
+    <control type="label" id="101">
+      <left>520</left><top>320</top><width>880</width><height>60</height>
+      <font>font35</font><textcolor>FFFFFFFF</textcolor><label />
+    </control>
+    <control type="textbox" id="102">
+      <left>520</left><top>400</top><width>880</width><height>105</height>
+      <font>font22</font><textcolor>FFE8E8E8</textcolor><label />
+    </control>
+    <control type="label" id="103">
+      <left>520</left><top>525</top><width>880</width><height>45</height>
+      <font>font20</font><textcolor>FF9B7CFF</textcolor><label />
+    </control>
+    <control type="textbox" id="104">
+      <left>520</left><top>585</top><width>880</width><height>75</height>
+      <font>font18</font><textcolor>FFB7B7BD</textcolor><label />
+    </control>
+    <control type="label" id="105">
+      <left>520</left><top>675</top><width>880</width><height>38</height>
+      <font>font18</font><textcolor>FFBBBBBB</textcolor><label />
+    </control>
+    <control type="button" id="201">
+      <left>700</left><top>735</top><width>300</width><height>64</height>
+      <label>Report issue</label><font>font22</font><align>center</align>
+      <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
+      <texturenofocus colordiffuse="FF2A2736">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <onright>202</onright><onleft>202</onleft>
+    </control>
+    <control type="button" id="202">
+      <left>1020</left><top>735</top><width>200</width><height>64</height>
+      <label>Dismiss</label><font>font22</font><align>center</align>
+      <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
+      <texturenofocus colordiffuse="FF2A2736">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <onright>201</onright><onleft>201</onleft>
+    </control>
+  </controls>
+</window>

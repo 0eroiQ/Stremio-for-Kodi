@@ -1235,8 +1235,8 @@ if __name__ == '__main__':
             xbmcplugin.setResolvedUrl(HANDLE, False, xbmcgui.ListItem())
         else:
             xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
-        from lib.error_report import offer_report
-        offer_report(
+        from lib.error_report import handle_error
+        handle_error(
             'Plugin route: {}'.format(params.get('action') or 'root'),
             error,
             'Unable to load this addon response. Check the connection and try again.')

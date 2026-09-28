@@ -95,7 +95,7 @@ class WelcomeWindow(xbmcgui.WindowXML):
                 self.cancel.wait(0.25)
         except Exception as error:
             self.last_error = error
-            self.label(111, 'Unable to connect. A safe GitHub report can be opened next.')
+            self.label(111, 'Unable to connect. Preparing an anonymous error report…')
             self.close()
 
         finally:
@@ -129,8 +129,8 @@ def show_signin():
         authenticated = window.authenticated
         error = window.last_error
         if error is not None and not authenticated:
-            from lib.error_report import offer_report
-            offer_report('Stremio sign-in', error, 'Stremio sign-in failed on this device.')
+            from lib.error_report import handle_error
+            handle_error('Stremio sign-in', error, 'Stremio sign-in failed on this device.')
         return authenticated
     finally:
         window.cancel.set()
