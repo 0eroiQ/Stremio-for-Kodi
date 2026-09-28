@@ -1,3 +1,9 @@
+1.0.35
+- Fix Stremio QR linking compatibility with current link-service response variants, including authKey/auth_key and nested/top-level response shapes.
+- Keep valid direct HTTPS debrid streams when providers also include infoHash or externalUrl metadata.
+- Preserve the safety rejection for streams that require proxyHeaders.
+- Add focused regression coverage for the public Reddit reports.
+
 1.0.34
 - Make the GitHub source and Kodi repository distribution public-ready while keeping Premium authority server-side on vortexo.app.
 - Add Vortexo Premium status and entitlement checks using the existing verified Stremio session; no second Vortexo login is required.
