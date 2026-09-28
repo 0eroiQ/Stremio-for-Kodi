@@ -94,6 +94,18 @@ def purchase_payload(*, already_owned=False):
     }
 
 
+def translation_payload():
+    return {
+        "feature": "ai_translation",
+        "sourceLanguage": "en",
+        "targetLanguage": "bs",
+        "segments": [
+            {"id": "1", "text": "Zdravo"},
+            {"id": "2", "text": "Laku noc"}
+        ]
+    }
+
+
 
 class PremiumTests(unittest.TestCase):
     def test_stremio_auth_is_used_only_to_issue_short_lived_vortexo_token(self):
@@ -197,6 +209,70 @@ class PremiumTests(unittest.TestCase):
             opener.requests[1].headers.get("Authorization"),
             "Bearer signed.vortexo.token"
         )
+
+    def test_ai_translation_uses_only_short_lived_vortexo_token(self):
+        module = load_module()
+        store = Store({
+            "token": "test-only-stremio-auth",
+            "vortexo_premium_session": {
+                "access_token": "cached.vortexo.token",
+                "expires_at": int(time.time()) + 300
+            }
+        })
+        opener = Opener([translation_payload()])
+        result = module.translate_segments(
+            store,
+            [{"id": "1", "text": "Hello"}, {"id": "2", "text": "Good night"}],
+            "bs",
+            source_language="en",
+            opener=opener
+        )
+        self.assertEqual(result["target_language"], "bs")
+        self.assertEqual(result["segments"][0]["text"], "Zdravo")
+        self.assertEqual(len(opener.requests), 1)
+        request = opener.requests[0]
+        self.assertEqual(
+            request.full_url,
+            "https://vortexo.app/api/stremio-for-kodi/v1/features/ai-translation"
+        )
+        self.assertEqual(request.headers.get("Authorization"), "Bearer cached.vortexo.token")
+        body = json.loads(request.data)
+        self.assertEqual(body, {
+            "sourceLanguage": "en",
+            "targetLanguage": "bs",
+            "segments": [
+                {"id": "1", "text": "Hello"},
+                {"id": "2", "text": "Good night"}
+            ]
+        })
+        serialized = json.dumps(body)
+        self.assertNotIn("test-only-stremio-auth", serialized)
+        self.assertNotIn("apiKey", serialized)
+        self.assertNotIn("stremioUid", serialized)
+
+    def test_ai_translation_rejects_unbounded_or_mismatched_response(self):
+        module = load_module()
+        store = Store({
+            "token": "test-only-stremio-auth",
+            "vortexo_premium_session": {
+                "access_token": "cached.vortexo.token",
+                "expires_at": int(time.time()) + 300
+            }
+        })
+        opener = Opener([{
+            "feature": "ai_translation",
+            "sourceLanguage": "en",
+            "targetLanguage": "bs",
+            "segments": [{"id": "wrong", "text": "Zdravo"}]
+        }])
+        with self.assertRaises(module.PremiumError):
+            module.translate_segments(
+                store,
+                [{"id": "1", "text": "Hello"}],
+                "bs",
+                source_language="en",
+                opener=opener
+            )
 
     def test_purchase_session_uses_only_vortexo_bearer_token(self):
         module = load_module()
