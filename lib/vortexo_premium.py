@@ -1,9 +1,10 @@
 """Vortexo Premium entitlement client.
 
 The Kodi source may be public. Premium authority stays server-side at
-https://vortexo.app. The client proves the current Stremio session with its
-existing authKey; it never sends or trusts a caller-supplied Stremio UID,
-product, price, feature grant, or payment state.
+https://vortexo.app. The client exchanges its existing Stremio authKey for a
+short-lived Vortexo access token; Premium APIs receive only that Vortexo token.
+The client never sends or trusts a caller-supplied Stremio UID, product, price,
+feature grant, or payment state.
 """
 import json
 import time
@@ -11,10 +12,13 @@ from urllib.parse import urlsplit
 from urllib.request import Request, HTTPRedirectHandler, build_opener
 
 BASE_URL = "https://vortexo.app"
+SESSION_PATH = "/api/stremio-for-kodi/v1/session"
 ENTITLEMENTS_PATH = "/api/stremio-for-kodi/v1/entitlements"
 MAX_RESPONSE_BYTES = 64 * 1024
 TIMEOUT_SECONDS = 6
+TOKEN_REFRESH_SKEW_SECONDS = 30
 FEATURES = ("trailers", "ai_translation")
+_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH)
 
 
 class PremiumError(Exception):
@@ -31,13 +35,30 @@ def _opener():
 
 
 def _validated_url(path):
-    if path != ENTITLEMENTS_PATH:
+    if path not in _ALLOWED_PATHS:
         raise PremiumError("Unsupported Vortexo endpoint.")
     url = BASE_URL + path
     parsed = urlsplit(url)
     if parsed.scheme != "https" or parsed.netloc != "vortexo.app":
         raise PremiumError("Invalid Vortexo endpoint.")
     return url
+
+
+def _read_json(request, opener=None):
+    client = opener or _opener()
+    try:
+        with client.open(request, timeout=TIMEOUT_SECONDS) as response:
+            body = response.read(MAX_RESPONSE_BYTES + 1)
+    except PremiumError:
+        raise
+    except Exception:
+        raise PremiumError("Premium status is temporarily unavailable.") from None
+    if len(body) > MAX_RESPONSE_BYTES:
+        raise PremiumError("Premium response was too large.")
+    try:
+        return json.loads(body)
+    except (ValueError, TypeError):
+        raise PremiumError("Invalid Premium response.") from None
 
 
 def _bounded_entitlement(payload):
@@ -58,12 +79,28 @@ def _bounded_entitlement(payload):
     return {"premium": premium, "entitlements": entitlements}
 
 
-def fetch_entitlements(auth_key, opener=None):
+def _bounded_session(payload):
+    safe = _bounded_entitlement(payload)
+    token = payload.get("accessToken") if isinstance(payload, dict) else None
+    expires_at = payload.get("expiresAt") if isinstance(payload, dict) else None
+    if not isinstance(token, str) or not token.strip() or len(token) > 4096:
+        raise PremiumError("Invalid Premium session.")
+    if not isinstance(expires_at, int) or expires_at <= 0:
+        raise PremiumError("Invalid Premium session.")
+    return {
+        "access_token": token.strip(),
+        "expires_at": expires_at,
+        "premium": safe["premium"],
+        "entitlements": safe["entitlements"]
+    }
+
+
+def fetch_session(auth_key, opener=None):
     auth_key = auth_key.strip() if isinstance(auth_key, str) else ""
     if not auth_key or len(auth_key) > 1024:
         raise PremiumError("A valid Stremio session is required.")
     request = Request(
-        _validated_url(ENTITLEMENTS_PATH),
+        _validated_url(SESSION_PATH),
         data=json.dumps({"authKey": auth_key}).encode("utf-8"),
         headers={
             "Content-Type": "application/json",
@@ -72,20 +109,24 @@ def fetch_entitlements(auth_key, opener=None):
         },
         method="POST"
     )
-    client = opener or _opener()
-    try:
-        with client.open(request, timeout=TIMEOUT_SECONDS) as response:
-            body = response.read(MAX_RESPONSE_BYTES + 1)
-    except PremiumError:
-        raise
-    except Exception:
-        raise PremiumError("Premium status is temporarily unavailable.") from None
-    if len(body) > MAX_RESPONSE_BYTES:
-        raise PremiumError("Premium response was too large.")
-    try:
-        return _bounded_entitlement(json.loads(body))
-    except (ValueError, TypeError):
-        raise PremiumError("Invalid Premium response.") from None
+    return _bounded_session(_read_json(request, opener=opener))
+
+
+def fetch_entitlements(access_token, opener=None):
+    access_token = access_token.strip() if isinstance(access_token, str) else ""
+    if not access_token or len(access_token) > 4096:
+        raise PremiumError("A valid Vortexo Premium session is required.")
+    request = Request(
+        _validated_url(ENTITLEMENTS_PATH),
+        data=b"",
+        headers={
+            "Accept": "application/json",
+            "Authorization": "Bearer " + access_token,
+            "User-Agent": "Stremio-for-Kodi/1"
+        },
+        method="POST"
+    )
+    return _bounded_entitlement(_read_json(request, opener=opener))
 
 
 def cached_state(store):
@@ -112,15 +153,44 @@ def cached_state(store):
     return safe
 
 
-def refresh(store):
+def _cached_access_token(state, now=None):
+    value = state.get("vortexo_premium_session") if isinstance(state, dict) else None
+    if not isinstance(value, dict):
+        return None
+    token = value.get("access_token")
+    expires_at = value.get("expires_at")
+    if not isinstance(token, str) or not token.strip() or len(token) > 4096:
+        return None
+    if not isinstance(expires_at, int):
+        return None
+    current = int(time.time()) if now is None else int(now)
+    if expires_at <= current + TOKEN_REFRESH_SKEW_SECONDS:
+        return None
+    return {"access_token": token.strip(), "expires_at": expires_at}
+
+
+def _premium_session(state, opener=None):
+    cached = _cached_access_token(state)
+    if cached:
+        return cached
+    auth_key = state.get("token") if isinstance(state, dict) else None
+    issued = fetch_session(auth_key, opener=opener)
+    return {
+        "access_token": issued["access_token"],
+        "expires_at": issued["expires_at"]
+    }
+
+
+def refresh(store, opener=None):
     state = store.load()
-    token = state.get("token")
-    result = fetch_entitlements(token)
+    session = _premium_session(state, opener=opener)
+    result = fetch_entitlements(session["access_token"], opener=opener)
     saved = {
         "checked_at": int(time.time()),
         "premium": result["premium"],
         "entitlements": result["entitlements"]
     }
+    state["vortexo_premium_session"] = session
     state["vortexo_premium"] = saved
     store.save(state)
     return dict(saved)
