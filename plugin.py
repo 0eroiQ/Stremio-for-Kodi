@@ -1228,10 +1228,15 @@ if __name__ == '__main__':
     except AccountError as error:
         xbmcgui.Dialog().ok('Stremio account', str(error))
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
-    except Exception:
-        # Provider URLs can contain secrets: never log exceptions/URLs here.
-        xbmcgui.Dialog().ok('Stremio for Kodi', 'Unable to load this addon response. Check the manifest setting and connection.')
+    except Exception as error:
+        # Provider URLs can contain secrets: the reporter never includes raw exception
+        # messages or provider URLs.
         if params.get('action') in ('play', 'helper_play'):
             xbmcplugin.setResolvedUrl(HANDLE, False, xbmcgui.ListItem())
         else:
             xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        from lib.error_report import offer_report
+        offer_report(
+            'Plugin route: {}'.format(params.get('action') or 'root'),
+            error,
+            'Unable to load this addon response. Check the connection and try again.')
