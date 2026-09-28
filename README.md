@@ -47,7 +47,7 @@ GPL-2.0-or-later; see `LICENSE`. Nimbus layouts, artwork and fonts are by Ivar B
 
 The Kodi client is designed to be safe to publish as open source. Free playback, browsing and account features remain client-side. Premium authority, customer records, payment state and entitlement grants stay server-side on `vortexo.app`.
 
-Kodi does not use a second Vortexo login. When Premium status is checked, the client sends only the existing Stremio `authKey` to the fixed HTTPS Vortexo entitlement endpoint. Vortexo verifies that session with Stremio and derives the stable Stremio UID server-side. The client never supplies a UID, price, payment result or feature grant. If Vortexo is unavailable or Premium is disabled, free Stremio for Kodi functionality continues to work.
+Kodi does not use a second Vortexo login. The client sends its existing Stremio `authKey` only to the fixed HTTPS Vortexo session endpoint. Vortexo verifies that session with Stremio, derives the stable Stremio UID server-side, and returns a short-lived signed Vortexo access token. Premium API calls then use only that Vortexo token; they do not repeatedly send the Stremio auth key. The client never supplies a UID, price, payment result or feature grant. If Vortexo is unavailable or Premium is disabled, free Stremio for Kodi functionality continues to work.
 
 The Premium checkout path is not enabled by this client change; pricing and production commerce are controlled separately by the private Vortexo backend.
 
