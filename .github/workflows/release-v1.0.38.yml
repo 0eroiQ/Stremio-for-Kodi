@@ -46,6 +46,7 @@ jobs:
           - Improve Stremio sign-in failure handling and diagnostics.
           - Distinguish Stremio service/API failures from local network failures.
           - Improve unexpected-response handling during account linking.
+          - Fix Windows sign-in failures caused by transient permission errors while saving account state.
           - Keep the privacy-minimised anonymous error-reporting flow for easier diagnosis.
           EOF
           if gh release view "$TAG" >/dev/null 2>&1; then
