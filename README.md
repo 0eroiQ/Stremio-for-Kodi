@@ -36,7 +36,7 @@ Browse seasons and episodes with watched-state checkmarks and TV-friendly horizo
 
 For installation and automatic updates, download [repository.stremioforkodi-1.0.0.zip](https://github.com/0eroiQ/Stremio-for-Kodi/releases/latest/download/repository.stremioforkodi-1.0.0.zip). In Kodi, choose **Add-ons → Install from zip file**, select that ZIP, then **Install from repository → Stremio for Kodi Repository → Program add-ons → Stremio for Kodi**. Enable automatic updates for the addon if desired.
 
-For a standalone installation, download `script.stremioelec-1.0.36.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+For a standalone installation, download `script.stremioelec-1.0.37.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
@@ -77,7 +77,7 @@ ZIP packages are distributed through GitHub Releases. The `kodi-repository` bran
 
 ## Validation
 
-Version 1.0.2 was launched in local macOS Kodi. Catalog loading and sidebar navigation were visually checked; media details were also checked in an isolated Kodi profile. These checks do not establish playback compatibility on every device or provider.
+Version 1.0.37 is the current public release. The project has been launched and visually checked in local macOS Kodi. Catalog loading and sidebar navigation were visually checked; media details were also checked in an isolated Kodi profile. These checks do not establish playback compatibility on every device or provider.
 
 ## Credits and license
 
