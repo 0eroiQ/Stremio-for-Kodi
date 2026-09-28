@@ -8,17 +8,18 @@ feature grant, or payment state.
 """
 import json
 import time
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from urllib.request import Request, HTTPRedirectHandler, build_opener
 
 BASE_URL = "https://vortexo.app"
 SESSION_PATH = "/api/stremio-for-kodi/v1/session"
 ENTITLEMENTS_PATH = "/api/stremio-for-kodi/v1/entitlements"
+PURCHASE_PATH = "/api/stremio-for-kodi/v1/purchase-sessions"
 MAX_RESPONSE_BYTES = 64 * 1024
 TIMEOUT_SECONDS = 6
 TOKEN_REFRESH_SKEW_SECONDS = 30
 FEATURES = ("trailers", "ai_translation")
-_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH)
+_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH)
 
 
 class PremiumError(Exception):
@@ -95,6 +96,62 @@ def _bounded_session(payload):
     }
 
 
+def _checkout_url(path):
+    if not isinstance(path, str) or not path.startswith("/account.html?"):
+        raise PremiumError("Invalid Premium checkout address.")
+    parsed = urlsplit(BASE_URL + path)
+    if parsed.scheme != "https" or parsed.netloc != "vortexo.app" or parsed.path != "/account.html":
+        raise PremiumError("Invalid Premium checkout address.")
+    query = parse_qs(parsed.query, keep_blank_values=False)
+    purchase_ids = query.get("kodiPurchase", [])
+    if query.get("section") != ["shop"] or len(purchase_ids) != 1:
+        raise PremiumError("Invalid Premium checkout address.")
+    purchase_id = purchase_ids[0]
+    if not purchase_id or len(purchase_id) > 128 or any(ch.isspace() for ch in purchase_id):
+        raise PremiumError("Invalid Premium checkout address.")
+    return parsed.geturl()
+
+
+def _bounded_purchase(payload):
+    if not isinstance(payload, dict) or not isinstance(payload.get("alreadyOwned"), bool):
+        raise PremiumError("Invalid Premium purchase response.")
+    entitlement_raw = payload.get("entitlement")
+    if not isinstance(entitlement_raw, dict):
+        raise PremiumError("Invalid Premium purchase response.")
+    entitlement = _bounded_entitlement(entitlement_raw)
+    session = payload.get("purchaseSession")
+    if payload["alreadyOwned"]:
+        if session is not None or not entitlement["premium"]:
+            raise PremiumError("Invalid Premium purchase response.")
+        return {
+            "already_owned": True,
+            "purchase_session": None,
+            "entitlement": entitlement
+        }
+    if not isinstance(session, dict):
+        raise PremiumError("Invalid Premium purchase response.")
+    session_id = session.get("id")
+    status = session.get("status")
+    product = session.get("product")
+    expires_at = session.get("expiresAt")
+    checkout_path = session.get("checkoutPath")
+    if (not isinstance(session_id, str) or not session_id or len(session_id) > 128 or
+            product != "stremio_for_kodi_premium" or
+            status not in ("pending", "completed", "expired", "cancelled") or
+            not isinstance(expires_at, int) or expires_at <= 0):
+        raise PremiumError("Invalid Premium purchase response.")
+    return {
+        "already_owned": False,
+        "purchase_session": {
+            "id": session_id,
+            "status": status,
+            "expires_at": expires_at,
+            "checkout_url": _checkout_url(checkout_path)
+        },
+        "entitlement": entitlement
+    }
+
+
 def fetch_session(auth_key, opener=None):
     auth_key = auth_key.strip() if isinstance(auth_key, str) else ""
     if not auth_key or len(auth_key) > 1024:
@@ -127,6 +184,32 @@ def fetch_entitlements(access_token, opener=None):
         method="POST"
     )
     return _bounded_entitlement(_read_json(request, opener=opener))
+
+
+def create_purchase_session(access_token, opener=None):
+    access_token = access_token.strip() if isinstance(access_token, str) else ""
+    if not access_token or len(access_token) > 4096:
+        raise PremiumError("A valid Vortexo Premium session is required.")
+    request = Request(
+        _validated_url(PURCHASE_PATH),
+        data=b"",
+        headers={
+            "Accept": "application/json",
+            "Authorization": "Bearer " + access_token,
+            "User-Agent": "Stremio-for-Kodi/1"
+        },
+        method="POST"
+    )
+    return _bounded_purchase(_read_json(request, opener=opener))
+
+
+def prepare_purchase(store, opener=None):
+    state = store.load()
+    session = _premium_session(state, opener=opener)
+    result = create_purchase_session(session["access_token"], opener=opener)
+    state["vortexo_premium_session"] = session
+    store.save(state)
+    return result
 
 
 def cached_state(store):
