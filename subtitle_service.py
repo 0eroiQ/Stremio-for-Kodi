@@ -1,4 +1,10 @@
 """Expose account subtitle providers in Kodi's standard subtitle download dialog."""
+import sys
+from pathlib import Path
+_CORE = Path(__file__).resolve().parent / "core"
+if str(_CORE) not in sys.path:
+    sys.path.insert(0, str(_CORE))
+
 import hashlib
 import secrets
 import sys

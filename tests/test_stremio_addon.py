@@ -13,6 +13,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT
+CORE = SOURCE / 'core'
 
 
 def load(name, path):
@@ -50,7 +51,7 @@ class AddonTests(unittest.TestCase):
 
     def test_migration_preserves_current_data_and_does_not_resurrect_login(self):
         with patch.dict(sys.modules, {'xbmcaddon': types.ModuleType('xbmcaddon'), 'xbmcvfs': types.ModuleType('xbmcvfs')}):
-            migration = load('addon_state', SOURCE / 'addon_state.py')
+            migration = load('addon_state', CORE / 'addon_state.py')
         with tempfile.TemporaryDirectory() as directory:
             old, new = Path(directory)/'old', Path(directory)/'new'
             old.mkdir(); new.mkdir()

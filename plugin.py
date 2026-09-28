@@ -1,5 +1,11 @@
 """Kodi entry point. No account writes, library mutations or torrent engine."""
 import sys
+from pathlib import Path
+_CORE = Path(__file__).resolve().parent / "core"
+if str(_CORE) not in sys.path:
+    sys.path.insert(0, str(_CORE))
+
+import sys
 import time
 import re
 import json

@@ -5,6 +5,12 @@ cannot run literally before skin initialization. It launches the addon at the
 earliest supported service point and uses a per-Kodi-session guard to avoid
 duplicate launches.
 """
+import sys
+from pathlib import Path
+_CORE = Path(__file__).resolve().parent / "core"
+if str(_CORE) not in sys.path:
+    sys.path.insert(0, str(_CORE))
+
 import xbmc
 import xbmcgui
 

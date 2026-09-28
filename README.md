@@ -58,7 +58,7 @@ You can also use **Settings → Support → Report a problem now** at any time.
 
 ## Project layout
 
-- `addon.xml`, `default.py`, `plugin.py`, backend modules, `lib/` and `resources/`: complete add-on source at the repository root.
+- `addon.xml` plus the small `default.py`, `plugin.py`, `service.py` and `subtitle_service.py` bootstraps: Kodi entry points kept at the add-on root.\n- `core/`: Stremio account, protocol, metadata, stream, subtitle and supporting runtime modules.\n- `lib/`: Nimbus UI, browsing, settings, caching, Premium client and other application modules.\n- `resources/`: embedded Nimbus skin assets, settings and runtime data.
 - `tools/build-stremio-addon.py`: builds the installation ZIP from source.
 - `tests/test_stremio_addon.py`: packaging, syntax, migration and launch-route regressions.
 
