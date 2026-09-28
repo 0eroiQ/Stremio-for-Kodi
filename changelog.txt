@@ -1,3 +1,10 @@
+1.0.36
+- Add optional Kodi-start autolaunch using a service addon, with immediate/1/2/3/5 second delay choices.
+- Launch Stremio for Kodi at the earliest supported Kodi service point while keeping the public setting off by default.
+- Guard against duplicate launches within the same Kodi session.
+- Make top-level Back show Exit or Cancel; Cancel leaves the Stremio UI unchanged and only Exit closes the app.
+- Keep normal Back navigation inside media-detail dialogs.
+
 1.0.35
 - Fix Stremio QR linking compatibility with current link-service response variants, including authKey/auth_key and nested/top-level response shapes.
 - Keep valid direct HTTPS debrid streams when providers also include infoHash or externalUrl metadata.
