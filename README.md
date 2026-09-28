@@ -67,6 +67,14 @@ Browsing responses are cached in the addon Kodi profile across restarts: catalog
 
 Optional MDbList ratings: open addon Settings > Ratings, enter an API key or use Import API key from Nimbus, and select a rating source. Reopen the addon after changing these settings. Lookup supports IMDb movie/show IDs; unavailable ratings retain the original Stremio rating.
 
+### Premium service boundary
+
+Premium authority is never a local boolean. The public client exchanges the existing Stremio session for a short-lived signed Vortexo token, then uses that token for private Vortexo Premium APIs.
+
+The first server-gated feature client is **AI Translation**. Translation requests contain only bounded subtitle/dialogue text, language codes and local segment IDs. The Stremio auth key, Stremio UID, Vortexo customer ID, provider API key and payment state are not sent in the translation payload. The private Vortexo backend verifies the signed token and current Premium entitlement before a translation provider can be invoked.
+
+The built-in direct IMDb trailer resolver described below is currently a **free local feature** because its implementation is already public in this repository. The server-side `trailers` Premium entitlement is reserved for future Vortexo-hosted trailer enhancements; the project does not pretend that public local trailer code can be securely paywalled.
+
 ### Built-in trailers
 
 Trailers resolve directly from IMDb and play with Kodi's native player. No YouTube or SlyGuy addon, API key or trailer login is required. Settings → Trailers controls enablement, maximum MP4 quality (1080p/720p/480p), autoplay and delay. HLS is used when MP4 is unavailable. Availability depends on IMDb: titles without an IMDb ID or a playable trailer report unavailable; YouTube-only clips are not resolved. The supplied SlyGuy Trailers 0.2.0 IMDb route informed the protocol integration; no SlyGuy framework or credentials are bundled.
