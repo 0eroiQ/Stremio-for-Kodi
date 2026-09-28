@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT
+SOURCE = ROOT\nCORE = SOURCE / 'core'
 
 
 def load(name, path):
@@ -50,7 +50,7 @@ class AddonTests(unittest.TestCase):
 
     def test_migration_preserves_current_data_and_does_not_resurrect_login(self):
         with patch.dict(sys.modules, {'xbmcaddon': types.ModuleType('xbmcaddon'), 'xbmcvfs': types.ModuleType('xbmcvfs')}):
-            migration = load('addon_state', SOURCE / 'addon_state.py')
+            migration = load('addon_state', CORE / 'addon_state.py')
         with tempfile.TemporaryDirectory() as directory:
             old, new = Path(directory)/'old', Path(directory)/'new'
             old.mkdir(); new.mkdir()
@@ -78,7 +78,7 @@ class AddonTests(unittest.TestCase):
                         self.assertTrue((SOURCE/value[len(prefix):]).is_file(), value)
 
     def test_ordinary_media_launch_opens_nimbus(self):
-        tree = ast.parse((SOURCE / 'plugin.py').read_text())
+        tree = ast.parse((CORE / 'plugin.py').read_text())
         run = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'run')
         kodi, plugin = Mock(), Mock()
         scope = {'xbmc': kodi, 'xbmcplugin': plugin, 'HANDLE': 1}
