@@ -67,6 +67,15 @@ def read_link(code):
     return None
 
 
+def pull_user_id(token):
+    """Return only Stremio's stable user id; do not persist the full user profile."""
+    result = request('https://api.strem.io/api/getUser', {'authKey': token}).get('result')
+    uid = result.get('_id') if isinstance(result, dict) else None
+    if not isinstance(uid, str) or not uid.strip() or len(uid) > 160:
+        raise AccountError('Unable to read the Stremio user identity.')
+    return uid.strip()
+
+
 def pull_addons(token):
     data = request('https://api.strem.io/api/addonCollectionGet', {
         'type': 'AddonCollectionGet', 'authKey': token, 'update': False})
