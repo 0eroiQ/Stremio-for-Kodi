@@ -616,7 +616,15 @@ class InfoWindow(NimbusWindow):
             if section == 'Episodes':
                 li.setProperty('watched', 'true' if row.get('id') in self.watched_episodes else '')
                 number = row.get('episode') or row.get('number') or ''
-                li.setLabel('{}. {}'.format(number, row.get('name') or row.get('title') or 'Episode'))
+                title = clean(row.get('name') or row.get('title') or 'Episode')
+                season = row.get('season', self.season)
+                if isinstance(season, int) and isinstance(number, int):
+                    episode_code = 'S{:02d}E{:02d}'.format(season, number)
+                else:
+                    episode_code = 'Ep. {}'.format(number) if number != '' else 'Episode'
+                li.setProperty('episode_code', episode_code)
+                li.setProperty('episode_title', title)
+                li.setLabel('{} · {}'.format(episode_code, title))
                 li.setArt({'thumb': row.get('thumbnail') or self.meta.get('background', '')})
             elif section == 'Similar':
                 li.setArt({'thumb': row.get('background') or row.get('poster', '')})
