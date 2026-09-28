@@ -6,23 +6,37 @@ ADDON = get_addon()
 ADDON_PATH = ADDON.getAddonInfo('path')
 SKIN = 'Main'
 RES = '1080i'
+SESSION_WINDOW_ID = 10000
+APP_RUNNING = 'stremioforkodi.running'
 
 
 def run():
-    from lib.signin import signed_in, show_signin
-    if not signed_in() and not show_signin():
+    session = xbmcgui.Window(SESSION_WINDOW_ID)
+    if session.getProperty(APP_RUNNING) == 'true':
         return
-    import xbmcvfs
-    from lib import backend
-    from lib.home_layout import build_layout
-    from lib.appearance import options
-    progress = xbmcgui.DialogProgressBG()
-    progress.create('Stremio for Kodi', 'Loading your account catalogs…')
+    session.setProperty(APP_RUNNING, 'true')
     try:
-        rows = backend.account_home()
-        filename, path, count = build_layout(ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')), max(8, len(rows)), options(ADDON))
+        from lib.signin import signed_in, show_signin
+        if not signed_in() and not show_signin():
+            return
+        import xbmcvfs
+        from lib import backend
+        from lib.home_layout import build_layout
+        from lib.appearance import options
+        progress = xbmcgui.DialogProgressBG()
+        progress.create('Stremio for Kodi', 'Loading your account catalogs…')
+        try:
+            rows = backend.account_home()
+            filename, path, count = build_layout(
+                ADDON_PATH,
+                xbmcvfs.translatePath(ADDON.getAddonInfo('profile')),
+                max(8, len(rows)),
+                options(ADDON)
+            )
+        finally:
+            progress.close()
+        window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)
+        window.doModal()
+        del window
     finally:
-        progress.close()
-    window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)
-    window.doModal()
-    del window
+        session.clearProperty(APP_RUNNING)
