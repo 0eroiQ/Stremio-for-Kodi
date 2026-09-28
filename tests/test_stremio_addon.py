@@ -79,7 +79,7 @@ class AddonTests(unittest.TestCase):
                         self.assertTrue((SOURCE/value[len(prefix):]).is_file(), value)
 
     def test_ordinary_media_launch_opens_nimbus(self):
-        tree = ast.parse((CORE / 'plugin.py').read_text())
+        tree = ast.parse((SOURCE / 'plugin.py').read_text())
         run = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'run')
         kodi, plugin = Mock(), Mock()
         scope = {'xbmc': kodi, 'xbmcplugin': plugin, 'HANDLE': 1}
