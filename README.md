@@ -6,11 +6,17 @@ A single Kodi Program add-on combining the StremioELEC program interface and med
 
 For installation and automatic updates, download [repository.stremioforkodi-1.0.0.zip](https://github.com/0eroiQ/Stremio-for-Kodi/releases/latest/download/repository.stremioforkodi-1.0.0.zip). In Kodi, choose **Add-ons → Install from zip file**, select that ZIP, then **Install from repository → Stremio for Kodi Repository → Program add-ons → Stremio for Kodi**. Enable automatic updates for the addon if desired.
 
-For a standalone installation, download `script.stremioelec-1.0.35.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+For a standalone installation, download `script.stremioelec-1.0.36.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
 Requires Kodi with the Python 3 add-on API. QR code support is optional. The add-on does not change the global Kodi skin. The bundled Nimbus masks and overlays load directly from the addon, independently of the global skin. Kodi still supplies the active font definitions, so typography can vary between global skins.
+
+## Startup shell mode
+
+Optional **Settings → Startup → Launch Stremio for Kodi when Kodi starts** opens the addon automatically at the earliest startup point supported for Kodi service addons. The public default is off. Startup delay can be Immediate, 1, 2, 3 or 5 seconds.
+
+At the top-level Stremio Home shell, Back does not silently fall through to Kodi Home. It shows **Exit** or **Cancel**; Cancel changes nothing and only Exit closes Stremio for Kodi. Back inside media-detail dialogs keeps its normal in-app navigation behavior.
 
 ## Support and error reports
 
