@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import time
 from urllib.parse import urlencode, urlsplit
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, HTTPRedirectHandler, build_opener
@@ -162,10 +163,31 @@ class Store:
                 json.dump(data, stream)
                 stream.flush()
                 os.fsync(stream.fileno())
-            os.replace(name, self.path)
+            # On Windows, antivirus/indexing or another short-lived file handle can
+            # temporarily deny os.replace(). Retry the atomic replacement briefly
+            # instead of turning a successful Stremio authentication into a login failure.
+            last_error = None
+            for attempt in range(6):
+                try:
+                    os.replace(name, self.path)
+                    name = None
+                    break
+                except PermissionError as error:
+                    last_error = error
+                    if attempt == 5:
+                        raise AccountError(
+                            'Could not save Stremio account data on this device. '
+                            'Check Kodi profile-folder permissions and retry.'
+                        ) from None
+                    time.sleep(0.05 * (attempt + 1))
+            if last_error is not None and name is not None:
+                raise AccountError('Could not save Stremio account data on this device.') from None
         finally:
-            if os.path.exists(name):
-                os.unlink(name)
+            if name and os.path.exists(name):
+                try:
+                    os.unlink(name)
+                except OSError:
+                    pass
 
     def forget(self):
         # Clear this device only; never alter the remote collection/session.
