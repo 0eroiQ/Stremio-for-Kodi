@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <settings>
+  <category label="Startup">
+    <setting id="startup_autostart" type="bool" label="Launch Stremio for Kodi when Kodi starts" default="false" />
+    <setting id="startup_delay" type="enum" label="Startup delay" values="Immediately|1 second|2 seconds|3 seconds|5 seconds" default="0" />
+    <setting type="lsep" label="Kodi loads its active skin before service addons. Stremio for Kodi opens at the earliest supported startup point. Leave this off if you prefer Kodi Home." />
+  </category>
   <category label="Language and location">
     <setting type="action" label="Language and location" action="RunScript(script.stremioelec,locale)" />
   </category>
