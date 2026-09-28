@@ -155,34 +155,57 @@ class Store:
             raise AccountError('Local account data cannot be read. Disconnect and reconnect.') from None
 
     def save(self, data):
-        self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
-        fd, name = tempfile.mkstemp(dir=self.directory, prefix='.account-')
+        # tempfile.mkstemp already creates a private temp file on POSIX. Some
+        # Windows Python builds do not expose os.fchmod at all, so permissions
+        # hardening must be best-effort instead of breaking a successful login.
+        fd = None
+        name = None
         try:
-            os.fchmod(fd, 0o600)
+            self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+            fd, name = tempfile.mkstemp(dir=self.directory, prefix='.account-')
+            if hasattr(os, 'fchmod'):
+                try:
+                    os.fchmod(fd, 0o600)
+                except OSError:
+                    pass
             with os.fdopen(fd, 'w') as stream:
+                fd = None
                 json.dump(data, stream)
                 stream.flush()
-                os.fsync(stream.fileno())
-            # On Windows, antivirus/indexing or another short-lived file handle can
-            # temporarily deny os.replace(). Retry the atomic replacement briefly
-            # instead of turning a successful Stremio authentication into a login failure.
-            last_error = None
+                if hasattr(os, 'fsync'):
+                    try:
+                        os.fsync(stream.fileno())
+                    except OSError:
+                        pass
+
+            # Windows antivirus/indexing can briefly keep the destination open.
+            # Retry any replacement-level OS error, then convert it to a stable
+            # AccountError instead of leaking PermissionError/WinError to sign-in.
             for attempt in range(6):
                 try:
                     os.replace(name, self.path)
                     name = None
-                    break
-                except PermissionError as error:
-                    last_error = error
+                    return
+                except OSError:
                     if attempt == 5:
                         raise AccountError(
                             'Could not save Stremio account data on this device. '
                             'Check Kodi profile-folder permissions and retry.'
                         ) from None
                     time.sleep(0.05 * (attempt + 1))
-            if last_error is not None and name is not None:
-                raise AccountError('Could not save Stremio account data on this device.') from None
+        except AccountError:
+            raise
+        except OSError:
+            raise AccountError(
+                'Could not save Stremio account data on this device. '
+                'Check Kodi profile-folder permissions and retry.'
+            ) from None
         finally:
+            if fd is not None:
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
             if name and os.path.exists(name):
                 try:
                     os.unlink(name)

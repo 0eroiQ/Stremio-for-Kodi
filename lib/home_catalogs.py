@@ -31,6 +31,18 @@ def load_rows(addons, fetch, resource_url):
         except Exception:
             return dict(spec, items=[], failed=True)
     specs = descriptors(addons)
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        # map preserves account order even when network requests finish out of order.
-        return list(pool.map(load, specs))
+    if not specs:
+        return []
+    if len(specs) == 1:
+        return [load(specs[0])]
+
+    # Keep startup lightweight on constrained Kodi/Linux devices. If the
+    # runtime cannot create another worker thread, fall back to sequential
+    # loading instead of aborting the whole Program entry.
+    workers = min(4, len(specs))
+    try:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            # map preserves account order even when requests finish out of order.
+            return list(pool.map(load, specs))
+    except RuntimeError:
+        return [load(spec) for spec in specs]
