@@ -22,6 +22,10 @@
     <setting id="ui_show_runtime" type="bool" label="Show runtime" default="true" />
     <setting type="lsep" label="Reopen the addon to apply appearance changes." />
   </category>
+  <category label="Premium">
+    <setting type="action" label="Premium status / Get Premium" action="RunScript(script.stremioelec,premium)" />
+    <setting type="lsep" label="Premium-ready features: Trailers and AI subtitle translation. Billing is connected through the website in the next phase; this foundation build does not lock existing free features." />
+  </category>
   <category label="Support">
     <setting id="error_reporting_auto" type="bool" label="Automatically send anonymous error reports" default="true" />
     <setting type="action" label="Report a problem now" action="RunScript(script.stremioelec,report_issue)" />
