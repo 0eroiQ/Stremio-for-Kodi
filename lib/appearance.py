@@ -5,11 +5,15 @@ COLORS = ['FFFFFFFF', 'FF9B7BFF', 'FF55BBFF', 'FF55DD99', 'FFFFBB55']
 
 
 def options(addon):
+    from lib.theme import index, PALETTES
+    selected = index(addon)
     try:
-        color = COLORS[int(addon.getSetting('ui_focus_color') or 0)]
-    except (ValueError, IndexError):
-        color = COLORS[0]
-    return {'color': color, 'animations': addon.getSetting('ui_animations') != 'false',
+        value = addon.getSetting('ui_focus_color')
+        poster = int(value) if value else 5
+        color = COLORS[poster] if 0 <= poster < len(COLORS) else PALETTES[selected][5]
+    except (TypeError, ValueError):
+        color = PALETTES[selected][5]
+    return {'theme': selected, 'color': color, 'animations': addon.getSetting('ui_animations') != 'false',
             'dim': addon.getSetting('ui_dim_rows') == 'true'}
 
 

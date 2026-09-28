@@ -27,6 +27,8 @@ def build_layout(source, profile, count, appearance=None):
         listing = row.find("control[@type='fixedlist']")
         listing.find('onup').text = str(cid-1) if index else '9000'
         listing.find('ondown').text = str(cid+1) if index+1 < count else str(cid)
+        heading = row.find("control[@type='group']")
+        heading.find('top').text = '-10'
         group.append(row)
     menu = tree.find('.//control[@id="9000"]')
     menu.find('onright').text = 'SetFocus($INFO[Window.Property(first_row)])'
@@ -46,16 +48,28 @@ def build_layout(source, profile, count, appearance=None):
             if key in ('texturefocus','texturenofocus'):
                 node.set('border','13');node.set('colordiffuse','FFF0F0F2' if key=='texturefocus' else 'FF30313B')
         button.append(copy.deepcopy(group.find('animation')))
+        ET.SubElement(button, 'animation', effect='slide', start='0,0', end='0,60', time='0',
+                      condition='String.IsEqual(Window.Property(page),Discover)', reversible='true').text = 'Conditional'
         arrow = ET.SubElement(controls, 'control', type='image')
         for key,value in {'left':str(290+index*290),'top':'560','width':'16','height':'14',
                           'texture':'special://home/addons/script.stremioelec/resources/skins/Main/media/overlays/arrowdown.png',
                           'visible':tags['visible']}.items(): ET.SubElement(arrow,key).text=value
         arrow.append(copy.deepcopy(group.find('animation')))
+        ET.SubElement(arrow, 'animation', effect='slide', start='0,0', end='0,60', time='0',
+                      condition='String.IsEqual(Window.Property(page),Discover)', reversible='true').text = 'Conditional'
+    group.find('top').text = '690'
+    ET.SubElement(group, 'animation', effect='slide', start='0,0', end='0,-24', time='0',
+                  condition='!String.IsEmpty(Window.Property(next_row))',
+                  reversible='true').text = 'Conditional'
     preview = tree.find('.//control[@id="2001"]')
     preview.find('label').text = '$INFO[Window.Property(next_row)]'
     preview.find('visible').text = '!String.IsEmpty(Window.Property(next_row)) + !Control.HasFocus(9000)'
     from lib.appearance import apply
     apply(tree, appearance or {})
+    from lib.addons_layout import build
+    build(tree)
+    from lib.theme import apply as apply_theme
+    apply_theme(tree, (appearance or {}).get('theme', 0), (appearance or {}).get('color'))
     # Unique filename ensures the active global skin cannot substitute its own XML.
     path = Path(profile)/'home-layout'
     output = path/'resources/skins/Main/1080i'

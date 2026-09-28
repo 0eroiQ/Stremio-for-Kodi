@@ -23,6 +23,9 @@ FEATURES = ("trailers", "ai_translation")
 _ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH)
 
 
+from lib.theme import window as themed_window
+
+
 class PremiumError(Exception):
     pass
 
@@ -496,7 +499,7 @@ def show_purchase():
 
     try:
         PremiumPurchaseWindow, get_addon = _purchase_window_class()
-        window = PremiumPurchaseWindow(
+        window = themed_window(PremiumPurchaseWindow,
             "script-vortexo-premium.xml",
             get_addon().getAddonInfo("path"),
             "Main",

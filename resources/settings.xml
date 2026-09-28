@@ -17,7 +17,8 @@
     <setting id="weather_lon" type="text" label="Weather longitude" default="" />
   </category>
   <category label="Appearance">
-    <setting id="ui_focus_color" type="enum" label="Poster focus color" values="Original|Purple|Blue|Green|Gold" default="0" />
+    <setting id="ui_theme" type="enum" label="Theme" values="Purple|Black|Blue|Green|Gold" default="0" />
+    <setting id="ui_focus_color" type="enum" label="Poster focus color" values="Original|Purple|Blue|Green|Gold|Theme" default="5" />
     <setting id="ui_animations" type="bool" label="Enable animations" default="true" />
     <setting id="ui_dim_rows" type="bool" label="Dim rows while the side menu is open" default="false" />
     <setting id="ui_show_logo" type="bool" label="Use title logo (otherwise show text)" default="true" />
@@ -25,7 +26,7 @@
     <setting id="ui_show_rating" type="bool" label="Show rating" default="true" />
     <setting id="ui_show_genres" type="bool" label="Show genres" default="true" />
     <setting id="ui_show_runtime" type="bool" label="Show runtime" default="true" />
-    <setting type="lsep" label="Reopen the addon to apply appearance changes." />
+    <setting type="lsep" label="Theme changes apply when you return from settings." />
   </category>
   <category label="Vortexo Premium">
     <setting type="action" label="Get Premium" action="RunScript(script.stremioelec,premium_buy)" />

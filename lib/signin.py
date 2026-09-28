@@ -9,6 +9,9 @@ from account import Store, create_link_details, read_link, pull_addons, pull_lib
 from addons_core import merge_account
 
 
+from lib.theme import window as themed_window
+
+
 def account_store():
     return Store(xbmcvfs.translatePath(get_addon().getAddonInfo('profile')))
 
@@ -130,7 +133,7 @@ class WelcomeWindow(xbmcgui.WindowXML):
 
 
 def show_signin():
-    window = WelcomeWindow('script-stremio-welcome.xml', get_addon().getAddonInfo('path'), 'Main', '1080i')
+    window = themed_window(WelcomeWindow, 'script-stremio-welcome.xml', get_addon().getAddonInfo('path'), 'Main', '1080i')
     try:
         window.doModal()
         authenticated = window.authenticated

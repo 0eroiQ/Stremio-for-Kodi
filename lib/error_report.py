@@ -17,6 +17,9 @@ REPORT_VERSION = 1
 MAX_FRAMES = 8
 
 
+from lib.theme import window as themed_window
+
+
 def _safe_frames(error, limit=MAX_FRAMES):
     if error is None or getattr(error, '__traceback__', None) is None:
         return []
@@ -190,7 +193,7 @@ def _report_window_class():
 def show_report_dialog(payload, summary):
     try:
         ReportWindow, get_addon = _report_window_class()
-        window = ReportWindow(
+        window = themed_window(ReportWindow,
             'script-stremio-error-report.xml',
             get_addon().getAddonInfo('path'),
             'Main',

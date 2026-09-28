@@ -19,6 +19,9 @@ PATH = ADDON.getAddonInfo('path')
 BACK = (10, 92, 216, 247)
 
 
+from lib.theme import window as themed_window
+
+
 def clean(value):
     return re.sub(r'<[^>]+>', '', str(value or ''))
 
@@ -141,7 +144,7 @@ class NimbusWindow(xbmcgui.WindowXML):
                 for field in fields:
                     row.pop(field, None)
         values = {'title': clean(row.get('name')), 'plot': clean(row.get('description')),
-                  'fanart': row.get('background') or row.get('poster') or '',
+                  'fanart': (row.get('background') or '') if row.get('background') != row.get('poster') else '',
                   'logo': row.get('logo') or '',
                   'genres': ' · '.join(row.get('genres') or []),
                   'facts': '  ·  '.join(str(v) for v in (
@@ -166,14 +169,17 @@ class NimbusWindow(xbmcgui.WindowXML):
         self.preview_suspended = True
         self.cancel_trailer()
         try:
-            window = InfoWindow('script-stremio-info.xml', PATH, 'Main', '1080i', meta=row)
+            window = themed_window(InfoWindow, 'script-stremio-info.xml', PATH, 'Main', '1080i', meta=row)
             window.doModal()
             del window
         finally:
             self.preview_suspended = False
 
 
-class HomeWindow(NimbusWindow):
+from lib.addons_page import AddonsPage
+
+
+class HomeWindow(AddonsPage, NimbusWindow):
     def __init__(self, *args, **kwargs):
         self.account_rows = kwargs.pop('account_rows', [])
         self.row_count = kwargs.pop('row_count', 2)
@@ -240,6 +246,9 @@ class HomeWindow(NimbusWindow):
         self.update_hero()
 
     def update_hero(self):
+        if self.getProperty('page') == 'Addons':
+            self.update_addon_selection()
+            return
         if self.preview_suspended:
             return
         cid = self.getFocusId()
@@ -277,7 +286,7 @@ class HomeWindow(NimbusWindow):
             self.set_hero(self.hero_cache[identity])
             return
         from lib import mdblist
-        if row.get('background') and row.get('description') and not mdblist.enabled():
+        if row.get('background') and row.get('background') != row.get('poster') and row.get('description') and not mdblist.enabled():
             return
         self.hero_request = (key, dict(row), self.getProperty('page'))
         if self.hero_loading:
@@ -290,7 +299,7 @@ class HomeWindow(NimbusWindow):
                     self.hero_request = None
                     request_key, preview, page = request
                     try:
-                        full = preview if preview.get('background') and preview.get('description') else api.metadata(preview)
+                        full = preview if preview.get('background') and preview.get('background') != preview.get('poster') and preview.get('description') else api.metadata(preview)
                         full = mdblist.enrich(full)
                         self.hero_cache[(preview.get('type'), preview.get('id'))] = full
                         if not self.closed and self.hero_key == request_key and self.getProperty('page') == page:
@@ -346,7 +355,8 @@ class HomeWindow(NimbusWindow):
 
     def edit_filters(self, direct=None):
         from lib.nimbus_select import Dialog
-        dialog = Dialog(PATH, left=50 + (direct or 0)*290)
+        dialog = Dialog(PATH, left=50 + (direct or 0)*290,
+                        top=660 if self.getProperty('page') == 'Discover' else 600)
         if self.getProperty('page') == 'Discover':
             choices = api.discover_choices()
             if not choices:
@@ -416,15 +426,20 @@ class HomeWindow(NimbusWindow):
     def onAction(self, action):
         aid = action.getId()
         if aid in BACK:
-            # At the top-level Stremio shell, Back is exit-only. Cancel leaves
-            # the UI, focus and any active hero preview untouched.
+            if not getattr(self, 'exit_armed', False):
+                self.cancel_trailer()
+                self.setFocusId(9000)
+                self.exit_armed = True
+                return
+            self.exit_armed = False
             if xbmcgui.Dialog().yesno(
                     'Exit Stremio for Kodi',
                     'Do you want to exit Stremio for Kodi?',
-                    nolabel='Cancel',
-                    yeslabel='Exit'):
+                    nolabel='Cancel', yeslabel='Exit'):
                 self.close()
             return
+        if aid in (1, 2, 3, 4, 7, 11, 100, 101):
+            self.exit_armed = False
         if aid == 117 and self.getProperty('page') == 'Discover':
             self.edit_filters()
             return
@@ -434,6 +449,10 @@ class HomeWindow(NimbusWindow):
             self.update_hero()
 
     def onClick(self, cid):
+        self.exit_armed = False
+        if cid in (9300, 9301, 9302, 9303, 9304):
+            self.addon_click(cid)
+            return
         self.cancel_trailer()
         self.hero_key = None
         if cid in (9200, 9201, 9202):
@@ -464,23 +483,21 @@ class HomeWindow(NimbusWindow):
             self.library_entries = entries if entries is not None else api.account_library(False)
             self.load_library()
         elif cid == 205:
-            rows = api.providers()
-            choice = xbmcgui.Dialog().select('Installed Stremio addons',
-                [r.get('manifest', {}).get('name', 'Addon') for r in rows]) if rows else -1
-            if choice >= 0:
-                manifest = rows[choice].get('manifest', {})
-                xbmcgui.Dialog().textviewer(manifest.get('name', 'Addon'), clean(manifest.get('description')))
-            elif not rows:
-                xbmcgui.Dialog().ok('Addons', 'No active Stremio addons. Connect or sync your account in Settings.')
+            self.load_addons()
         elif cid == 206:
             choice = xbmcgui.Dialog().select('Stremio for Kodi Settings', ['Account', 'Add-on settings', 'About Nimbus', 'Browse all addon features'])
             if choice == 0:
                 from settings_ui import account_menu
                 account_menu()
             elif choice == 1:
+                from lib.appearance import options
+                before = options(ADDON)
                 api.CORE.openSettings()
                 from lib.playback_settings import apply
                 apply()
+                if options(ADDON) != before:
+                    self.reload_appearance = True
+                    self.close()
             elif choice == 2:
                 xbmcgui.Dialog().textviewer('Nimbus · Stremio for Kodi',
                     'Nimbus by Ivar Brandt\nEmbedded program adaptation for Stremio for Kodi.\nGPL-2.0-or-later.\nKodi remains the playback engine.')
@@ -516,8 +533,15 @@ class InfoWindow(NimbusWindow):
         regular = [r for r in self.available_seasons if r['season'] > 0]
         self.season = (regular or self.available_seasons or [{'season': 1}])[0]['season']
         saved = api.saved(self.meta)
+        from lib.episode_state import watched_ids
+        self.watched_episodes = watched_ids(self.meta.get('videos', []), saved)
         if series:
             next_video, self.resume_ms = api.next_series_episode(self.meta.get('videos', []), self.meta['id'], saved)
+            if next_video and next_video['id'] in self.watched_episodes:
+                regular = [v for season in api.seasons(self.meta) if season['season'] > 0
+                           for v in api.episodes(self.meta, season['season'])]
+                next_video = next((v for v in regular if v['id'] not in self.watched_episodes), next_video)
+                self.resume_ms = 0
             if next_video:
                 self.play_target = next_video['id']
                 self.season = int(next_video.get('season', self.season))
@@ -528,7 +552,7 @@ class InfoWindow(NimbusWindow):
         self.setProperty('hastrailer', 'true' if ADDON.getSetting('trailers_enabled') != 'false' and imdb_id(self.meta) else '')
         self.refresh_library()
         self.select_section('Episodes' if series else 'Similar')
-        self.setFocusId(21001)
+        self.setFocusId(501 if series and self.cards else 21001)
         if (autoplay_enabled(ADDON.getSetting('trailers_auto'),
                              ADDON.getSetting('trailers_auto_scope'), 'info')
                 and self.getProperty('hastrailer')):
@@ -590,6 +614,7 @@ class InfoWindow(NimbusWindow):
             li.setProperty('initials', row.get('code') or ''.join(p[:1] for p in row.get('name', '').split()[:2]).upper())
             li.setProperty('job', row.get('job', ''))
             if section == 'Episodes':
+                li.setProperty('watched', 'true' if row.get('id') in self.watched_episodes else '')
                 number = row.get('episode') or row.get('number') or ''
                 li.setLabel('{}. {}'.format(number, row.get('name') or row.get('title') or 'Episode'))
                 li.setArt({'thumb': row.get('thumbnail') or self.meta.get('background', '')})
@@ -597,6 +622,11 @@ class InfoWindow(NimbusWindow):
                 li.setArt({'thumb': row.get('background') or row.get('poster', '')})
             items.append(li)
         self.getControl(self.active_list).addItems(items)
+        if section == 'Episodes' and rows:
+            target = next((i for i, row in enumerate(rows) if row.get('id') == self.play_target), None)
+            if target is None:
+                target = next((i for i, row in enumerate(rows) if row.get('id') not in self.watched_episodes), 0)
+            self.getControl(self.active_list).selectItem(target)
         self.setProperty('hascards', 'true' if rows else '')
         if not rows:
             self.report('No {} provided for this title.'.format(section.lower()))

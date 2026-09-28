@@ -35,8 +35,15 @@ def run():
             )
         finally:
             progress.close()
-        window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)
-        window.doModal()
-        del window
+        while True:
+            window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)
+            window.doModal()
+            reload_appearance = getattr(window, 'reload_appearance', False)
+            del window
+            if not reload_appearance:
+                break
+            filename, path, count = build_layout(
+                ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')),
+                max(8, len(rows)), options(ADDON))
     finally:
         session.clearProperty(APP_RUNNING)
