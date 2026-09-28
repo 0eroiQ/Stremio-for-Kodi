@@ -414,18 +414,21 @@ class HomeWindow(NimbusWindow):
             self.update_hero()
 
     def onAction(self, action):
-        if action.getId() in BACK and self.preview_url:
-            self.cancel_trailer()
+        aid = action.getId()
+        if aid in BACK:
+            # At the top-level Stremio shell, Back is exit-only. Cancel leaves
+            # the UI, focus and any active hero preview untouched.
+            if xbmcgui.Dialog().yesno(
+                    'Exit Stremio for Kodi',
+                    'Do you want to exit Stremio for Kodi?',
+                    nolabel='Cancel',
+                    yeslabel='Exit'):
+                self.close()
             return
-        if action.getId() == 117 and self.getProperty('page') == 'Discover':
+        if aid == 117 and self.getProperty('page') == 'Discover':
             self.edit_filters()
             return
-        if action.getId() in BACK:
-            if self.getFocusId() in self.rows:
-                self.setFocusId(9000)
-            else:
-                self.close()
-        elif action.getId() == 11 and self.getFocusId() in self.rows:
+        if aid == 11 and self.getFocusId() in self.rows:
             self.onClick(self.getFocusId())
         else:
             self.update_hero()
