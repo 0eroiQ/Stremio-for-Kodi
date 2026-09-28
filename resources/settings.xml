@@ -24,7 +24,7 @@
   </category>
   <category label="Vortexo Premium">
     <setting type="action" label="Premium status" action="RunScript(script.stremioelec,premium_status)" />
-    <setting type="lsep" label="Premium uses your verified Stremio identity. There is no separate Vortexo login inside Kodi. If the Premium service is unavailable, free features continue to work." />
+    <setting type="lsep" label="Premium uses your verified Stremio identity. Vortexo exchanges the Stremio session for a short-lived signed Premium token; there is no separate Vortexo login inside Kodi. If the Premium service is unavailable, free features continue to work." />
   </category>
   <category label="Support">
     <setting id="error_reporting_auto" type="bool" label="Automatically send anonymous error reports" default="true" />
