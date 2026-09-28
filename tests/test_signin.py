@@ -29,11 +29,21 @@ class SigninTests(unittest.TestCase):
         module.signed_in = Mock(return_value=False)
         module.show_signin = Mock(return_value=False)
         home = Mock()
-        scope = {'HomeWindow': home, 'ADDON_PATH': '/test', 'SKIN': 'Main', 'RES': '1080i'}
+        session = Mock()
+        session.getProperty.return_value = ''
+        kodi_gui = Mock()
+        kodi_gui.Window.return_value = session
+        scope = {
+            'HomeWindow': home, 'ADDON_PATH': '/test', 'SKIN': 'Main', 'RES': '1080i',
+            'xbmcgui': kodi_gui, 'SESSION_WINDOW_ID': 10000,
+            'APP_RUNNING': 'stremioforkodi.running'
+        }
         exec(compile(ast.Module(body=[run], type_ignores=[]), '<app>', 'exec'), scope)
         with patch.dict('sys.modules', {'lib.signin': module}):
             scope['run']()
             home.assert_not_called()
+            session.setProperty.assert_called_once_with('stremioforkodi.running', 'true')
+            session.clearProperty.assert_called_once_with('stremioforkodi.running')
 
 
     def test_confirmed_link_saves_token_and_opens_home(self):
