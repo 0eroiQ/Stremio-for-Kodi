@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='utf-8'?>
+<window>
+  <defaultcontrol always="true">103</defaultcontrol>
+  <controls>
+    <control type="image">
+      <left>0</left><top>0</top><width>1920</width><height>1080</height>
+      <texture colordiffuse="FF0B0B12">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texture>
+    </control>
+    <control type="label">
+      <left>65</left><top>45</top><width>1100</width><height>65</height>
+      <label>Stremio for Kodi</label><font>font30</font><textcolor>FFFFFFFF</textcolor>
+    </control>
+    <control type="label">
+      <left>410</left><top>160</top><width>1100</width><height>80</height>
+      <label>Get Premium</label><align>center</align><font>font45</font><textcolor>FFFFFFFF</textcolor>
+    </control>
+    <control type="image">
+      <left>765</left><top>270</top><width>390</width><height>390</height>
+      <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texture>
+    </control>
+    <control type="image" id="120">
+      <left>780</left><top>285</top><width>360</width><height>360</height>
+      <aspectratio>keep</aspectratio><texture />
+    </control>
+    <control type="label" id="110">
+      <left>240</left><top>695</top><width>1440</width><height>60</height>
+      <label /><align>center</align><font>font20</font><textcolor>FF9B7CFF</textcolor>
+    </control>
+    <control type="textbox" id="112">
+      <left>420</left><top>765</top><width>1080</width><height>110</height>
+      <label /><align>center</align><font>font25</font><textcolor>FFFFFFFF</textcolor>
+    </control>
+    <control type="label" id="111">
+      <left>300</left><top>875</top><width>1320</width><height>50</height>
+      <label /><align>center</align><font>font20</font><textcolor>FFBBBBBB</textcolor>
+    </control>
+    <control type="button" id="103">
+      <left>620</left><top>940</top><width>440</width><height>65</height>
+      <label>Refresh Premium status</label><font>font25</font><align>center</align>
+      <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
+      <texturenofocus colordiffuse="FF252333">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <onleft>104</onleft><onright>104</onright>
+    </control>
+    <control type="button" id="104">
+      <left>1090</left><top>940</top><width>210</width><height>65</height>
+      <label>Close</label><font>font25</font><align>center</align>
+      <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
+      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
+      <texturenofocus colordiffuse="FF252333">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <onleft>103</onleft><onright>103</onright>
+    </control>
+  </controls>
+</window>
