@@ -15,11 +15,12 @@ BASE_URL = "https://vortexo.app"
 SESSION_PATH = "/api/stremio-for-kodi/v1/session"
 ENTITLEMENTS_PATH = "/api/stremio-for-kodi/v1/entitlements"
 PURCHASE_PATH = "/api/stremio-for-kodi/v1/purchase-sessions"
+AI_TRANSLATION_PATH = "/api/stremio-for-kodi/v1/features/ai-translation"
 MAX_RESPONSE_BYTES = 64 * 1024
 TIMEOUT_SECONDS = 6
 TOKEN_REFRESH_SKEW_SECONDS = 30
 FEATURES = ("trailers", "ai_translation")
-_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH)
+_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH)
 
 
 class PremiumError(Exception):
@@ -184,6 +185,84 @@ def fetch_entitlements(access_token, opener=None):
         method="POST"
     )
     return _bounded_entitlement(_read_json(request, opener=opener))
+
+
+def _bounded_translation(payload, expected_ids):
+    if not isinstance(payload, dict) or payload.get("feature") != "ai_translation":
+        raise PremiumError("Invalid AI translation response.")
+    target = payload.get("targetLanguage")
+    source = payload.get("sourceLanguage")
+    rows = payload.get("segments")
+    if not isinstance(target, str) or not target or not isinstance(rows, list):
+        raise PremiumError("Invalid AI translation response.")
+    if source is not None and not isinstance(source, str):
+        raise PremiumError("Invalid AI translation response.")
+    if len(rows) != len(expected_ids):
+        raise PremiumError("Invalid AI translation response.")
+    result = []
+    seen = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            raise PremiumError("Invalid AI translation response.")
+        item_id = row.get("id")
+        text = row.get("text")
+        if (not isinstance(item_id, str) or item_id not in expected_ids or
+                item_id in seen or not isinstance(text, str) or not text or len(text) > 2400):
+            raise PremiumError("Invalid AI translation response.")
+        seen.add(item_id)
+        result.append({"id": item_id, "text": text})
+    return {
+        "source_language": source,
+        "target_language": target,
+        "segments": result
+    }
+
+
+def translate_segments(store, segments, target_language, source_language=None, opener=None):
+    if not isinstance(segments, list) or not segments or len(segments) > 120:
+        raise PremiumError("Invalid AI translation request.")
+    normalized = []
+    expected_ids = set()
+    total = 0
+    for row in segments:
+        if not isinstance(row, dict):
+            raise PremiumError("Invalid AI translation request.")
+        item_id = row.get("id")
+        text = row.get("text")
+        if (not isinstance(item_id, str) or not item_id or len(item_id) > 80 or
+                item_id in expected_ids or not isinstance(text, str) or not text or len(text) > 1200):
+            raise PremiumError("Invalid AI translation request.")
+        total += len(text)
+        if total > 32 * 1024:
+            raise PremiumError("Invalid AI translation request.")
+        expected_ids.add(item_id)
+        normalized.append({"id": item_id, "text": text})
+    if not isinstance(target_language, str) or not target_language.strip():
+        raise PremiumError("A target language is required.")
+
+    state = store.load()
+    session = _premium_session(state, opener=opener)
+    body = {
+        "targetLanguage": target_language.strip(),
+        "segments": normalized
+    }
+    if isinstance(source_language, str) and source_language.strip():
+        body["sourceLanguage"] = source_language.strip()
+    request = Request(
+        _validated_url(AI_TRANSLATION_PATH),
+        data=json.dumps(body).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": "Bearer " + session["access_token"],
+            "User-Agent": "Stremio-for-Kodi/1"
+        },
+        method="POST"
+    )
+    result = _bounded_translation(_read_json(request, opener=opener), expected_ids)
+    state["vortexo_premium_session"] = session
+    store.save(state)
+    return result
 
 
 def create_purchase_session(access_token, opener=None):
