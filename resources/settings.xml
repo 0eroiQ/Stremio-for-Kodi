@@ -22,6 +22,10 @@
     <setting id="ui_show_runtime" type="bool" label="Show runtime" default="true" />
     <setting type="lsep" label="Reopen the addon to apply appearance changes." />
   </category>
+  <category label="Support">
+    <setting type="action" label="Report a problem on GitHub" action="RunScript(script.stremioelec,report_issue)" />
+    <setting type="lsep" label="Generated reports include only safe diagnostics. Tokens, addon URLs, API keys and media URLs are never added automatically." />
+  </category>
   <category label="Cache and maintenance">
     <setting type="action" label="Cache information" action="RunScript(script.stremioelec,cache_info)" />
     <setting type="action" label="Clear addon browsing and ratings cache" action="RunScript(script.stremioelec,cache_clear)" />

@@ -1,3 +1,8 @@
+1.0.33
+- Add privacy-preserving GitHub issue drafts for unexpected sign-in, program and plugin errors.
+- Add Settings > Support > Report a problem on GitHub.
+- Generated reports include addon/Kodi/platform/error type and sanitized stack frames only; tokens, addon/provider URLs, API keys, media URLs and raw exception messages are excluded.
+
 1.0.32
 - Choose automatic trailers in Home hero only, Media info hero only, or both.
 - Keep the autoplay master switch and manual fullscreen Trailer button independent.
