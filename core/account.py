@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import tempfile
 from urllib.parse import urlencode, urlsplit
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, HTTPRedirectHandler, build_opener
 
 from protocol import base_url
@@ -35,8 +36,18 @@ def request(url, payload=None):
         if not isinstance(result, dict):
             raise ValueError()
         return result
+    except HTTPError as error:
+        # A non-2xx response is an upstream/API failure, not necessarily a device
+        # connectivity problem. Keep the message useful without exposing response data.
+        raise AccountError('Stremio service returned HTTP {}. Please retry shortly.'.format(error.code)) from None
+    except URLError:
+        raise AccountError('Could not reach the Stremio service. Check your connection and retry.') from None
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        raise AccountError('Stremio returned an unexpected response. Please retry shortly.') from None
+    except AccountError:
+        raise
     except Exception:
-        raise AccountError('Stremio request failed. Check your connection and retry.') from None
+        raise AccountError('Stremio request failed. Please retry shortly.') from None
 
 
 def create_link():
