@@ -25,6 +25,7 @@ class WelcomeWindow(xbmcgui.WindowXML):
         self.refresh = threading.Event()
         self.worker = None
         self.authenticated = False
+        self.last_error = None
 
     def onInit(self):
         self.setFocusId(103)
@@ -46,6 +47,7 @@ class WelcomeWindow(xbmcgui.WindowXML):
         self.worker.start()
 
     def link_account(self):
+        self.last_error = None
         try:
             self.label(110, 'Creating a sign-in link…')
             self.label(111, '')
@@ -91,8 +93,10 @@ class WelcomeWindow(xbmcgui.WindowXML):
                         return
                     next_poll = time.monotonic() + 3
                 self.cancel.wait(0.25)
-        except Exception:
-            self.label(111, 'Unable to connect. Check your connection and request a new link.')
+        except Exception as error:
+            self.last_error = error
+            self.label(111, 'Unable to connect. A safe GitHub report can be opened next.')
+            self.close()
 
         finally:
             if self.refresh.is_set() and not self.cancel.is_set():
@@ -122,6 +126,11 @@ def show_signin():
     window = WelcomeWindow('script-stremio-welcome.xml', get_addon().getAddonInfo('path'), 'Main', '1080i')
     try:
         window.doModal()
-        return window.authenticated
+        authenticated = window.authenticated
+        error = window.last_error
+        if error is not None and not authenticated:
+            from lib.error_report import offer_report
+            offer_report('Stremio sign-in', error, 'Stremio sign-in failed on this device.')
+        return authenticated
     finally:
         window.cancel.set()
