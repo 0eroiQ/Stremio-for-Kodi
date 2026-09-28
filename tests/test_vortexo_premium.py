@@ -3,6 +3,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,15 +31,17 @@ class Response:
 
 
 class Opener:
-    def __init__(self, payload):
-        self.payload = payload
-        self.request = None
-        self.timeout = None
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.requests = []
+        self.timeouts = []
 
     def open(self, request, timeout=None):
-        self.request = request
-        self.timeout = timeout
-        return Response(self.payload)
+        self.requests.append(request)
+        self.timeouts.append(timeout)
+        if not self.responses:
+            raise AssertionError("unexpected request")
+        return Response(self.responses.pop(0))
 
 
 class Store:
@@ -52,47 +55,132 @@ class Store:
         self.state = dict(state)
 
 
+def session_payload(module, *, premium=False):
+    return {
+        "accessToken": "signed.vortexo.token",
+        "expiresAt": int(time.time()) + 600,
+        "product": "stremio_for_kodi",
+        "premium": premium,
+        "entitlements": {
+            "trailers": premium,
+            "ai_translation": premium
+        }
+    }
+
+
+def entitlement_payload(*, premium=False):
+    return {
+        "product": "stremio_for_kodi",
+        "premium": premium,
+        "entitlements": {
+            "trailers": premium,
+            "ai_translation": premium
+        }
+    }
+
+
 class PremiumTests(unittest.TestCase):
-    def test_request_sends_only_stremio_auth_proof(self):
+    def test_stremio_auth_is_used_only_to_issue_short_lived_vortexo_token(self):
         module = load_module()
-        opener = Opener({
-            "product": "stremio_for_kodi",
-            "premium": False,
-            "entitlements": {"trailers": False, "ai_translation": False}
-        })
-        result = module.fetch_entitlements("test-only-auth", opener=opener)
-        self.assertFalse(result["premium"])
-        self.assertEqual(json.loads(opener.request.data), {"authKey": "test-only-auth"})
-        self.assertEqual(opener.request.full_url, "https://vortexo.app/api/stremio-for-kodi/v1/entitlements")
-        self.assertEqual(opener.timeout, module.TIMEOUT_SECONDS)
+        opener = Opener([session_payload(module)])
+        result = module.fetch_session("test-only-auth", opener=opener)
+        self.assertEqual(result["access_token"], "signed.vortexo.token")
+        self.assertEqual(len(opener.requests), 1)
+        request = opener.requests[0]
+        self.assertEqual(json.loads(request.data), {"authKey": "test-only-auth"})
+        self.assertEqual(
+            request.full_url,
+            "https://vortexo.app/api/stremio-for-kodi/v1/session"
+        )
+        self.assertNotIn("Authorization", request.headers)
+        self.assertEqual(opener.timeouts[0], module.TIMEOUT_SECONDS)
+
+    def test_entitlement_check_uses_only_vortexo_bearer_token_and_empty_body(self):
+        module = load_module()
+        opener = Opener([entitlement_payload(premium=True)])
+        result = module.fetch_entitlements("signed.vortexo.token", opener=opener)
+        self.assertTrue(result["premium"])
+        request = opener.requests[0]
+        self.assertEqual(request.data, b"")
+        self.assertEqual(
+            request.full_url,
+            "https://vortexo.app/api/stremio-for-kodi/v1/entitlements"
+        )
+        self.assertEqual(request.headers.get("Authorization"), "Bearer signed.vortexo.token")
+        self.assertNotIn("authKey", (request.data or b"").decode("utf-8"))
 
     def test_rejects_client_granted_feature_shape(self):
         module = load_module()
-        opener = Opener({
+        opener = Opener([{
             "product": "stremio_for_kodi",
             "premium": False,
             "entitlements": {"trailers": True, "ai_translation": False}
-        })
+        }])
         with self.assertRaises(module.PremiumError):
-            module.fetch_entitlements("test-only-auth", opener=opener)
+            module.fetch_entitlements("signed.vortexo.token", opener=opener)
 
-    def test_refresh_caches_only_bounded_entitlement_state(self):
+    def test_refresh_caches_only_short_lived_vortexo_session_and_bounded_entitlement_state(self):
         module = load_module()
         store = Store({"token": "test-only-auth", "library": [{"id": "keep"}]})
-        original = module.fetch_entitlements
-        module.fetch_entitlements = lambda token: {
-            "premium": True,
-            "entitlements": {"trailers": True, "ai_translation": True}
-        }
-        try:
-            result = module.refresh(store)
-        finally:
-            module.fetch_entitlements = original
+        opener = Opener([
+            session_payload(module, premium=True),
+            entitlement_payload(premium=True)
+        ])
+        result = module.refresh(store, opener=opener)
         self.assertTrue(result["premium"])
         self.assertEqual(store.state["library"], [{"id": "keep"}])
-        self.assertNotIn("token", store.state["vortexo_premium"])
-        self.assertNotIn("customerId", store.state["vortexo_premium"])
-        self.assertNotIn("stremioUid", store.state["vortexo_premium"])
+        premium_state = store.state["vortexo_premium"]
+        premium_session = store.state["vortexo_premium_session"]
+        self.assertNotIn("token", premium_state)
+        self.assertNotIn("customerId", premium_state)
+        self.assertNotIn("stremioUid", premium_state)
+        self.assertEqual(premium_session["access_token"], "signed.vortexo.token")
+        self.assertNotIn("authKey", premium_session)
+        self.assertNotIn("customerId", premium_session)
+        self.assertNotIn("stremioUid", premium_session)
+        self.assertEqual(len(opener.requests), 2)
+
+    def test_cached_vortexo_token_avoids_reusing_stremio_auth_until_expiry_window(self):
+        module = load_module()
+        store = Store({
+            "token": "test-only-auth",
+            "vortexo_premium_session": {
+                "access_token": "cached.vortexo.token",
+                "expires_at": int(time.time()) + 300
+            }
+        })
+        opener = Opener([entitlement_payload(premium=False)])
+        result = module.refresh(store, opener=opener)
+        self.assertFalse(result["premium"])
+        self.assertEqual(len(opener.requests), 1)
+        self.assertEqual(
+            opener.requests[0].headers.get("Authorization"),
+            "Bearer cached.vortexo.token"
+        )
+
+    def test_expiring_vortexo_token_is_replaced_from_stremio_auth(self):
+        module = load_module()
+        store = Store({
+            "token": "test-only-auth",
+            "vortexo_premium_session": {
+                "access_token": "almost.expired.token",
+                "expires_at": int(time.time()) + 5
+            }
+        })
+        opener = Opener([
+            session_payload(module, premium=False),
+            entitlement_payload(premium=False)
+        ])
+        module.refresh(store, opener=opener)
+        self.assertEqual(len(opener.requests), 2)
+        self.assertEqual(
+            json.loads(opener.requests[0].data),
+            {"authKey": "test-only-auth"}
+        )
+        self.assertEqual(
+            opener.requests[1].headers.get("Authorization"),
+            "Bearer signed.vortexo.token"
+        )
 
     def test_cached_state_rejects_unknown_grant(self):
         module = load_module()
