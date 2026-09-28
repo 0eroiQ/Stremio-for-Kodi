@@ -14,6 +14,7 @@
     <provides>video</provides>
   </extension>
   <extension point="xbmc.subtitle.module" library="subtitle_service.py" />
+  <extension point="xbmc.service" library="service.py" />
   <extension point="xbmc.addon.metadata">
     <summary lang="en_GB">Stremio experience on Kodi</summary>
     <description lang="en_GB">Stremio for Kodi program addon with embedded Nimbus Home and media information. Nimbus layouts and artwork by Ivar Brandt. Kodi remains the playback engine; the global Kodi skin is unchanged.</description>
