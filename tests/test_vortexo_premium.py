@@ -243,6 +243,21 @@ class PremiumTests(unittest.TestCase):
         self.assertNotIn("stremioUid", serialized)
         self.assertNotIn("customerId", serialized)
 
+    def test_public_kodi_ui_exposes_safe_get_premium_handoff(self):
+        default_source = (ROOT / "default.py").read_text(encoding="utf-8")
+        settings_source = (ROOT / "resources" / "settings.xml").read_text(encoding="utf-8")
+        window_source = (
+            ROOT / "resources" / "skins" / "Main" / "1080i" / "script-vortexo-premium.xml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("'premium_buy'", default_source)
+        self.assertIn("show_purchase", default_source)
+        self.assertIn('label="Get Premium"', settings_source)
+        self.assertIn("script-vortexo-premium.xml", (ROOT / "lib" / "vortexo_premium.py").read_text(encoding="utf-8"))
+        self.assertIn("<label>Get Premium</label>", window_source)
+        self.assertIn("Refresh Premium status", window_source)
+        self.assertNotIn("apiKey", window_source)
+        self.assertNotIn("authKey", window_source)
+
     def test_cached_state_rejects_unknown_grant(self):
         module = load_module()
         store = Store({
