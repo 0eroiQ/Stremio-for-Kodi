@@ -148,11 +148,9 @@ def _report_window_class():
     from addon_state import get_addon
 
     class ReportWindow(xbmcgui.WindowXMLDialog):
-        def __init__(self, *args, **kwargs):
-            self.payload = kwargs.pop('payload')
-            self.summary = kwargs.pop('summary')
-            self.sent = False
-            super().__init__(*args, **kwargs)
+        payload = None
+        summary = ''
+        sent = False
 
         def onInit(self):
             self.getControl(101).setLabel('Something went wrong')
@@ -196,9 +194,10 @@ def show_report_dialog(payload, summary):
             'script-stremio-error-report.xml',
             get_addon().getAddonInfo('path'),
             'Main',
-            '1080i',
-            payload=payload,
-            summary=summary)
+            '1080i')
+        window.payload = payload
+        window.summary = summary
+        window.sent = False
         window.doModal()
         return window.sent
     except Exception:
