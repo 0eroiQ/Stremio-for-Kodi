@@ -48,6 +48,10 @@ Optional **Settings → Startup → Launch Stremio for Kodi when Kodi starts** o
 
 At the top-level Stremio Home shell, Back does not silently fall through to Kodi Home. It shows **Exit** or **Cancel**; Cancel changes nothing and only Exit closes Stremio for Kodi. Back inside media-detail dialogs keeps its normal in-app navigation behavior.
 
+## Community and support
+
+For Kodi-specific questions, feedback and discussion, use the [official Stremio for Kodi thread on the Kodi Community Forum](https://forum.kodi.tv/showthread.php?tid=388819).
+
 ## Support and error reports
 
 Anonymous automatic error reporting is enabled by default and can be disabled under **Settings → Support → Automatically send anonymous error reports**. The first launch shows a one-time notice explaining this preference. When an unexpected fatal error is captured, the addon sends a small sanitized report and shows a Kodi notification such as **Error reported · <Error ID>**. If automatic reporting is disabled or a send fails, an addon-owned Nimbus-style dialog offers **Report issue** or **Dismiss** without opening a browser.
