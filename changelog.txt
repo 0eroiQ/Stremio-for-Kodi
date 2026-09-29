@@ -5,6 +5,7 @@
 - Remove per-series network metadata verification from the Home refresh path; native Stremio progress state remains local and details playback verifies metadata when needed.
 - Keep the existing stale-while-revalidate Home snapshot so cached Home remains immediately usable while the bounded refresh runs in the background.
 - Add regression coverage for the low-power Home performance budget.
+- Add privacy-safe local PERF timings for cached Home, account sync, catalogs, library sync and Kodi UI population so N60/Pi bottlenecks can be measured from kodi.log.
 
 1.0.49 (2026-09-30)
 

@@ -60,7 +60,8 @@ class StartupWiringTests(unittest.TestCase):
 
     def test_home_revalidates_after_window_is_visible(self):
         text=(ROOT/'lib/nimbus.py').read_text()
-        self.assertIn('self.load_home()\n        self.setFocusId(9000)\n        self.refresh_home_async()',text)
+        self.assertIn('self.load_home()',text)
+        self.assertIn('self.setFocusId(9000)\n        self.refresh_home_async()',text)
         self.assertIn('fresh = api.account_home(True)',text)
 
 
@@ -126,6 +127,24 @@ class HomePerformanceBudgetTests(unittest.TestCase):
         text=(ROOT/'lib/backend.py').read_text()
         self.assertIn('_continue_rows(state, catalog_rows, False)',text)
         self.assertNotIn('_continue_rows(state, catalog_rows, True)',text)
+
+
+class PerformanceTraceWiringTests(unittest.TestCase):
+    def test_home_records_safe_stage_timings(self):
+        backend=(ROOT/'lib/backend.py').read_text()
+        nimbus=(ROOT/'lib/nimbus.py').read_text()
+        self.assertIn("perf_log('home.cached'",backend)
+        self.assertIn("perf_log('home.refresh.account'",backend)
+        self.assertIn("perf_log('home.refresh.catalogs'",backend)
+        self.assertIn("perf_log('home.refresh.library'",backend)
+        self.assertIn("perf_log('home.refresh.total'",backend)
+        self.assertIn("perf_log('ui.home.initial'",nimbus)
+        self.assertIn("perf_log('ui.home.repopulate'",nimbus)
+
+    def test_perf_trace_never_accepts_freeform_values(self):
+        text=(ROOT/'lib/perf_trace.py').read_text()
+        self.assertNotIn('**fields',text)
+        self.assertIn('value = int(counts[key])',text)
 
 
 if __name__=='__main__':

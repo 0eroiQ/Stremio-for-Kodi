@@ -298,6 +298,8 @@ class HomeWindow(AddonsPage, NimbusWindow):
         super().__init__(*args, **kwargs)
 
     def onInit(self):
+        from lib.perf_trace import now as perf_now, log as perf_log
+        init_started = perf_now()
         if getattr(self, 'initialized', False):
             return
         self.initialized = True
@@ -306,6 +308,12 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.getControl(9000).addItems(menu_items(xbmcgui))
         self.getControl(9000).selectItem(home_index())
         self.load_home()
+        if isinstance(self.account_rows, (list, tuple)):
+            perf_log('ui.home.initial', init_started, rows=len(self.account_rows),
+                     items=sum(len(row.get('items') or []) for row in self.account_rows
+                               if isinstance(row, dict)))
+        else:
+            perf_log('ui.home.initial', init_started)
         self.setFocusId(9000)
         self.refresh_home_async()
         from lib.weather_widget import request_refresh
@@ -320,6 +328,8 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.home_refreshing = True
 
         def refresh():
+            from lib.perf_trace import now as perf_now, log as perf_log
+            refresh_started = perf_now()
             try:
                 fresh = api.account_home(True)
                 if self.closed:
@@ -332,7 +342,11 @@ class HomeWindow(AddonsPage, NimbusWindow):
                 position = None
                 if focus in self.rows:
                     position = self.getControl(focus).getSelectedPosition()
+                populate_started = perf_now()
                 self.populate_rows('Home', fresh)
+                perf_log('ui.home.repopulate', populate_started, rows=len(fresh),
+                         items=sum(len(row.get('items') or []) for row in fresh))
+                perf_log('ui.home.background.total', refresh_started)
                 if focus == 9000:
                     self.setFocusId(9000)
                 elif focus in self.rows and self.rows[focus]:

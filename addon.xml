@@ -18,7 +18,7 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.50: Make Home lighter on constrained devices: cap each Home row at 40 items, limit catalog refresh to two workers, and remove per-series metadata fan-out from the background Home refresh while keeping the cached stale-while-revalidate startup.</news>
+    <news>1.0.50: Make Home lighter on constrained devices and add privacy-safe local startup timing markers for cached Home, account sync, catalog refresh, library sync and Kodi UI population.</news>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>

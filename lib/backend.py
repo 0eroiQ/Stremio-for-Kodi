@@ -185,6 +185,8 @@ def account_home_capacity():
 
 
 def account_home(refresh=True):
+    from lib.perf_trace import now as perf_now, log as perf_log
+    total_started = perf_now()
     """Return Home without blocking startup when refresh=False.
 
     Fast mode uses the last display-only snapshot plus the locally saved Stremio
@@ -197,9 +199,14 @@ def account_home(refresh=True):
         return []
 
     if not refresh:
+        stage_started = perf_now()
         rows = load_snapshot(STORE.directory)
         continuing = _continue_rows(state, rows, False)
-        return ([continuing] if continuing else []) + rows
+        result = ([continuing] if continuing else []) + rows
+        perf_log('home.cached', stage_started, rows=len(result),
+                 items=sum(len(row.get('items') or []) for row in result))
+        perf_log('home.cached.total', total_started)
+        return result
 
     from account import pull_addons, pull_library
     from addons_core import merge_account
@@ -207,6 +214,7 @@ def account_home(refresh=True):
 
     # Account addon order may change on another Stremio device. Failure here is
     # non-fatal: the last saved account collection remains usable.
+    addons_started = perf_now()
     try:
         remote, _ = pull_addons(state['token'])
         state['addons'] = merge_account(state, remote)
@@ -214,10 +222,15 @@ def account_home(refresh=True):
     except Exception:
         xbmc.log('Stremio for Kodi: using saved account catalog order; sync unavailable', xbmc.LOGWARNING)
 
+    perf_log('home.refresh.account', addons_started)
     remote = [a for a in state.get('addons', []) if a.get('account') is True]
+    catalogs_started = perf_now()
     catalog_rows = load_rows(remote, fetch, resource_url)
+    perf_log('home.refresh.catalogs', catalogs_started, rows=len(catalog_rows),
+             items=sum(len(row.get('items') or []) for row in catalog_rows))
     catalog_rows = save_snapshot(STORE.directory, catalog_rows)
 
+    library_started = perf_now()
     try:
         state['library'] = pull_library(state['token'])
         STORE.save(state)
@@ -228,8 +241,12 @@ def account_home(refresh=True):
     # many extra provider requests and made the background refresh CPU/network
     # heavy on Pi-class hardware. Native playback sync already updates the local
     # Stremio state; details playback can verify episode metadata when needed.
+    perf_log('home.refresh.library', library_started)
     continuing = _continue_rows(state, catalog_rows, False)
-    return ([continuing] if continuing else []) + catalog_rows
+    result = ([continuing] if continuing else []) + catalog_rows
+    perf_log('home.refresh.total', total_started, rows=len(result),
+             items=sum(len(row.get('items') or []) for row in result))
+    return result
 
 
 def discover_choices():
