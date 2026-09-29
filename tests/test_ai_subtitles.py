@@ -173,12 +173,24 @@ class AISubtitleTests(unittest.TestCase):
         self.assertIn("return maybe_translate(target, Path(directory).parent, lang)", source)
         self.assertIn("def ai_source_candidates", source)
 
+    def test_libreelec_ffmpeg_tools_path_is_supported(self):
+        module = load_module()
+        with patch.object(module.shutil, "which", return_value=None), \
+                patch.object(module.Path, "is_file", autospec=True) as exists:
+            exists.side_effect = lambda path: str(path) == "/storage/.kodi/addons/tools.ffmpeg-tools/bin/ffmpeg"
+            self.assertEqual(
+                module._binary("ffmpeg"),
+                "/storage/.kodi/addons/tools.ffmpeg-tools/bin/ffmpeg",
+            )
+
     def test_service_runs_video_first_then_stremio_fallback_in_background(self):
         source = (ROOT / "service.py").read_text(encoding="utf-8")
         self.assertIn("prepare_embedded_auto", source)
         self.assertIn("ai_source_candidates", source)
         self.assertIn("threading.Thread", source)
         self.assertLess(source.index("prepare_embedded_auto"), source.index("ai_source_candidates("))
+        self.assertIn("_remember_ai_error", source)
+        self.assertIn("Report last error is available", source)
 
 
 if __name__ == "__main__":

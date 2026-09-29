@@ -41,6 +41,16 @@ def _notify(message, milliseconds=4000):
     themed_dialog().notification("AI Subtitles", message, time=milliseconds)
 
 
+def _remember_ai_error(context, error):
+    """Capture a sanitized diagnostic without interrupting playback."""
+    try:
+        from lib.error_report import build_payload
+        from lib.last_error import remember_error
+        remember_error(build_payload(context, error))
+    except Exception:
+        pass
+
+
 class PlaybackWatcher(xbmc.Player):
     def __init__(self, monitor):
         super().__init__()
@@ -114,8 +124,10 @@ class PlaybackWatcher(xbmc.Player):
                     result["source_language"], result["target_language"]
                 ):
                     return
-            except Exception:
-                pass
+            except Exception as error:
+                _remember_ai_error("AI subtitles embedded source", error)
+                if settings.get("source") == "1":
+                    _notify("Video subtitle extraction failed. See Support → Report last error.", 5000)
 
         if not self._matches(digest) or settings.get("source") == "1":
             return
@@ -137,11 +149,21 @@ class PlaybackWatcher(xbmc.Player):
                 source_language = entry.get("lang")
                 if self._apply(path, digest, "Stremio addon", source_language, target):
                     return
-            except Exception:
+            except Exception as error:
+                last_fallback_error = error
+                _remember_ai_error("AI subtitles Stremio translation", error)
                 continue
 
         if self._matches(digest):
-            _notify("No usable subtitle source found; keeping the original.", 4500)
+            if not entries:
+                from ai_subtitles import AITranslationError
+                _remember_ai_error(
+                    "AI subtitles source selection",
+                    AITranslationError("No usable embedded or Stremio subtitle source was available.")
+                )
+            elif last_fallback_error is not None:
+                _remember_ai_error("AI subtitles fallback exhausted", last_fallback_error)
+            _notify("No usable subtitle source found; keeping the original. Report last error is available.", 5500)
 
 
 def maybe_autostart(monitor):

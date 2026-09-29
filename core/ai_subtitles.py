@@ -102,7 +102,14 @@ def _binary(name):
     found = shutil.which(name)
     if found:
         return found
-    for root in ("/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"):
+    roots = (
+        "/storage/.kodi/addons/tools.ffmpeg-tools/bin",
+        "/storage/.kodi/addons/virtual.multimedia-tools/bin",
+        "/opt/homebrew/bin",
+        "/usr/local/bin",
+        "/usr/bin",
+    )
+    for root in roots:
         candidate = Path(root) / name
         if candidate.is_file():
             return str(candidate)
@@ -184,7 +191,10 @@ def _embedded_rank(track, target_language):
 def extract_best_embedded(stream_url, cache_directory, target_language):
     ffmpeg = _binary("ffmpeg")
     if not ffmpeg:
-        raise AITranslationError("Embedded subtitle extraction is unavailable.")
+        raise AITranslationError(
+            "Embedded subtitle extraction is unavailable. "
+            "LibreELEC users can install the official FFmpeg Tools addon."
+        )
     tracks = embedded_tracks(stream_url)
     if not tracks:
         raise AITranslationError("No text subtitle track is embedded in this video.")

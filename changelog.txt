@@ -1,3 +1,11 @@
+1.0.46 (2026-09-30)
+
+- Detect the official LibreELEC FFmpeg Tools addon binaries for embedded subtitle extraction on LibreELEC/Kodi boxes.
+- Keep standard PATH, Homebrew and system ffmpeg/ffprobe discovery for other platforms.
+- Capture sanitized AI subtitle extraction, source-selection and translation failures as Last Error while keeping playback unaffected.
+- Make Support → Report last error actionable for AI subtitle failures without storing API keys or stream URLs.
+- Keep Auto source behavior: video subtitles first for sync, then Stremio subtitle addons when a usable fallback exists.
+
 1.0.45 (2026-09-30)
 
 - Restore native Stremio playback progress write-back on Stop/End while keeping playback independent of sync failures.
