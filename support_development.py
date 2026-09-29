@@ -45,6 +45,7 @@ def dialog_class(gui):
             url, is_test, qr = load_config()
             self.getControl(101).setImage(str(qr), False)
             self.setProperty('support_url', url)
+            self.setProperty('support_display_url', url.replace('stripe.com/', 'stripe.com/\n'))
             self.setProperty('support_mode', 'TEST CHECKOUT - NO REAL PAYMENTS' if is_test
                              else 'Optional one-time developer tip')
             self.setProperty('support_help',

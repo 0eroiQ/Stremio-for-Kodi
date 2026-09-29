@@ -68,25 +68,25 @@
     </control>
     <control type="textbox">
       <left>320</left>
-      <top>660</top>
+      <top>650</top>
       <width>610</width>
-      <height>105</height>
-      <font>font23</font>
+      <height>100</height>
+      <font>font10</font>
       <textcolor>FFADACB5</textcolor>
       <aligny>center</aligny>
-      <label>Not a subscription or Premium purchase.
-Nothing to activate. No payment information is entered in Kodi.</label>
+      <label>Optional tip, not a subscription or Premium purchase.
+Payments are completed on Stripe, not inside Kodi.</label>
       <autoscroll>false</autoscroll>
     </control>
     <control type="textbox">
       <left>320</left>
-      <top>790</top>
+      <top>770</top>
       <width>610</width>
-      <height>65</height>
-      <font>font23</font>
+      <height>90</height>
+      <font>font10</font>
       <textcolor>FFADACB5</textcolor>
       <aligny>center</aligny>
-      <label>$INFO[Window.Property(support_url)]</label>
+      <label>$INFO[Window.Property(support_display_url)]</label>
       <autoscroll>false</autoscroll>
     </control>
     <control type="image" id="101">

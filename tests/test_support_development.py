@@ -73,6 +73,7 @@ class SupportTests(unittest.TestCase):
         win=support.dialog_class(types.SimpleNamespace(WindowXMLDialog=Window))()
         win.onInit()
         self.assertEqual(win.props['support_url'], LINK)
+        self.assertEqual(win.props['support_display_url'].replace('\n', ''), LINK)
         self.assertEqual(win.props['support_mode'], 'Optional one-time developer tip')
         self.assertNotIn('TEST', win.props['support_mode'])
         win.onClick(99); self.assertFalse(win.closed)
