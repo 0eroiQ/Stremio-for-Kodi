@@ -1,4 +1,5 @@
 """Optional MDbList ratings, independent of the active Kodi skin."""
+from lib.ui_dialogs import dialog as themed_dialog
 import re
 from urllib.parse import urlencode
 
@@ -76,7 +77,7 @@ def import_nimbus_key():
     from addon_state import get_addon
     addon = get_addon()
     if addon.getSetting('mdblist_api_key').strip():
-        xbmcgui.Dialog().ok('MDbList', 'An API key is already saved in this addon.')
+        themed_dialog().ok('MDbList', 'An API key is already saved in this addon.')
         return
     try:
         path = Path(xbmcvfs.translatePath('special://profile/addon_data/skin.nimbus/settings.xml'))
@@ -86,9 +87,9 @@ def import_nimbus_key():
         if not key:
             raise ValueError()
         addon.setSetting('mdblist_api_key', key)
-        xbmcgui.Dialog().ok('MDbList', 'API key copied from Nimbus. Reopen the addon to apply.')
+        themed_dialog().ok('MDbList', 'API key copied from Nimbus. Reopen the addon to apply.')
     except Exception:
-        xbmcgui.Dialog().ok('MDbList', 'No saved Nimbus API key found. Enter your key in addon settings.')
+        themed_dialog().ok('MDbList', 'No saved Nimbus API key found. Enter your key in addon settings.')
 
 
 def badges(payload, get_setting):

@@ -1,0 +1,113 @@
+import tempfile
+import time
+import unittest
+from pathlib import Path
+import sys
+
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+sys.path.insert(0,str(ROOT/'core'))
+
+from lib import home_snapshot
+from continue_playback import resume_seconds, next_series_episode
+
+
+class FastHomeTests(unittest.TestCase):
+    def test_snapshot_roundtrip_is_display_only_and_fast(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            rows=[{'label':'Popular','provider':'secret-provider-id','kind':'movie',
+                   'catalog_id':'top','url':'https://example.test/manifest.json',
+                   'items':[{'id':'tt1','type':'movie','name':'One'}]}]
+            home_snapshot.save(directory,rows)
+            started=time.perf_counter()
+            loaded=home_snapshot.load(directory)
+            elapsed=time.perf_counter()-started
+            self.assertLess(elapsed,0.25)
+            self.assertEqual(loaded[0]['items'][0]['id'],'tt1')
+            raw=(directory/'home-snapshot'/'account.json').read_text()
+            self.assertNotIn('example.test',raw)
+            self.assertNotIn('manifest.json',raw)
+
+    def test_failed_refresh_keeps_previous_catalog_items(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            first=[{'label':'Popular','provider':'p','kind':'movie','catalog_id':'top',
+                    'items':[{'id':'tt1','type':'movie','name':'One'}]}]
+            home_snapshot.save(directory,first)
+            failed=[{'label':'Popular','provider':'p','kind':'movie','catalog_id':'top',
+                     'items':[],'failed':True}]
+            rows=home_snapshot.save(directory,failed)
+            self.assertEqual(rows[0]['items'][0]['id'],'tt1')
+            self.assertTrue(rows[0]['failed'])
+
+    def test_continue_rows_are_built_from_local_progress_without_network(self):
+        library=[{'_id':'tt1','type':'movie','name':'One','temp':True,'removed':True,
+                  'state':{'timeOffset':123000,'lastWatched':'2026-09-29T10:00:00Z'}}]
+        rows=home_snapshot.update_continue_rows(
+            [{'label':'Popular','items':[{'id':'tt1','type':'movie','name':'One','poster':'p'}]}],
+            library)
+        self.assertEqual(rows[0]['label'],'Continue Watching')
+        self.assertEqual(rows[0]['items'][0]['state']['timeOffset'],123000)
+        self.assertEqual(rows[0]['items'][0]['poster'],'p')
+
+
+class StartupWiringTests(unittest.TestCase):
+    def test_app_opens_cached_home_without_waiting_for_catalog_network(self):
+        text=(ROOT/'lib/app.py').read_text()
+        self.assertIn('backend.account_home(False)',text)
+        self.assertNotIn("Loading your account catalogs",text)
+
+    def test_home_revalidates_after_window_is_visible(self):
+        text=(ROOT/'lib/nimbus.py').read_text()
+        self.assertIn('self.load_home()\n        self.setFocusId(9000)\n        self.refresh_home_async()',text)
+        self.assertIn('fresh = api.account_home(True)',text)
+
+
+class PosterProgressTests(unittest.TestCase):
+    def test_home_skin_has_plex_style_progress_in_both_layouts(self):
+        import xml.etree.ElementTree as ET
+        tree=ET.parse(ROOT/'resources/skins/Main/1080i/script-stremio-nimbus.xml')
+        fixed=tree.find('.//control[@type="fixedlist"][@id="400"]')
+        for name in ('itemlayout','focusedlayout'):
+            bars=[c for c in fixed.find(name).iter('control')
+                  if c.get('type')=='progress' and c.findtext('description')=='Stremio watch progress']
+            self.assertEqual(len(bars),1)
+            self.assertEqual(bars[0].findtext('info'),'ListItem.PercentPlayed')
+            self.assertIn('WatchedProgress',bars[0].findtext('visible'))
+
+    def test_nimbus_sets_native_resume_point_for_poster_progress(self):
+        text=(ROOT/'lib/nimbus.py').read_text()
+        self.assertIn("li.setProperty('WatchedProgress', str(progress))",text)
+        self.assertIn('li.getVideoInfoTag().setResumePoint(offset, duration)',text)
+
+
+    def test_progress_fill_follows_every_theme_accent(self):
+        import copy
+        import xml.etree.ElementTree as ET
+        from lib.theme import apply, PALETTES
+        for filename in ('script-stremio-nimbus.xml','script-stremio-info.xml'):
+            source=ET.parse(ROOT/'resources/skins/Main/1080i'/filename)
+            for index,palette in enumerate(PALETTES):
+                tree=copy.deepcopy(source)
+                apply(tree,index)
+                fills=[node.get('colordiffuse') for node in tree.iter('midtexture')
+                       if 'progress-local/capsule.png' in (node.text or '')]
+                self.assertTrue(fills)
+                self.assertTrue(all(value == palette[6] for value in fills))
+
+
+class ResumeSentinelTests(unittest.TestCase):
+    def test_one_millisecond_next_episode_sentinel_is_play_not_resume(self):
+        self.assertEqual(resume_seconds(1),0)
+        videos=[{'id':'tt1:1:1','season':1,'episode':1},
+                {'id':'tt1:1:2','season':1,'episode':2}]
+        video,offset=next_series_episode(
+            videos,'tt1',{'_id':'tt1','type':'series',
+                           'state':{'video_id':'tt1:1:2','timeOffset':1}})
+        self.assertEqual(video['id'],'tt1:1:2')
+        self.assertEqual(offset,0)
+
+
+if __name__=='__main__':
+    unittest.main()

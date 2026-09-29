@@ -2,7 +2,7 @@
 from concurrent.futures import ThreadPoolExecutor
 
 
-def prepare(rows, catalogs, fetch_details):
+def prepare(rows, catalogs, fetch_details=None):
     known = {(r.get('type'), r.get('id')): r
              for catalog in catalogs for r in catalog.get('items', [])
              if r.get('background') and r.get('description')}
@@ -11,6 +11,8 @@ def prepare(rows, catalogs, fetch_details):
         result = dict(row)
         full = known.get((row.get('type'), row.get('id')))
         if full is None:
+            if fetch_details is None:
+                return result
             try:
                 full = fetch_details(row)
             except Exception:

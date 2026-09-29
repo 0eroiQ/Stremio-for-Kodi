@@ -1,4 +1,5 @@
 """Embedded Nimbus program windows. All navigation stays inside this addon."""
+from lib.ui_dialogs import progress_bg as themed_progress_bg, dialog as themed_dialog
 import re
 import json
 import threading
@@ -104,6 +105,21 @@ def item(row):
     li.setProperty('id', str(row.get('id', '')))
     li.setProperty('type', str(row.get('type', 'movie')))
     li.setProperty('plot', clean(row.get('description')))
+    state = row.get('state') if isinstance(row.get('state'), dict) else {}
+    try:
+        offset = max(0.0, float(state.get('timeOffset') or 0) / 1000.0)
+        duration = max(0.0, float(state.get('duration') or 0) / 1000.0)
+    except (TypeError, ValueError):
+        offset, duration = 0.0, 0.0
+    if duration > 0 and offset >= 1 and offset < duration:
+        progress = max(1, min(99, int(round(offset * 100.0 / duration))))
+        li.setProperty('WatchedProgress', str(progress))
+        try:
+            li.getVideoInfoTag().setResumePoint(offset, duration)
+        except Exception:
+            pass
+    else:
+        li.setProperty('WatchedProgress', '0')
     return li
 
 
@@ -190,7 +206,7 @@ class NimbusWindow(xbmcgui.WindowXML):
         self.setProperty('status', text)
 
     def busy(self, label, fn):
-        progress = xbmcgui.DialogProgressBG()
+        progress = themed_progress_bg()
         progress.create('Stremio for Kodi', label)
         try:
             return fn()
@@ -236,18 +252,28 @@ class NimbusWindow(xbmcgui.WindowXML):
         for key, value in values.items():
             self.setProperty(key, value)
 
-    def details(self, row):
+    def details(self, row, auto_source=None, focus_video_id=None):
         from lib.launch_guard import mark_window, unmark_window
         self.preview_suspended = True
         self.cancel_trailer()
         window = None
         try:
-            window = themed_window(InfoWindow, 'script-stremio-info.xml', PATH, 'Main', '1080i', meta=row)
+            window = themed_window(InfoWindow, 'script-stremio-info.xml', PATH, 'Main', '1080i',
+                                   meta=row, auto_source=auto_source,
+                                   focus_video_id=focus_video_id)
             mark_window(window, 'info')
             window.doModal()
         finally:
             unmark_window(window)
             self.preview_suspended = False
+            if hasattr(self, 'account_rows') and self.getProperty('page') == 'Home':
+                try:
+                    fresh = api.account_home(False)
+                    if fresh != self.account_rows:
+                        self.account_rows = fresh
+                        self.load_home()
+                except Exception:
+                    pass
 
 
 from lib.addons_page import AddonsPage
@@ -268,6 +294,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.hero_request = None
         self.hero_loading = False
         self.closed = False
+        self.home_refreshing = False
         super().__init__(*args, **kwargs)
 
     def onInit(self):
@@ -280,11 +307,45 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.getControl(9000).selectItem(home_index())
         self.load_home()
         self.setFocusId(9000)
+        self.refresh_home_async()
         from lib.weather_widget import request_refresh
         request_refresh()
 
     def load_home(self):
         self.populate_rows('Home', self.account_rows)
+
+    def refresh_home_async(self):
+        if self.home_refreshing or self.closed:
+            return
+        self.home_refreshing = True
+
+        def refresh():
+            try:
+                fresh = api.account_home(True)
+                if self.closed:
+                    return
+                self.account_rows = fresh
+                # Never steal focus from another page or an open details window.
+                if self.getProperty('page') != 'Home' or self.preview_suspended:
+                    return
+                focus = self.getFocusId()
+                position = None
+                if focus in self.rows:
+                    position = self.getControl(focus).getSelectedPosition()
+                self.populate_rows('Home', fresh)
+                if focus == 9000:
+                    self.setFocusId(9000)
+                elif focus in self.rows and self.rows[focus]:
+                    self.getControl(focus).selectItem(
+                        min(max(0, position or 0), len(self.rows[focus]) - 1))
+                    self.setFocusId(focus)
+            except Exception:
+                # Cached/snapshot Home stays usable and the next launch retries.
+                pass
+            finally:
+                self.home_refreshing = False
+
+        threading.Thread(target=refresh, daemon=True).start()
 
     def populate(self, section, first, second=(), labels=('Movies', 'Series')):
         self.populate_rows(section, [{'label': labels[0], 'items': first},
@@ -502,7 +563,67 @@ class HomeWindow(AddonsPage, NimbusWindow):
                 from lib.weather_widget import request_refresh
                 request_refresh()
 
+    def home_media_context_menu(self):
+        cid = self.getFocusId()
+        if (self.getProperty('page') != 'Home' or cid not in self.rows or
+                self.row_labels.get(cid) != 'Continue Watching'):
+            return False
+        pos = self.getControl(cid).getSelectedPosition()
+        if not 0 <= pos < len(self.rows[cid]):
+            return False
+        row = self.rows[cid][pos]
+        saved = api.saved(row)
+        state = saved.get('state') or {}
+        target_id = str(state.get('video_id') or row.get('id') or '')
+        from lib.media_action_menu import choose
+        try:
+            offset = max(0, int(float(state.get('timeOffset') or 0)))
+            duration = max(0, int(float(state.get('duration') or 0)))
+        except (TypeError, ValueError):
+            offset, duration = 0, 0
+        # A current partial rewatch is not treated as watched merely because an
+        # older flaggedWatched value remains on the Stremio library item.
+        partial = offset > 1 and (not duration or offset < duration * 0.90)
+        watched = bool(state.get('flaggedWatched')) and not partial
+        from context_options import continue_options
+        selected = choose(PATH, continue_options(row.get('type'), watched))
+        if selected is None:
+            return True
+        full = self.busy('Loading media', lambda: mdblist.enrich(api.metadata(row))) or row
+        if selected == 'restart':
+            identity = target_id if row.get('type') == 'series' else str(row.get('id') or '')
+            self.details(full, auto_source=(identity, 0), focus_video_id=target_id)
+        elif selected == 'episode':
+            self.details(full, focus_video_id=target_id)
+        elif selected in ('series', 'info'):
+            self.details(full)
+        elif selected == 'toggle-watched':
+            if row.get('type') == 'series':
+                from lib.episode_state import watched_ids
+                is_watched = target_id in watched_ids(full.get('videos', []), api.saved(full))
+                result = self.busy('Updating watched state',
+                                   lambda: api.mark_episode(full, target_id, not is_watched))
+            else:
+                result = self.busy('Updating watched state',
+                                   lambda: api.mark_movie(full, not watched))
+            if result is not None:
+                self.account_rows = api.account_home(False)
+                self.load_home()
+        elif selected == 'remove-continue':
+            result = self.busy('Updating Continue Watching', lambda: api.remove_continue(full))
+            if result is not None:
+                self.account_rows = api.account_home(False)
+                self.load_home()
+        if cid in self.rows and self.rows[cid]:
+            self.setFocusId(cid)
+            self.getControl(cid).selectItem(min(pos, len(self.rows[cid]) - 1))
+        return True
+
     def onAction(self, action):
+        if isinstance(getattr(xbmcgui, '__name__', None), str):
+            from lib.ui_dialogs import dialog as themed_dialog
+        else:
+            themed_dialog = xbmcgui.Dialog
         aid = action.getId()
         if aid in BACK:
             if not getattr(self, 'exit_armed', False):
@@ -511,7 +632,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
                 self.exit_armed = True
                 return
             self.exit_armed = False
-            if xbmcgui.Dialog().yesno(
+            if themed_dialog().yesno(
                     'Exit Stremio for Kodi',
                     'Do you want to exit Stremio for Kodi?',
                     nolabel='Cancel', yeslabel='Exit'):
@@ -519,6 +640,8 @@ class HomeWindow(AddonsPage, NimbusWindow):
             return
         if aid in (1, 2, 3, 4, 7, 11, 100, 101):
             self.exit_armed = False
+        if aid == 117 and self.home_media_context_menu():
+            return
         if aid == 117 and self.getProperty('page') == 'Discover':
             self.edit_filters()
             return
@@ -539,6 +662,10 @@ class HomeWindow(AddonsPage, NimbusWindow):
             self.close()
 
     def onClick(self, cid):
+        if isinstance(getattr(xbmcgui, '__name__', None), str):
+            from lib.ui_dialogs import dialog as themed_dialog
+        else:
+            themed_dialog = xbmcgui.Dialog
         self.exit_armed = False
         if cid in (9300, 9301, 9302, 9303, 9304):
             self.addon_click(cid)
@@ -561,7 +688,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
         if cid == 202:
             self.load_home()
         elif cid == 201:
-            query = xbmcgui.Dialog().input('Search movies and series').strip()
+            query = themed_dialog().input('Search movies and series').strip()
             if query:
                 result = self.busy('Searching', lambda: api.search(query, api.providers())) or []
                 self.populate('Search: ' + query, [r for r in result if r.get('type') == 'movie'],
@@ -584,6 +711,8 @@ from lib.inline_streams import InlineStreams
 class InfoWindow(InlineStreams, NimbusWindow):
     def __init__(self, *args, **kwargs):
         self.preview = kwargs.pop('meta')
+        self.auto_source = kwargs.pop('auto_source', None)
+        self.focus_video_id = kwargs.pop('focus_video_id', None)
         super().__init__(*args, **kwargs)
         self.initialized = False
         self.menu_mode = None
@@ -620,6 +749,11 @@ class InfoWindow(InlineStreams, NimbusWindow):
             if next_video:
                 self.play_target = next_video['id']
                 self.season = int(next_video.get('season', self.season))
+            if self.focus_video_id:
+                focus_video = next((v for v in self.meta.get('videos', [])
+                                    if str(v.get('id') or '') == str(self.focus_video_id)), None)
+                if focus_video:
+                    self.season = int(focus_video.get('season', self.season))
         else:
             self.play_target = self.meta['id']
             self.resume_ms = (saved.get('state') or {}).get('timeOffset') or 0
@@ -627,7 +761,17 @@ class InfoWindow(InlineStreams, NimbusWindow):
         self.setProperty('hastrailer', 'true' if ADDON.getSetting('trailers_enabled') != 'false' and imdb_id(self.meta) else '')
         self.refresh_library()
         self.select_section('Episodes' if series else 'Similar')
+        if series and self.focus_video_id:
+            pos = next((i for i, row in enumerate(self.cards)
+                        if str(row.get('id') or '') == str(self.focus_video_id)), None)
+            if pos is not None:
+                self.getControl(501).selectItem(pos)
         self.setFocusId(501 if series and self.cards else 21001)
+        if self.auto_source:
+            identity, resume = self.auto_source
+            self.choose_source(identity, resume_ms=resume)
+            self.auto_source = None
+            return
         if (autoplay_enabled(ADDON.getSetting('trailers_auto'),
                              ADDON.getSetting('trailers_auto_scope'), 'info')
                 and self.getProperty('hastrailer')):
@@ -685,6 +829,19 @@ class InfoWindow(InlineStreams, NimbusWindow):
         for cid in (500, 501, 502, 503):
             self.getControl(cid).reset()
         items = []
+        episode_progress = {}
+        if section == 'Episodes':
+            saved = api.saved(self.meta)
+            state = saved.get('state') if isinstance(saved, dict) else {}
+            if isinstance(state, dict):
+                active_id = str(state.get('video_id') or '')
+                try:
+                    offset = max(0.0, float(state.get('timeOffset') or 0) / 1000.0)
+                    duration = max(0.0, float(state.get('duration') or 0) / 1000.0)
+                except (TypeError, ValueError):
+                    offset, duration = 0.0, 0.0
+                if active_id and duration > 0 and offset >= 1 and offset < duration:
+                    episode_progress[active_id] = (offset, duration)
         for row in rows:
             li = item(row)
             li.setProperty('initials', row.get('code') or ''.join(p[:1] for p in row.get('name', '').split()[:2]).upper())
@@ -705,6 +862,17 @@ class InfoWindow(InlineStreams, NimbusWindow):
                     row.get('runtime') if row.get('runtime') not in (None, '') else row.get('duration')))
                 li.setProperty('episode_imdb', episode_rating(row))
                 li.setProperty('episode_date', episode_date(row))
+                progress = episode_progress.get(str(row.get('id') or ''))
+                if progress and row.get('id') not in self.watched_episodes:
+                    offset, duration = progress
+                    percent = max(1, min(99, int(round(offset * 100.0 / duration))))
+                    li.setProperty('WatchedProgress', str(percent))
+                    try:
+                        li.getVideoInfoTag().setResumePoint(offset, duration)
+                    except Exception:
+                        pass
+                else:
+                    li.setProperty('WatchedProgress', '0')
                 li.setLabel('{} - {}'.format(episode_code, title))
                 li.setArt({'thumb': row.get('thumbnail') or self.meta.get('background', '')})
             elif section == 'Similar':
@@ -742,16 +910,100 @@ class InfoWindow(InlineStreams, NimbusWindow):
         if current in self.menu_entries:
             listing.selectItem(self.menu_entries.index(current))
 
+    def _refresh_episode_cards(self, pos):
+        saved = api.saved(self.meta)
+        from lib.episode_state import watched_ids
+        self.watched_episodes = watched_ids(self.meta.get('videos', []), saved)
+        self._resume_marker = None
+        self.refresh_resume_state()
+        self.select_section('Episodes')
+        self.getControl(501).selectItem(min(pos, max(0, len(self.cards) - 1)))
+        self.setFocusId(501)
+
+    def episode_context_menu(self):
+        if self.section != 'Episodes' or self.getFocusId() != 501:
+            return False
+        pos = self.getControl(501).getSelectedPosition()
+        if not 0 <= pos < len(self.cards):
+            return False
+        episode = self.cards[pos]
+        target_id = str(episode.get('id') or '')
+        if not target_id:
+            return False
+        watched = target_id in self.watched_episodes
+        from episode_actions import through_is_watched
+        prefix_watched = through_is_watched(
+            self.meta.get('videos') or [], target_id, self.watched_episodes)
+        from lib.media_action_menu import choose
+        from context_options import episode_options
+        resume = bool(target_id == self.play_target and api.resume_seconds(self.resume_ms))
+        selected = choose(PATH, episode_options(watched, prefix_watched, resume))
+        if selected is None:
+            return True
+        if selected == 'play':
+            resume = self.resume_ms if target_id == self.play_target else 0
+            self.choose_source(target_id, resume_ms=resume)
+            return True
+        if selected == 'restart':
+            self.choose_source(target_id, resume_ms=0)
+            return True
+        if selected == 'info':
+            title = episode.get('name') or episode.get('title') or 'Episode'
+            plot = clean(episode.get('description') or episode.get('overview') or 'No episode description is available.')
+            themed_dialog().textviewer(title, plot)
+            return True
+        operation = None
+        if selected == 'toggle-watched':
+            operation = lambda: api.mark_episode(self.meta, target_id, not watched)
+        elif selected == 'through-watched':
+            operation = lambda: api.mark_episodes_through(self.meta, target_id, True)
+        elif selected == 'through-unwatched':
+            operation = lambda: api.mark_episodes_through(self.meta, target_id, False)
+        if operation is not None:
+            result = self.busy('Updating watched episodes', operation)
+            if result is not None:
+                self._refresh_episode_cards(pos)
+        return True
+
+    def refresh_resume_state(self):
+        if not self.initialized or xbmc.Player().isPlayingVideo():
+            return
+        saved = api.saved(self.meta)
+        state = saved.get('state') or {}
+        marker = (saved.get('_mtime'), state.get('video_id'), state.get('timeOffset'), state.get('watched'))
+        if marker == getattr(self, '_resume_marker', None):
+            return
+        self._resume_marker = marker
+        from lib.episode_state import watched_ids
+        self.watched_episodes = watched_ids(self.meta.get('videos', []), saved)
+        if self.meta.get('type') == 'series':
+            next_video, self.resume_ms = api.next_series_episode(
+                self.meta.get('videos', []), self.meta['id'], saved)
+            if next_video:
+                self.play_target = next_video['id']
+                self.season = int(next_video.get('season', self.season))
+        else:
+            self.resume_ms = state.get('timeOffset') or 0
+        self.setProperty('playlabel', 'Resume' if api.resume_seconds(self.resume_ms) else 'Play')
+
     def onFocus(self, control_id):
         if self.initialized:
+            self.refresh_resume_state()
             self.streams_focus(control_id)
 
     def onAction(self, action):
+        if isinstance(getattr(xbmcgui, '__name__', None), str):
+            from lib.ui_dialogs import dialog as themed_dialog
+        else:
+            themed_dialog = xbmcgui.Dialog
+        self.refresh_resume_state()
         if self.streams_action(action):
             return
         was_preview = bool(self.preview_url)
         self.cancel_trailer()
         aid = action.getId()
+        if aid == 117 and self.episode_context_menu():
+            return
         if aid in BACK and was_preview:
             return
         if aid in BACK:
@@ -766,6 +1018,10 @@ class InfoWindow(InlineStreams, NimbusWindow):
             self.setFocusId(22001)
 
     def onClick(self, cid):
+        if isinstance(getattr(xbmcgui, '__name__', None), str):
+            from lib.ui_dialogs import dialog as themed_dialog
+        else:
+            themed_dialog = xbmcgui.Dialog
         if self.streams_click(cid):
             return
         self.cancel_trailer()
@@ -805,5 +1061,5 @@ class InfoWindow(InlineStreams, NimbusWindow):
             elif self.section == 'Episodes':
                 self.choose_source(row['id'], resume_ms=self.resume_ms if row['id'] == self.play_target else 0)
             elif self.section in ('Cast', 'Crew'):
-                xbmcgui.Dialog().ok(row['name'], row.get('job', self.section))
+                themed_dialog().ok(row['name'], row.get('job', self.section))
 

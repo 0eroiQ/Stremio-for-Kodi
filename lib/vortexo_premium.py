@@ -6,6 +6,7 @@ short-lived Vortexo access token; Premium APIs receive only that Vortexo token.
 The client never sends or trusts a caller-supplied Stremio UID, product, price,
 feature grant, or payment state.
 """
+from lib.ui_dialogs import dialog as themed_dialog
 import json
 import time
 from urllib.parse import parse_qs, urlsplit
@@ -376,7 +377,7 @@ def show_status():
     state = store.load()
     token = state.get("token")
     if not isinstance(token, str) or not token.strip():
-        xbmcgui.Dialog().ok(
+        themed_dialog().ok(
             "Stremio for Kodi Premium",
             "Connect a Stremio account first. Premium uses the same Stremio identity; there is no second Vortexo login."
         )
@@ -389,7 +390,7 @@ def show_status():
         suffix = ""
         if cached:
             suffix = "\n\nLast verified status: " + ("Premium" if cached["premium"] else "Free")
-        xbmcgui.Dialog().ok(
+        themed_dialog().ok(
             "Stremio for Kodi Premium",
             "Premium status is temporarily unavailable. Your free Stremio for Kodi features continue to work." + suffix
         )
@@ -399,9 +400,9 @@ def show_status():
         enabled = [name.replace("_", " ").title()
                    for name, value in result["entitlements"].items() if value]
         detail = ", ".join(enabled) if enabled else "No Premium features enabled"
-        xbmcgui.Dialog().ok("Stremio for Kodi Premium", "Premium is active.\n\n" + detail)
+        themed_dialog().ok("Stremio for Kodi Premium", "Premium is active.\n\n" + detail)
     else:
-        xbmcgui.Dialog().ok(
+        themed_dialog().ok(
             "Stremio for Kodi Premium",
             "This Stremio account is currently on the free plan. Premium checkout will be enabled separately on vortexo.app."
         )
@@ -435,7 +436,7 @@ def _purchase_window_class():
                     result = refresh(self.store)
                     if result["premium"]:
                         self.getControl(111).setLabel("Premium is active.")
-                        xbmcgui.Dialog().notification(
+                        themed_dialog().notification(
                             "Stremio for Kodi Premium",
                             "Premium activated.",
                             time=5000
@@ -463,7 +464,7 @@ def show_purchase():
     state = store.load()
     auth_key = state.get("token")
     if not isinstance(auth_key, str) or not auth_key.strip():
-        xbmcgui.Dialog().ok(
+        themed_dialog().ok(
             "Stremio for Kodi Premium",
             "Connect a Stremio account first. Premium uses the same verified Stremio identity."
         )
@@ -472,14 +473,14 @@ def show_purchase():
     try:
         result = prepare_purchase(store)
     except PremiumError:
-        xbmcgui.Dialog().ok(
+        themed_dialog().ok(
             "Stremio for Kodi Premium",
             "Premium checkout is not available yet. Your free Stremio for Kodi features continue to work."
         )
         return False
 
     if result["already_owned"] or result["entitlement"]["premium"]:
-        xbmcgui.Dialog().ok("Stremio for Kodi Premium", "Premium is already active for this Stremio account.")
+        themed_dialog().ok("Stremio for Kodi Premium", "Premium is already active for this Stremio account.")
         return True
 
     checkout_url = result["purchase_session"]["checkout_url"]
@@ -511,7 +512,7 @@ def show_purchase():
         window.doModal()
         return True
     except Exception:
-        xbmcgui.Dialog().ok(
+        themed_dialog().ok(
             "Stremio for Kodi Premium",
             "Open this address on your phone or computer:\n\n" + checkout_url
         )

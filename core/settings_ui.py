@@ -1,4 +1,5 @@
 """Curated appliance settings. Never opens the generic addon/settings browser."""
+from lib.ui_dialogs import dialog as themed_dialog
 import sys
 import ast
 from decimal import Decimal
@@ -15,7 +16,7 @@ from setup_profile import rpc, get_setting, prepare, replace_backed_up, home_xml
 
 ADDON = get_addon()
 PROFILE = Path(xbmcvfs.translatePath(ADDON.getAddonInfo('profile')))
-DIALOG = xbmcgui.Dialog()
+DIALOG = themed_dialog()
 HOME = 'special://profile/addon_data/script.skinshortcuts/skin.stremioelec-10000-1.DATA.xml'
 SETTINGS_COMMAND_WINDOW_ID = 1198
 SETTINGS_RUNTIME_WINDOW_ID = 11198

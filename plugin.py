@@ -1,4 +1,5 @@
 """Kodi entry point. No account writes, library mutations or torrent engine."""
+from lib.ui_dialogs import progress as themed_progress, dialog as themed_dialog
 import sys
 from pathlib import Path
 _CORE = Path(__file__).resolve().parent / "core"
@@ -69,12 +70,12 @@ def resource_names(manifest):
 
 
 def connect_account():
-    if not xbmcgui.Dialog().yesno('Connect Stremio',
+    if not themed_dialog().yesno('Connect Stremio',
             'Sign in on the official Stremio page. This device will store a session token '
             'and your addon URLs locally (not encrypted). Continue?'):
         return
     code, link = create_link()
-    progress = xbmcgui.DialogProgress()
+    progress = themed_progress()
     progress.create('Connect Stremio', 'Open on your phone or computer:\n' + link)
     monitor = xbmc.Monitor()
     deadline = time.monotonic() + 300
@@ -98,15 +99,15 @@ def connect_account():
                     state['library'] = library
                     STORE.save(state)
                 except AccountError:
-                    xbmcgui.Dialog().notification('Stremio', 'Library import failed; retry Refresh library.')
+                    themed_dialog().notification('Stremio', 'Library import failed; retry Refresh library.')
                 progress.close()
-                xbmcgui.Dialog().ok('Stremio connected',
+                themed_dialog().ok('Stremio connected',
                     '{} addons imported. {} unsupported entries skipped.'.format(len(addons), skipped))
                 return
             if monitor.waitForAbort(5):
                 return
         if not progress.iscanceled():
-            xbmcgui.Dialog().ok('Stremio', 'Sign-in timed out. Start again for a new link.')
+            themed_dialog().ok('Stremio', 'Sign-in timed out. Start again for a new link.')
     finally:
         progress.close()
 
@@ -578,7 +579,7 @@ def run(params):
             entry.getVideoInfoTag().setTitle(stream['title'])
             xbmcplugin.setResolvedUrl(HANDLE, True, entry)
         except Exception:
-            xbmcgui.Dialog().notification('Stremio for Kodi', 'Trailer unavailable. Please try another title or retry later.')
+            themed_dialog().notification('Stremio for Kodi', 'Trailer unavailable. Please try another title or retry later.')
             xbmcplugin.setResolvedUrl(HANDLE, False, entry)
         return
     if action == 'open_season':
@@ -598,7 +599,7 @@ def run(params):
         from subtitles import prepare_selected
         providers = active_addons(STORE.load())
         return resolve(params, providers, collect,
-                       xbmcgui.Dialog(), xbmcplugin, xbmcgui, HANDLE,
+                       themed_dialog(), xbmcplugin, xbmcgui, HANDLE,
                        lambda kind, identity, stream, item: prepare_selected(STORE.directory, kind, identity, stream, providers, item))
     if action == 'subtitles':
         from subtitles import manual_selection
@@ -607,7 +608,7 @@ def run(params):
     if action == 'setup_home':
         from setup_profile import prepare
         prepare(STORE.directory, xbmcvfs.translatePath(ADDON.getAddonInfo('path')), force_home=True)
-        xbmcgui.Dialog().notification('Stremio for Kodi', 'Home defaults restored')
+        themed_dialog().notification('Stremio for Kodi', 'Home defaults restored')
         xbmc.executebuiltin('ReloadSkin()')
         return
     if action == 'first_catalog':
@@ -765,9 +766,9 @@ def run(params):
         row = next((item for item in saved.get('visible', [])
                     if descriptor_id(item.get('transportUrl', '')) == key), None)
         if not row or time.time() - saved.get('created', 0) > 900:
-            xbmcgui.Dialog().notification('Community Addons', 'Catalog item expired. Reopen Community Addons.')
+            themed_dialog().notification('Community Addons', 'Catalog item expired. Reopen Community Addons.')
         else:
-            community_selected(row, xbmcgui.Dialog())
+            community_selected(row, themed_dialog())
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
         return
 
@@ -781,15 +782,15 @@ def run(params):
             addons, skipped = pull_addons(state['token'])
             state['addons'] = merge_account(state, addons)
             STORE.save(state)
-            xbmcgui.Dialog().ok('Stremio', '{} addons imported. {} skipped.'.format(len(addons), skipped))
+            themed_dialog().ok('Stremio', '{} addons imported. {} skipped.'.format(len(addons), skipped))
         elif action == 'sync_library':
             state = STORE.load()
             if not state.get('token'):
                 raise AccountError('Connect your account first.')
             state['library'] = pull_library(state['token'])
             STORE.save(state)
-            xbmcgui.Dialog().ok('Stremio', '{} library entries imported. Account unchanged.'.format(len(state['library'])))
-        elif xbmcgui.Dialog().yesno('Disconnect this device',
+            themed_dialog().ok('Stremio', '{} library entries imported. Account unchanged.'.format(len(state['library'])))
+        elif themed_dialog().yesno('Disconnect this device',
                 'Remove this device login and account-synced addons? Local-only Stremio addons stay on this device. Your online account stays unchanged.'):
             state = STORE.load()
             local = [item for item in state.get('addons', []) if item.get('account') is not True]
@@ -1041,7 +1042,7 @@ def run(params):
         add_installed_addons()
     elif action == 'addon_action':
         from addons_ui import addon_actions
-        addon_actions(xbmcgui.Dialog(), params.get('id', ''))
+        addon_actions(themed_dialog(), params.get('id', ''))
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
         xbmc.executebuiltin('Container.Refresh')
         return
@@ -1056,7 +1057,7 @@ def run(params):
                 state['library'] = pull_library(state['token'])
                 STORE.save(state)
             except AccountError:
-                xbmcgui.Dialog().notification('My Library', 'Offline — showing the last synced library')
+                themed_dialog().notification('My Library', 'Offline — showing the last synced library')
         rows = library_rows(state.get('library', []), action == 'continue')
         # Home is bounded; keep the full Library browsable.
         if action == 'continue':
@@ -1090,7 +1091,7 @@ def run(params):
         manifest = descriptor['manifest'] if descriptor else fetch(manifest_url)
         available = catalogs(manifest)
         if not available:
-            xbmcgui.Dialog().ok('Stremio', 'This addon has no unfiltered catalogs. Its supported streams are requested when opening sources for a matching title.')
+            themed_dialog().ok('Stremio', 'This addon has no unfiltered catalogs. Its supported streams are requested when opening sources for a matching title.')
         for catalog in available:
             label = catalog.get('name', catalog['id']) + ' · ' + catalog['type']
             xbmcplugin.addDirectoryItem(HANDLE, provider_route(action='catalog', kind=catalog['type'],
@@ -1189,11 +1190,11 @@ def run(params):
             play_meta, kind, stream_id, selected_provider, resume_ms)
 
         if not playable:
-            xbmcgui.Dialog().ok('Stremio for Kodi',
+            themed_dialog().ok('Stremio for Kodi',
                 'No supported direct HTTP streams. {} unsupported; {} addons failed. '
                 'Torrents, DRM and custom proxy headers are not supported yet.'.format(skipped, failed))
         elif skipped or failed:
-            xbmcgui.Dialog().notification('Stremio for Kodi',
+            themed_dialog().notification('Stremio for Kodi',
                 '{} unsupported streams; {} addons failed'.format(skipped, failed))
 
         xbmcplugin.endOfDirectory(HANDLE)
@@ -1212,14 +1213,24 @@ def run(params):
         else:
             entry = xbmcgui.ListItem(path=url)
         if isinstance(stream, dict) and resume_seconds(stream.get('resume_ms')):
-            entry.setProperty('StartOffset', str(resume_seconds(stream['resume_ms'])))
+            resume_at = resume_seconds(stream['resume_ms'])
+            entry.setProperty('StartOffset', str(resume_at))
+            try:
+                entry.getVideoInfoTag().setResumePoint(float(resume_at))
+            except Exception:
+                pass
+        if isinstance(stream, dict):
+            playback_key = params.get('key', '')
+            entry.setProperty('StremioPlaybackKey', playback_key)
+            Store(STORE.directory / 'playback-context').save({
+                'key': playback_key, 'created': time.time()})
         if isinstance(stream, dict):
             from subtitles import prepare_selected
             try:
                 prepare_selected(STORE.directory, stream['kind'], stream['id'], stream,
                                  active_addons(STORE.load()), entry)
             except Exception:
-                xbmcgui.Dialog().notification('Stremio subtitles', 'Subtitles unavailable; video will still start.')
+                themed_dialog().notification('Stremio subtitles', 'Subtitles unavailable; video will still start.')
         xbmcplugin.setResolvedUrl(HANDLE, True, entry)
         return
     else:
@@ -1232,7 +1243,7 @@ if __name__ == '__main__':
     try:
         run(params)
     except AccountError as error:
-        xbmcgui.Dialog().ok('Stremio account', str(error))
+        themed_dialog().ok('Stremio account', str(error))
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
     except Exception as error:
         # Provider URLs can contain secrets: the reporter never includes raw exception

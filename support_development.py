@@ -3,6 +3,7 @@
 This is a separate short-lived entrypoint so opening support does not launch
 another Home instance. The QR is bundled and works without a QR dependency.
 """
+from lib.ui_dialogs import dialog as themed_dialog
 from pathlib import Path
 import hashlib
 import json
@@ -83,7 +84,7 @@ def main():
             del window
     except Exception:
         # Avoid logging exception contents or opening an unverified external URL.
-        xbmcgui.Dialog().ok('Support Stremio for Kodi',
+        themed_dialog().ok('Support Stremio for Kodi',
                            'The support screen is unavailable. Please try again later.')
 
 

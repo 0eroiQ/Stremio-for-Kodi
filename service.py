@@ -1,4 +1,4 @@
-"""Persistent Stremio for Kodi service: startup launch + AUTO AI subtitles."""
+"""Persistent service: startup shell, watch-progress sync and AUTO AI subtitles."""
 import hashlib
 import sys
 import threading
@@ -17,12 +17,15 @@ from addon_state import get_addon
 from addons_core import active_addons
 from ai_subtitles import CODE_NAMES, local_settings, prepare_embedded_auto
 from subtitles import ai_source_candidates, download
+from lib.playback_observer import ProgressPlayer, flush_pending
+from lib.ui_dialogs import dialog as themed_dialog
 
 ADDON = get_addon()
 PROFILE = Path(xbmcvfs.translatePath(ADDON.getAddonInfo("profile")))
 SESSION_WINDOW_ID = 10000
 STARTUP_LAUNCHED = "stremioforkodi.startup.launched"
 APP_RUNNING = "stremioforkodi.running"
+PROGRESS_READY = "stremioforkodi.progress.ready"
 DELAYS = (0, 1, 2, 3, 5)
 
 
@@ -32,8 +35,10 @@ def configured_delay():
     except (TypeError, ValueError):
         index = 0
     return DELAYS[index] if 0 <= index < len(DELAYS) else 0
+
+
 def _notify(message, milliseconds=4000):
-    xbmcgui.Dialog().notification("AI Subtitles", message, time=milliseconds)
+    themed_dialog().notification("AI Subtitles", message, time=milliseconds)
 
 
 class PlaybackWatcher(xbmc.Player):
@@ -139,9 +144,10 @@ class PlaybackWatcher(xbmc.Player):
             _notify("No usable subtitle source found; keeping the original.", 4500)
 
 
-def _maybe_launch_startup(monitor, session):
+def maybe_autostart(monitor):
     if ADDON.getSetting("startup_autostart") != "true":
         return
+    session = xbmcgui.Window(SESSION_WINDOW_ID)
     if session.getProperty(STARTUP_LAUNCHED) == "true":
         return
     session.setProperty(STARTUP_LAUNCHED, "true")
@@ -155,25 +161,27 @@ def _maybe_launch_startup(monitor, session):
 def main():
     monitor = xbmc.Monitor()
 
-    # Keep the historical startup-launch behavior, but the service itself now
-    # remains alive even when autostart is disabled so AI subtitles can watch playback.
-    if ADDON.getSetting("startup_autostart") == "true":
-        session = xbmcgui.Window(SESSION_WINDOW_ID)
-        if session.getProperty(STARTUP_LAUNCHED) != "true":
-            session.setProperty(STARTUP_LAUNCHED, "true")
-            delay = configured_delay()
-            if delay and monitor.waitForAbort(delay):
-                return
-            if not monitor.abortRequested() and session.getProperty(APP_RUNNING) != "true":
-                xbmc.executebuiltin("RunScript(script.stremioelec,startup)")
-
-    # Unit tests execute main() in isolation without the runtime watcher class.
-    if "PlaybackWatcher" not in globals():
+    # Unit tests may execute main() with only the historical startup symbols.
+    if "PlaybackWatcher" not in globals() or "ProgressPlayer" not in globals():
+        maybe_autostart(monitor)
         return
+
+    player = ProgressPlayer()
     watcher = PlaybackWatcher(monitor)
-    watcher.schedule()
-    while not monitor.waitForAbort(1):
-        pass
+    session = xbmcgui.Window(SESSION_WINDOW_ID)
+    session.setProperty(PROGRESS_READY, "true")
+    try:
+        maybe_autostart(monitor)
+        # Service updates can restart while a video is already playing.
+        watcher.schedule()
+        while not monitor.waitForAbort(1):
+            player.tick()
+            while flush_pending(player):
+                pass
+        while flush_pending(player):
+            pass
+    finally:
+        session.clearProperty(PROGRESS_READY)
 
 
 if __name__ == "__main__":

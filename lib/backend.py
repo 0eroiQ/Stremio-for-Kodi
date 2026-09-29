@@ -68,6 +68,28 @@ def toggle_library(meta):
     STORE.save(state)
 
 
+def mark_episodes_through(meta, target_id, watched=True):
+    from episode_actions import sync_through
+    remote, selected = sync_through(STORE, meta, target_id, watched)
+    return remote, selected
+
+
+def mark_episode(meta, target_id, watched=True):
+    from episode_actions import sync_single
+    remote, selected = sync_single(STORE, meta, target_id, watched)
+    return remote, selected
+
+
+def mark_movie(meta, watched=True):
+    from media_actions import sync_movie_watched
+    return sync_movie_watched(STORE, meta, watched)
+
+
+def remove_continue(meta):
+    from media_actions import sync_remove_continue
+    return sync_remove_continue(STORE, meta)
+
+
 def languages(meta):
     raw = (meta.get('languages') or meta.get('spokenLanguages') or
            meta.get('audioLanguages') or meta.get('language') or [])
@@ -111,35 +133,99 @@ def play(meta, identity, stream, resume_ms=0):
     xbmc.executebuiltin('PlayMedia(' + url + ')')
 
 
-def account_home():
-    from account import pull_addons, pull_library
-    from addons_core import merge_account
-    from lib.home_catalogs import load_rows
+def _continue_rows(state, catalogs=(), allow_network=False):
+    continuing = [dict(row, id=row.get('_id') or row.get('id'))
+                  for row in library_rows(state.get('library', []), True)]
+    if not continuing:
+        return None
+
+    # Fast startup stays network-free and trusts Stremio's saved pointer. During
+    # the background refresh we can verify series episode state against current
+    # metadata so a watched/future/final episode never remains in Continue Watching.
+    if allow_network:
+        from continue_playback import continue_series_target
+        verified = []
+        for row in continuing:
+            if row.get('type') != 'series':
+                verified.append(row)
+                continue
+            try:
+                full = metadata(row)
+                target, resume_ms = continue_series_target(full.get('videos') or [], row)
+            except Exception:
+                # A metadata outage must not destructively remove a valid saved
+                # Continue Watching item. Keep it until a later refresh can verify.
+                verified.append(row)
+                continue
+            if target is None:
+                continue
+            projected = dict(row)
+            projected.update({key: value for key, value in full.items()
+                              if value not in ('', None, [], {})})
+            projected['id'] = row.get('_id') or row.get('id')
+            projected['state'] = dict(row.get('state') or {})
+            projected['state']['video_id'] = str(target.get('id') or '')
+            projected['state']['timeOffset'] = int(resume_ms) if resume_ms else 1
+            verified.append(projected)
+        continuing = verified
+
+    if continuing:
+        from lib.hero_metadata import prepare
+        continuing = prepare(continuing, catalogs, metadata if allow_network else None)
+        return {'label': 'Continue Watching', 'items': continuing, 'failed': False}
+    return None
+
+
+def account_home_capacity():
+    """Number of Home controls needed from saved manifests; no network access."""
+    from lib.home_catalogs import descriptors
+    state = STORE.load()
+    remote = [a for a in state.get('addons', []) if a.get('account') is True]
+    return len(descriptors(remote)) + (1 if library_rows(state.get('library', []), True) else 0)
+
+
+def account_home(refresh=True):
+    """Return Home without blocking startup when refresh=False.
+
+    Fast mode uses the last display-only snapshot plus the locally saved Stremio
+    library. Refresh mode performs account/catalog network work and replaces the
+    snapshot only after the UI is already available.
+    """
+    from lib.home_snapshot import load as load_snapshot, save as save_snapshot
     state = STORE.load()
     if not state.get('token'):
         return []
+
+    if not refresh:
+        rows = load_snapshot(STORE.directory)
+        continuing = _continue_rows(state, rows, False)
+        return ([continuing] if continuing else []) + rows
+
+    from account import pull_addons, pull_library
+    from addons_core import merge_account
+    from lib.home_catalogs import load_rows
+
+    # Account addon order may change on another Stremio device. Failure here is
+    # non-fatal: the last saved account collection remains usable.
     try:
         remote, _ = pull_addons(state['token'])
         state['addons'] = merge_account(state, remote)
         STORE.save(state)
     except Exception:
         xbmc.log('Stremio for Kodi: using saved account catalog order; sync unavailable', xbmc.LOGWARNING)
-    # Home follows the account collection, including account order; local-only
-    # installations and Kodi-specific enable toggles do not rewrite that collection.
+
     remote = [a for a in state.get('addons', []) if a.get('account') is True]
-    rows = load_rows(remote, fetch, resource_url)
+    catalog_rows = load_rows(remote, fetch, resource_url)
+    catalog_rows = save_snapshot(STORE.directory, catalog_rows)
+
     try:
         state['library'] = pull_library(state['token'])
         STORE.save(state)
     except Exception:
         pass
-    continuing = [dict(row, id=row.get('_id') or row.get('id'))
-                  for row in library_rows(state.get('library', []), True)]
-    if continuing:
-        from lib.hero_metadata import prepare
-        continuing = prepare(continuing, rows, metadata)
-        rows.insert(0, {'label': 'Continue Watching', 'items': continuing, 'failed': False})
-    return rows
+
+    continuing = _continue_rows(state, catalog_rows, True)
+    return ([continuing] if continuing else []) + catalog_rows
 
 
 def discover_choices():

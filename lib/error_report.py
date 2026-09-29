@@ -5,6 +5,7 @@ context, and basename/function/line stack frames. They never include raw
 exception messages, account tokens, addon/provider URLs, API keys, media URLs,
 account identifiers, device identifiers, or local filesystem paths.
 """
+from lib.ui_dialogs import dialog as themed_dialog
 import hashlib
 import json
 import os
@@ -133,7 +134,7 @@ def show_reporting_notice_once():
             return
     try:
         import xbmcgui
-        xbmcgui.Dialog().notification(
+        themed_dialog().notification(
             'Stremio for Kodi',
             'Anonymous error reporting is on. You can turn it off in Settings > Support.',
             time=7000)
@@ -179,7 +180,7 @@ def _report_window_class():
                     self.sent = True
                     self.getControl(105).setLabel('Error reported · ' + self.payload['fingerprint'])
                     try:
-                        xbmcgui.Dialog().notification(
+                        themed_dialog().notification(
                             'Stremio for Kodi',
                             'Error reported · ' + self.payload['fingerprint'],
                             time=5000)
@@ -244,7 +245,7 @@ def handle_error(context, error=None, summary='Stremio for Kodi encountered an u
         mark_sent(payload['fingerprint'])
         try:
             import xbmcgui
-            xbmcgui.Dialog().notification(
+            themed_dialog().notification(
                 'Stremio for Kodi',
                 'Error reported · ' + payload['fingerprint'],
                 time=5000)
@@ -261,7 +262,7 @@ def report_last_error(dialog=None):
     from lib.report_feedback import report_labels
     if dialog is None:
         import xbmcgui
-        dialog = xbmcgui.Dialog()
+        dialog = themed_dialog()
     record = load_last_error()
     if record is None:
         dialog.ok('Report last error',
@@ -313,7 +314,7 @@ def manual_report(dialog=None):
     from lib.report_feedback import CATEGORIES, attach_feedback, report_labels
     if dialog is None:
         import xbmcgui
-        dialog = xbmcgui.Dialog()
+        dialog = themed_dialog()
     types = ('Bug report', 'Feature request', 'Report last error')
     selected = dialog.select('Stremio for Kodi - feedback', list(types))
     if not _valid_choice(selected, types):

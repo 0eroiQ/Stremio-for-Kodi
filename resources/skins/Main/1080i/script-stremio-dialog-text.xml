@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog"><defaultcontrol always="true">201</defaultcontrol><coordinates><system>1</system></coordinates><controls>
+<control type="image"><left>0</left><top>0</top><width>1920</width><height>1080</height><texture colordiffuse="55000000">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texture></control>
+<control type="image"><left>340</left><top>145</top><width>1240</width><height>790</height><texture colordiffuse="F2181720" border="36,36,36,36">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-card-rounded.png</texture></control>
+<control type="label"><left>410</left><top>195</top><width>1100</width><height>55</height><font>font30</font><textcolor>FFFFFFFF</textcolor><label>$INFO[Window.Property(dialog_title)]</label></control>
+<control type="textbox" id="101"><left>410</left><top>280</top><width>1100</width><height>535</height><font>font20</font><textcolor>FFD8D4E2</textcolor><label>$INFO[Window.Property(dialog_text)]</label><pagecontrol>60</pagecontrol></control>
+<control type="scrollbar" id="60"><left>1520</left><top>280</top><width>8</width><height>535</height><orientation>vertical</orientation></control>
+<control type="button" id="201"><left>1190</left><top>840</top><width>320</width><height>64</height><label>Close</label><font>font20</font><align>center</align><texturefocus colordiffuse="FFC4ACFF" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h64-v1.png</texturefocus><texturenofocus colordiffuse="FF302B41" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h64-v1.png</texturenofocus></control>
+</controls></window>

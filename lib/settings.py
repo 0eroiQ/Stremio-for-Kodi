@@ -1,3 +1,4 @@
+from lib.ui_dialogs import dialog as themed_dialog
 import json
 from pathlib import Path
 import xbmcaddon
@@ -51,11 +52,11 @@ def locale_menu():
     import xbmcgui
     from lib.windows import LANGUAGES, REGIONS
     setup = load_setup()
-    choice = xbmcgui.Dialog().select('Language and location', ['Language', 'Location'])
+    choice = themed_dialog().select('Language and location', ['Language', 'Location'])
     rows = LANGUAGES if choice == 0 else REGIONS
     if choice < 0:
         return
-    selected = xbmcgui.Dialog().select('Language' if choice == 0 else 'Location', [row[0] for row in rows])
+    selected = themed_dialog().select('Language' if choice == 0 else 'Location', [row[0] for row in rows])
     if selected < 0:
         return
     setup['language' if choice == 0 else 'region'] = rows[selected]

@@ -19,51 +19,33 @@ def function_from_file(path, name, class_name=None):
 class StartupShellTests(unittest.TestCase):
     def test_service_launches_once_when_enabled(self):
         configured_delay = function_from_file(ROOT / "service.py", "configured_delay")
-        main = function_from_file(ROOT / "service.py", "main")
+        maybe_autostart = function_from_file(ROOT / "service.py", "maybe_autostart")
         addon = Mock()
         addon.getSetting.side_effect = lambda key: {
-            "startup_autostart": "true",
-            "startup_delay": "0",
-        }.get(key, "")
-        session = Mock()
-        session.getProperty.return_value = ""
-        monitor = Mock()
-        monitor.abortRequested.return_value = False
-        xbmc = Mock()
-        xbmc.Monitor.return_value = monitor
-        xbmcgui = Mock()
-        xbmcgui.Window.return_value = session
-        scope = {
-            "ADDON": addon,
-            "SESSION_WINDOW_ID": 10000,
-            "STARTUP_LAUNCHED": "stremioforkodi.startup.launched",
-            "APP_RUNNING": "stremioforkodi.running",
-            "DELAYS": (0, 1, 2, 3, 5),
-            "xbmc": xbmc,
-            "xbmcgui": xbmcgui,
-        }
-        exec(compile(ast.Module(body=[configured_delay, main], type_ignores=[]), "<service>", "exec"), scope)
-        scope["main"]()
-        session.setProperty.assert_called_once_with("stremioforkodi.startup.launched", "true")
+            "startup_autostart": "true", "startup_delay": "0"}.get(key, "")
+        session = Mock(); session.getProperty.return_value = ""
+        monitor = Mock(); monitor.abortRequested.return_value = False
+        xbmc = Mock(); xbmcgui = Mock(); xbmcgui.Window.return_value = session
+        scope = {"ADDON":addon,"SESSION_WINDOW_ID":10000,
+                 "STARTUP_LAUNCHED":"stremioforkodi.startup.launched",
+                 "APP_RUNNING":"stremioforkodi.running","DELAYS":(0,1,2,3,5),
+                 "xbmc":xbmc,"xbmcgui":xbmcgui}
+        exec(compile(ast.Module(body=[configured_delay, maybe_autostart],type_ignores=[]),
+                     "<service>","exec"),scope)
+        scope["maybe_autostart"](monitor)
+        session.setProperty.assert_called_once_with("stremioforkodi.startup.launched","true")
         xbmc.executebuiltin.assert_called_once_with("RunScript(script.stremioelec,startup)")
 
-    def test_service_does_nothing_when_autostart_disabled(self):
-        main = function_from_file(ROOT / "service.py", "main")
-        addon = Mock()
-        addon.getSetting.return_value = "false"
-        xbmc = Mock()
-        xbmcgui = Mock()
-        scope = {
-            "ADDON": addon,
-            "SESSION_WINDOW_ID": 10000,
-            "STARTUP_LAUNCHED": "stremioforkodi.startup.launched",
-            "APP_RUNNING": "stremioforkodi.running",
-            "configured_delay": lambda: 0,
-            "xbmc": xbmc,
-            "xbmcgui": xbmcgui,
-        }
-        exec(compile(ast.Module(body=[main], type_ignores=[]), "<service>", "exec"), scope)
-        scope["main"]()
+    def test_service_does_not_autostart_when_disabled(self):
+        maybe_autostart = function_from_file(ROOT / "service.py", "maybe_autostart")
+        addon=Mock(); addon.getSetting.return_value="false"
+        xbmc=Mock(); xbmcgui=Mock(); monitor=Mock()
+        scope={"ADDON":addon,"SESSION_WINDOW_ID":10000,
+               "STARTUP_LAUNCHED":"stremioforkodi.startup.launched",
+               "APP_RUNNING":"stremioforkodi.running","configured_delay":lambda:0,
+               "xbmc":xbmc,"xbmcgui":xbmcgui}
+        exec(compile(ast.Module(body=[maybe_autostart],type_ignores=[]),"<service>","exec"),scope)
+        scope["maybe_autostart"](monitor)
         xbmcgui.Window.assert_not_called()
         xbmc.executebuiltin.assert_not_called()
 

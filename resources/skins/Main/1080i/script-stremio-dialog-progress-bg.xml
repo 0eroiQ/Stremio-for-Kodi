@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog"><visible>true</visible><coordinates><system>1</system></coordinates><controls>
+<control type="image"><left>1180</left><top>75</top><width>650</width><height>190</height><texture colordiffuse="F2181720" border="34,34,34,34">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-card-rounded.png</texture></control>
+<control type="label"><left>1230</left><top>105</top><width>550</width><height>42</height><font>font22</font><textcolor>FFFFFFFF</textcolor><label>$INFO[Window.Property(dialog_title)]</label></control>
+<control type="textbox"><left>1230</left><top>150</top><width>550</width><height>55</height><font>font17</font><textcolor>FFD8D4E2</textcolor><label>$INFO[Window.Property(dialog_message)]</label></control>
+<control type="progress"><left>1230</left><top>225</top><width>550</width><height>8</height><texturebg colordiffuse="55FFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/progress-local/capsule.png</texturebg><midtexture colordiffuse="FFB5A4E8">special://home/addons/script.stremioelec/resources/skins/Main/media/progress-local/capsule.png</midtexture><info>Window.Property(progress_percent)</info></control>
+</controls></window>

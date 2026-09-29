@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog">
+  <defaultcontrol always="true">600</defaultcontrol>
+  <coordinates><system>1</system></coordinates>
+  <controls>
+    <control type="image">
+      <left>0</left><top>0</top><width>1920</width><height>1080</height>
+      <texture colordiffuse="33000000">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texture>
+    </control>
+    <control type="image" id="100">
+      <left>690</left><top>280</top><width>540</width><height>520</height>
+      <texture colordiffuse="F2181720" border="36,36,36,36">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-card-rounded.png</texture>
+    </control>
+    <control type="list" id="600">
+      <left>704</left><top>294</top><width>512</width><height>490</height>
+      <orientation>vertical</orientation>
+      <scrolltime tween="sine" easing="out">120</scrolltime>
+      <itemlayout width="512" height="70">
+        <control type="image">
+          <left>18</left><top>15</top><width>40</width><height>40</height>
+          <texture colordiffuse="FFD7D4DC">$INFO[ListItem.Property(icon)]</texture>
+        </control>
+        <control type="label">
+          <left>76</left><top>0</top><width>410</width><height>70</height>
+          <font>font20</font><aligny>center</aligny>
+          <textcolor>FFE6E3E9</textcolor><label>$INFO[ListItem.Label]</label>
+        </control>
+      </itemlayout>
+      <focusedlayout width="512" height="70">
+        <control type="image">
+          <left>0</left><top>3</top><width>512</width><height>64</height>
+          <texture colordiffuse="FFC4ACFF" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h64-v1.png</texture>
+        </control>
+        <control type="image">
+          <left>18</left><top>15</top><width>40</width><height>40</height>
+          <texture colordiffuse="FF17151F">$INFO[ListItem.Property(icon)]</texture>
+        </control>
+        <control type="label">
+          <left>76</left><top>0</top><width>410</width><height>70</height>
+          <font>font20</font><aligny>center</aligny>
+          <textcolor>FF17151F</textcolor><focusedcolor>FF17151F</focusedcolor>
+          <label>$INFO[ListItem.Label]</label>
+        </control>
+      </focusedlayout>
+    </control>
+  </controls>
+</window>

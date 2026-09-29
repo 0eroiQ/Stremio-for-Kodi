@@ -41,6 +41,19 @@ class LaunchTests(unittest.TestCase):
         win = self.gui.windows[wid] = Window()
         mark_window(win, role)
         return win
+    def test_fresh_session_does_not_probe_python_window_range(self):
+        calls = []
+        original = self.gui.Window
+        def tracked(wid=None):
+            calls.append(wid)
+            return original(wid)
+        self.gui.Window = tracked
+        guard = self.guard()
+        guard.injected_gui = False
+        self.assertTrue(guard.acquire())
+        self.assertFalse(any(isinstance(wid, int) and 13000 <= wid < 13200 for wid in calls))
+        guard.release()
+
     def test_stale_flag_does_not_block_start(self):
         self.session.setProperty(RUNNING, 'true')
         guard = self.guard()

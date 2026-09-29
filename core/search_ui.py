@@ -1,11 +1,12 @@
 """Stremio for Kodi search launcher; no autocomplete/helper addon required."""
+from lib.ui_dialogs import dialog as themed_dialog
 from urllib.parse import urlencode
 import xbmc
 import xbmcgui
 
 
 def run():
-    query = xbmcgui.Dialog().input('Search Stremio', type=xbmcgui.INPUT_ALPHANUM).strip()
+    query = themed_dialog().input('Search Stremio', type=xbmcgui.INPUT_ALPHANUM).strip()
     if not query:
         return
     path = 'plugin://script.stremioelec/?' + urlencode({

@@ -47,6 +47,7 @@ def target_label(meta, identity):
 def playback_meta(meta, identity):
     result = dict(meta)
     if meta.get('type') == 'series':
+        result['_stremio_meta_id'] = meta.get('_stremio_meta_id') or meta.get('id')
         video = next((v for v in meta.get('videos', []) if v.get('id') == identity), {})
         result.update(id=identity, name=video.get('name') or video.get('title') or meta.get('name'),
                       season=video.get('season'), episode=video.get('episode'),

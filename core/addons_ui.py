@@ -1,4 +1,5 @@
 """TV-friendly Stremio addon manager. Kodi addons remain internal."""
+from lib.ui_dialogs import dialog as themed_dialog
 import html
 import re
 import sys
@@ -250,7 +251,7 @@ def addon_actions(dialog, identity=None):
 
 
 def main(action='open', value=''):
-    dialog = xbmcgui.Dialog()
+    dialog = themed_dialog()
     if action == 'open':
         xbmc.executebuiltin('ActivateWindow(' + str(WINDOW_ID) + ')')
     elif action == 'refresh':

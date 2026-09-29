@@ -8,6 +8,7 @@ import xbmcvfs
 from addon_state import get_addon
 from account import Store
 from lib.theme import window as themed_window
+from lib.ui_dialogs import dialog as themed_dialog
 
 ADDON = get_addon()
 PROFILE = Path(xbmcvfs.translatePath(ADDON.getAddonInfo("profile")))
@@ -291,7 +292,7 @@ def _set_bool(row):
 
 def _set_text(row):
     current = ADDON.getSetting(row["id"]).strip()
-    value = xbmcgui.Dialog().input(row["label"], defaultt=current, type=xbmcgui.INPUT_ALPHANUM)
+    value = themed_dialog().input(row["label"], defaultt=current, type=xbmcgui.INPUT_ALPHANUM)
     if not value.strip():
         return False
     if row["id"] == "manifest":
@@ -299,7 +300,7 @@ def _set_text(row):
         try:
             base_url(value.strip())
         except Exception:
-            xbmcgui.Dialog().ok("Catalog manifest", "Use an HTTP(S) URL ending in /manifest.json.")
+            themed_dialog().ok("Catalog manifest", "Use an HTTP(S) URL ending in /manifest.json.")
             return False
     ADDON.setSetting(row["id"], value.strip())
     return True
@@ -317,9 +318,9 @@ def run_action(action, owner=None):
             if state.get("token"):
                 state["library"] = pull_library(state["token"])
                 store.save(state)
-                xbmcgui.Dialog().notification("Stremio for Kodi", "Library refreshed.")
+                themed_dialog().notification("Stremio for Kodi", "Library refreshed.")
         except Exception:
-            xbmcgui.Dialog().notification("Stremio for Kodi", "Library refresh unavailable.")
+            themed_dialog().notification("Stremio for Kodi", "Library refresh unavailable.")
     elif action == "account_disconnect" and owner is not None:
         owner.open_command(
             "account_disconnect", "Disconnect this device",
@@ -338,9 +339,9 @@ def run_action(action, owner=None):
         try:
             from weather import refresh
             refresh(force=True)
-            xbmcgui.Dialog().notification("Weather", "Weather refreshed.")
+            themed_dialog().notification("Weather", "Weather refreshed.")
         except Exception:
-            xbmcgui.Dialog().notification("Weather", "Weather refresh unavailable.")
+            themed_dialog().notification("Weather", "Weather refresh unavailable.")
     elif action == "cache_clear_selected_custom" and owner is not None:
         from lib.cache_policy import GROUPS
         labels = [label for _, label, _ in GROUPS] + ["Older entries", "Cancel"]
@@ -471,7 +472,7 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
         from lib.error_report import show_report_dialog
         record = load_last_error()
         if record is None:
-            xbmcgui.Dialog().notification("Report last error", "No saved error is available.")
+            themed_dialog().notification("Report last error", "No saved error is available.")
             return
         payload = record["payload"]
         summary = "{}: {}\nAddon {} | {}".format(
@@ -500,20 +501,20 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
         code = resolve_country(ADDON.getSetting("weather_country_code") or
                                ADDON.getSetting("weather_country_name"))
         if not code:
-            xbmcgui.Dialog().notification("Weather", "Choose a country first.")
+            themed_dialog().notification("Weather", "Choose a country first.")
             return
         heading = "ZIP / postal code" if postal else "City / suburb"
-        query = xbmcgui.Dialog().input(heading)
+        query = themed_dialog().input(heading)
         if not query or not query.strip():
             return
         try:
             query = postcode(query) if postal else query.strip()
             rows = search(query, code, postal=postal)
         except Exception:
-            xbmcgui.Dialog().notification("Weather", "Location search unavailable.")
+            themed_dialog().notification("Weather", "Location search unavailable.")
             return
         if not rows:
-            xbmcgui.Dialog().notification("Weather", "No matching places found.")
+            themed_dialog().notification("Weather", "No matching places found.")
             return
         row = {
             "kind": "weather_result", "id": "weather_result",
@@ -527,12 +528,12 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
         configured = bool(ADDON.getSetting(row["id"]).strip())
         labels = ["Replace key", "Remove key"] if configured else ["Add key"]
         self.open_subpage(row, labels, values=labels, selected=0,
-                          help_text="API keys stay hidden. Typing uses Kodi's secure on-screen keyboard.")
+                          help_text="API keys stay hidden. Typing uses the Stremio for Kodi secure hidden-input keyboard.")
 
     def open_kodi(self, row):
         definition = _kodi_definition(row["id"])
         if not definition or not definition.get("enabled", True):
-            xbmcgui.Dialog().notification("Stremio for Kodi", "This setting is unavailable on this device.")
+            themed_dialog().notification("Stremio for Kodi", "This setting is unavailable on this device.")
             return
         value = definition.get("value")
         if isinstance(value, bool):
@@ -542,7 +543,7 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
             return
         options = _kodi_options(definition)
         if not options:
-            xbmcgui.Dialog().notification("Stremio for Kodi", "No supported choices were reported for this setting.")
+            themed_dialog().notification("Stremio for Kodi", "No supported choices were reported for this setting.")
             return
         labels = [str(option.get("label")) for option in options]
         values = [option.get("value") for option in options]
@@ -588,12 +589,12 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
         if identity == "feedback_category" and value != "cancel":
             from lib.report_feedback import feedback_text
             self.feedback_category = value
-            title = xbmcgui.Dialog().input(
+            title = themed_dialog().input(
                 "Feature request title" if self.feedback_kind == "feature" else "Bug title"
             )
             if not title:
                 return
-            description = xbmcgui.Dialog().input(
+            description = themed_dialog().input(
                 "Describe the idea and why it helps" if self.feedback_kind == "feature"
                 else "Steps to reproduce, expected result and what happens instead"
             )
@@ -603,7 +604,7 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
                 self.feedback_title = feedback_text(title, 5, 100)
                 self.feedback_description = feedback_text(description, 10, 1000)
             except ValueError:
-                xbmcgui.Dialog().notification("Feedback", "Check the title/description and remove links or credentials.")
+                themed_dialog().notification("Feedback", "Check the title/description and remove links or credentials.")
                 return
             if self.feedback_kind == "feature":
                 self.finish_feedback("not-applicable")
@@ -687,7 +688,7 @@ class SettingsWindow(xbmcgui.WindowXMLDialog):
                 ADDON.setSetting(row["id"], "")
                 self.close_subpage()
                 return
-            entered = xbmcgui.Dialog().input(
+            entered = themed_dialog().input(
                 row["label"], type=xbmcgui.INPUT_ALPHANUM,
                 option=xbmcgui.ALPHANUM_HIDE_INPUT
             )

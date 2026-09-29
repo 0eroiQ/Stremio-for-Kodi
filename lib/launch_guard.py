@@ -27,6 +27,7 @@ def unmark_window(window):
 
 class LaunchGuard:
     def __init__(self, gui=None, kodi=None):
+        self.injected_gui = gui is not None
         if gui is None:
             import xbmcgui as gui
         if kodi is None:
@@ -38,6 +39,11 @@ class LaunchGuard:
 
     def _windows(self):
         legacy = self.session.getProperty(RUNNING) == 'true'
+        # A fresh Kodi session cannot have one of our live Python windows.
+        # Avoid probing ~200 nonexistent Python IDs on every cold launch; Kodi
+        # logs each failed Window(id) lookup as an exception even when caught.
+        if not legacy and not self.injected_gui:
+            return []
         found = []
         for identity in range(13000, 13200):
             try:
@@ -66,8 +72,13 @@ class LaunchGuard:
                 self.kodi.executebuiltin('ActivateWindow({})'.format(wid))
             return False
         if windows:
-            self.gui.Dialog().notification('Stremio for Kodi',
-                'The addon is still loading. Please wait.', time=3000)
+            if self.injected_gui:
+                self.gui.Dialog().notification('Stremio for Kodi',
+                    'The addon is still loading. Please wait.', time=3000)
+            else:
+                from lib.ui_dialogs import dialog
+                dialog().notification('Stremio for Kodi',
+                    'The addon is still loading. Please wait.', time=3000)
             return False
         # An orphan running flag is not a live instance. Start a fresh owner.
         self.lease = self.gui.Window()

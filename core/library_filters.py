@@ -1,4 +1,5 @@
 """Library filters and remote-friendly selection controls."""
+from lib.ui_dialogs import dialog as themed_dialog
 import json
 import sys
 import time
@@ -25,18 +26,18 @@ def main():
     if action == 'default':
         kind, sort, genre = 'all', 'recent', ''
     if action == 'kind':
-        index = xbmcgui.Dialog().select('My Library — type', ['All', 'Movies', 'Series'])
+        index = themed_dialog().select('My Library — type', ['All', 'Movies', 'Series'])
         if index < 0:
             return
         kind = ['all', 'movie', 'series'][index]
     elif action == 'sort':
-        index = xbmcgui.Dialog().select('My Library — sort', [v for k, v in SORTS])
+        index = themed_dialog().select('My Library — sort', [v for k, v in SORTS])
         if index < 0:
             return
         sort = SORTS[index][0]
     elif action == 'genre':
         values = [''] + json.loads(home.getProperty('LibraryGenres') or '[]')
-        index = xbmcgui.Dialog().select('My Library — genre', ['All genres'] + values[1:])
+        index = themed_dialog().select('My Library — genre', ['All genres'] + values[1:])
         if index < 0:
             return
         genre = values[index]

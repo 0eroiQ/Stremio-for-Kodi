@@ -1,4 +1,5 @@
 """Expose account subtitle providers in Kodi's standard subtitle download dialog."""
+from lib.ui_dialogs import dialog as themed_dialog
 import sys
 from pathlib import Path
 _CORE = Path(__file__).resolve().parent / "core"
@@ -61,7 +62,7 @@ def run():
         xbmcplugin.endOfDirectory(handle)
     except Exception:
         # Never expose signed provider URLs or account secrets in Kodi logs.
-        xbmcgui.Dialog().notification('Stremio subtitles', 'No matching subtitles available. Start playback through Stremio for Kodi and check Kodi languages.')
+        themed_dialog().notification('Stremio subtitles', 'No matching subtitles available. Start playback through Stremio for Kodi and check Kodi languages.')
         xbmcplugin.endOfDirectory(handle, succeeded=False)
 
 

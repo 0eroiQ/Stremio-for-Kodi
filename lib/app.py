@@ -23,18 +23,15 @@ def run():
         from lib import backend
         from lib.home_layout import build_layout
         from lib.appearance import options
-        progress = xbmcgui.DialogProgressBG()
-        progress.create('Stremio for Kodi', 'Loading your account catalogs…')
-        try:
-            rows = backend.account_home()
-            filename, path, count = build_layout(
-                ADDON_PATH,
-                xbmcvfs.translatePath(ADDON.getAddonInfo('profile')),
-                max(8, len(rows)),
-                options(ADDON)
-            )
-        finally:
-            progress.close()
+        # Startup is stale-while-revalidate: never hold the UI behind catalog
+        # network requests. HomeWindow refreshes account/catalog data in background.
+        rows = backend.account_home(False)
+        filename, path, count = build_layout(
+            ADDON_PATH,
+            xbmcvfs.translatePath(ADDON.getAddonInfo('profile')),
+            max(8, len(rows), backend.account_home_capacity()),
+            options(ADDON)
+        )
         while True:
             window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)
             mark_window(window, 'home')
@@ -48,6 +45,6 @@ def run():
                 break
             filename, path, count = build_layout(
                 ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')),
-                max(8, len(rows)), options(ADDON))
+                max(8, len(rows), backend.account_home_capacity()), options(ADDON))
     finally:
         guard.release()

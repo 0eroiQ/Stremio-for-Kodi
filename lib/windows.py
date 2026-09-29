@@ -1,3 +1,4 @@
+from lib.ui_dialogs import dialog as themed_dialog
 import xbmc
 import xbmcgui
 from lib.cinemeta import catalog
@@ -64,7 +65,7 @@ class HomeWindow(xbmcgui.WindowXML):
             self.series = catalog('series', 'top')
         except Exception as error:
             xbmc.log('Stremio for Kodi Cinemeta: {}'.format(error), xbmc.LOGERROR)
-            xbmcgui.Dialog().notification('Stremio for Kodi', 'Cinemeta catalog unavailable')
+            themed_dialog().notification('Stremio for Kodi', 'Cinemeta catalog unavailable')
         self._fill(LIST_MOVIES, self.movies)
         self._fill(LIST_SERIES, self.series)
         if self.movies:
@@ -94,7 +95,7 @@ class HomeWindow(xbmcgui.WindowXML):
             BTN_SETTINGS: 'Settings',
         }
         if control_id in labels:
-            xbmcgui.Dialog().ok('Stremio for Kodi', '{} — sljedeći korak.'.format(labels[control_id]))
+            themed_dialog().ok('Stremio for Kodi', '{} — sljedeći korak.'.format(labels[control_id]))
             return
         if control_id == LIST_MOVIES:
             self._open(self.movies, LIST_MOVIES)
@@ -108,7 +109,7 @@ class HomeWindow(xbmcgui.WindowXML):
             return
         row = rows[pos]
         self._hero(row)
-        xbmcgui.Dialog().ok(row['name'], row.get('description') or row['id'])
+        themed_dialog().ok(row['name'], row.get('description') or row['id'])
 
     def onAction(self, action):
         if action.getId() in (10, 92):

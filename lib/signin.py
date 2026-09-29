@@ -1,4 +1,5 @@
 """Account-link welcome window; never treats setup completion as authentication."""
+from lib.ui_dialogs import dialog as themed_dialog
 import threading
 import time
 import xbmc
@@ -168,7 +169,7 @@ def show_signin():
             from lib.error_report import handle_error
             context, summary = sign_in_failure(error)
             if isinstance(error, AccountStorageError):
-                xbmcgui.Dialog().ok('Cannot save Stremio login', summary)
+                themed_dialog().ok('Cannot save Stremio login', summary)
             handle_error(context, error, summary)
         return authenticated
     finally:

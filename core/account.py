@@ -160,8 +160,19 @@ def library_rows(entries, continuing=False):
         if entry.get('type') not in ('movie', 'series'):
             return False
         if continuing:
-            offset = entry['state'].get('timeOffset', 0)
-            return (not entry.get('removed') or entry.get('temp')) and isinstance(offset, (int, float)) and offset > 0
+            state = entry.get('state') or {}
+            offset = state.get('timeOffset', 0)
+            if not ((not entry.get('removed') or entry.get('temp'))
+                    and isinstance(offset, (int, float)) and offset > 0):
+                return False
+            if entry.get('type') == 'movie':
+                duration = state.get('duration', 0)
+                # Stremio Core treats the credits threshold as completion. Keep
+                # genuine partial rewatches (even if flaggedWatched is still set)
+                # but never leave a 90%+ completed movie in Continue Watching.
+                if isinstance(duration, (int, float)) and duration > 0:
+                    return float(offset) < float(duration) * 0.90
+            return True
         return not entry.get('removed') and not entry.get('temp')
     return sorted((entry for entry in entries if eligible(entry)),
                   key=lambda entry: str(entry['state'].get('lastWatched') or entry.get('_mtime') or ''), reverse=True)

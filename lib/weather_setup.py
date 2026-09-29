@@ -1,4 +1,5 @@
 """Country-scoped weather setup. No IP location, account data or global changes."""
+from lib.ui_dialogs import progress_bg as themed_progress_bg, dialog as themed_dialog
 import json
 import math
 from pathlib import Path
@@ -65,7 +66,7 @@ def _lookup(query, country, postal, fetcher):
     progress = None
     try:
         import xbmcgui
-        progress = xbmcgui.DialogProgressBG()
+        progress = themed_progress_bg()
         progress.create('Weather', 'Finding places in ' + dict(countries())[country] + '...')
     except ImportError:
         pass
@@ -78,7 +79,7 @@ def _lookup(query, country, postal, fetcher):
 def configure_weather(action='menu', dialog=None, addon=None, fetcher=None):
     if dialog is None:
         import xbmcgui
-        dialog = xbmcgui.Dialog()
+        dialog = themed_dialog()
     if addon is None:
         from addon_state import get_addon
         addon = get_addon()

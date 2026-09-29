@@ -1,4 +1,5 @@
 """Kodi-language filtered Stremio subtitles; download only the selected file."""
+from lib.ui_dialogs import dialog as themed_dialog
 import hashlib
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -143,15 +144,15 @@ def manual_selection(profile, providers):
         except Exception:
             return False
     if not matches():
-        xbmcgui.Dialog().ok('Stremio subtitles', 'Start a video through Stremio for Kodi first.')
+        themed_dialog().ok('Stremio subtitles', 'Start a video through Stremio for Kodi first.')
         return
     allowed, preferred, _ = preferences()
     entries = collect_subtitles(providers, context['kind'], context['id'], allowed, preferred,
                                 context.get('subtitles'), context.get('filename', ''))
     if not entries:
-        xbmcgui.Dialog().ok('Stremio subtitles', 'No subtitles found in the languages selected in Kodi Settings.')
+        themed_dialog().ok('Stremio subtitles', 'No subtitles found in the languages selected in Kodi Settings.')
         return
-    index = xbmcgui.Dialog().select('Stremio subtitles — Kodi languages', [entry['label'] for entry in entries])
+    index = themed_dialog().select('Stremio subtitles — Kodi languages', [entry['label'] for entry in entries])
     if index < 0 or index >= len(entries) or not matches():
         return
     path = download(entries[index], Path(profile) / 'subtitles')

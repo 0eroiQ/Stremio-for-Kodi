@@ -1,4 +1,5 @@
 """Info-dialog library status and user-triggered write, exact IMDb IDs only."""
+from lib.ui_dialogs import dialog as themed_dialog
 import re
 import sys
 from pathlib import Path
@@ -55,11 +56,11 @@ def main():
         home.setProperty('StremioLibraryLabel', 'Remove from library' if present else 'Add to library')
         home.setProperty('StremioLibraryReady', 'true')
         if action == 'toggle':
-            xbmcgui.Dialog().notification('Stremio library', 'Added to library' if desired else 'Removed from library')
+            themed_dialog().notification('Stremio library', 'Added to library' if desired else 'Removed from library')
     except Exception:
         home.setProperty('StremioLibraryLabel', 'Library unavailable')
         if action == 'toggle':
-            xbmcgui.Dialog().ok('Stremio library', 'The change could not be confirmed. Reopen this info screen to check your account before retrying.')
+            themed_dialog().ok('Stremio library', 'The change could not be confirmed. Reopen this info screen to check your account before retrying.')
 
 
 if __name__ == '__main__':

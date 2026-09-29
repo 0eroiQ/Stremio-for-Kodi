@@ -1,4 +1,5 @@
 """Installed addon page interactions in Kodi."""
+from lib.ui_dialogs import progress_bg as themed_progress_bg, dialog as themed_dialog
 from lib.addons_layout import build
 from lib.theme import window as themed_window
 
@@ -110,7 +111,7 @@ class AddonsPage:
         if cid == 9301:
             set_enabled(state, identity, identity in state.get('disabledAddons', []))
         elif cid == 9303:
-            if not xbmcgui.Dialog().yesno('Remove from this device?',
+            if not themed_dialog().yesno('Remove from this device?',
                     'Remove '+entry.get('manifest', {}).get('name','this addon')+'? Your Stremio account and other devices are unchanged.'):
                 return
             remove_local(state, identity)
@@ -137,7 +138,7 @@ class AddWindow(xbmcgui.WindowXMLDialog):
         if cid == 3:
             self.close()
         elif cid == 1:
-            value = xbmcgui.Dialog().input('Paste addon manifest URL', defaultt=self.url, type=xbmcgui.INPUT_ALPHANUM)
+            value = themed_dialog().input('Paste addon manifest URL', defaultt=self.url, type=xbmcgui.INPUT_ALPHANUM)
             if value.strip():
                 self.url = value.strip()
                 # Configured URLs may contain credentials; keep them out of the page preview.
@@ -151,7 +152,7 @@ class AddWindow(xbmcgui.WindowXMLDialog):
                 self.setProperty('add_error', 'Enter an addon manifest URL first.')
                 self.setFocusId(1)
                 return
-            progress = xbmcgui.DialogProgressBG()
+            progress = themed_progress_bg()
             try:
                 url = normalize_manifest_url(self.url)
                 progress.create('Add addon', 'Reading addon manifest…')

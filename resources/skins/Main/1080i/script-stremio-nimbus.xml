@@ -524,7 +524,7 @@
                   <align>right</align>
                   <visible>[[false + Control.HasFocus(400)] | false + [Control.IsVisible(54) | Control.IsVisible(500)]] + [String.IsEqual(ListItem.Property(type),movie) | String.IsEqual(ListItem.Property(type),episode)] + !Integer.IsEqual(Container(400).ListItem.Property(WatchedProgress),0)</visible>
                 </control>
-              </control>
+              <control type="progress"><description>Stremio watch progress</description><left>21</left><top>297</top><width>198</width><height>10</height><reveal>true</reveal><texturebg colordiffuse="77FFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/progress-local/capsule.png</texturebg><midtexture colordiffuse="FFB5A4E8">special://home/addons/script.stremioelec/resources/skins/Main/media/progress-local/capsule.png</midtexture><info>ListItem.PercentPlayed</info><visible>Integer.IsGreater(ListItem.Property(WatchedProgress),0) + Integer.IsLess(ListItem.Property(WatchedProgress),100)</visible></control></control>
               <control type="group">
                 <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
                 <top>265</top>
@@ -690,7 +690,7 @@
                   <animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
                   <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
                 </control>
-              </control>
+              <control type="progress"><description>Stremio watch progress</description><left>21</left><top>297</top><width>198</width><height>10</height><reveal>true</reveal><texturebg colordiffuse="77FFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/progress-local/capsule.png</texturebg><midtexture colordiffuse="FFB5A4E8">special://home/addons/script.stremioelec/resources/skins/Main/media/progress-local/capsule.png</midtexture><info>ListItem.PercentPlayed</info><visible>Integer.IsGreater(ListItem.Property(WatchedProgress),0) + Integer.IsLess(ListItem.Property(WatchedProgress),100)</visible></control></control>
               <control type="group">
                 <visible>String.IsEqual(ListItem.Property(type),series) | String.IsEqual(ListItem.Property(type),season)</visible>
                 <top>265</top>

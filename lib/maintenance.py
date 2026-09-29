@@ -1,4 +1,5 @@
 """Cache controls for addon-owned response data only; never clears login/library."""
+from lib.ui_dialogs import dialog as themed_dialog
 from lib.cache_policy import (GROUPS, DEFAULTS, read_policy, setting_id,
                               parse_duration, parse_size, format_duration, format_size)
 
@@ -46,7 +47,7 @@ def apply_settings():
 
 def cache_action(clear=False):
     import xbmcgui
-    dialog = xbmcgui.Dialog()
+    dialog = themed_dialog()
     try:
         policy = read_policy()
         cache = _cache(policy)
@@ -67,7 +68,7 @@ def cache_action(clear=False):
 
 def clear_selected():
     import xbmcgui
-    dialog = xbmcgui.Dialog()
+    dialog = themed_dialog()
     choices = [(key, label) for key, label, _ in GROUPS] + [('legacy', 'Older entries (not yet classified)')]
     selected = dialog.select('Clear which cache?', [label for _, label in choices])
     if selected < 0 or selected >= len(choices):
@@ -143,7 +144,7 @@ def configure_cache():
     import xbmcgui
     from addon_state import get_addon
     addon = get_addon()
-    dialog = xbmcgui.Dialog()
+    dialog = themed_dialog()
     while True:
         policy = read_policy(addon.getSetting)
         labels = [label + ': ' + format_duration(policy[key]) for key, label, _ in GROUPS]
