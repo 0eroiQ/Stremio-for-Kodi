@@ -1,3 +1,21 @@
+1.0.43 (2026-09-29)
+
+- Add optional free AI subtitle translation using the viewer's own Gemini API key.
+- Keep the Gemini key in local Kodi add-on settings and send it only to Google's Gemini API.
+- Translate complete SRT/WebVTT cue sets while preserving original cue IDs, order and timestamps.
+- Cache successful translated subtitle files and reuse them without another AI request.
+- Fall back to the original subtitle on missing keys, unsupported formats, quota/network failures or invalid/incomplete AI output.
+- Show Vortexo Premium hosted AI as In construction: planned $4.99 USD/month, no Gemini API key required, using the existing verified Stremio identity model.
+- Do not enable Premium checkout or hosted production AI before the website/backend release gates are complete.
+- Add Auto subtitle source selection: prefer a clean full subtitle embedded in the exact video for best sync, then fall back to the best subtitle returned by the user's Stremio addons.
+- Translate Gemini subtitles in validated batches, preserving every cue and timestamp; cache successful results and keep the original subtitle on any failure.
+- Add a full addon-owned Settings interface instead of Kodi's native Add-on Settings dialogs.
+- Reorganize Settings into General, Account & Stremio, Playback, Subtitles & AI, Appearance, Weather, Ratings, Cache, Support and Premium.
+- Keep list choices, confirmations, weather results, cache controls, AI controls and subtitle appearance inside the Stremio for Kodi design; use Kodi's keyboard only when text must be entered.
+- Put Kodi subtitle font, size, style, color, position, background, border, shadow and style-override controls directly under Subtitles & AI.
+- Prevent Language/Region changes from reloading Kodi's global skin while the addon Settings window is open.
+- Keep Vortexo Premium visible only as an In construction $4.99 USD/month hosted-AI option; Free BYOK remains available without Premium.
+
 1.0.42 (2026-09-29)
 
 This release consolidates the locally reviewed interface, support and reliability updates.

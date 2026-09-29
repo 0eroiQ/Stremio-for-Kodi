@@ -67,7 +67,8 @@ class SidebarTests(unittest.TestCase):
                     dialog.input.assert_called_once_with('Search movies and series')
                     window.load_home.assert_not_called()
                 elif target=='settings':
-                    dialog.select.assert_called_once()
+                    window.open_settings.assert_called_once_with()
+                    dialog.select.assert_not_called()
                 else:
                     getattr(window,target).assert_called_once_with()
                     dialog.input.assert_not_called()

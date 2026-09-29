@@ -58,13 +58,26 @@ def collect_subtitles(providers, kind, identity, allowed, preferred, inline=None
         if not isinstance(entry, dict) or not direct_url(entry):
             continue
         lang = language(entry.get('lang'))
-        if lang not in allowed or (lang, entry['url']) in seen:
+        if (allowed and lang not in allowed) or (lang, entry['url']) in seen:
             continue
         seen.add((lang, entry['url']))
         results.append({'lang': lang, 'url': entry['url'],
                         'label': '{} · {}'.format(lang, ' '.join(str(entry.get('label') or entry.get('id') or 'Subtitle').split()))})
     # Allowed languages are a set, NOT user-ranked fallback priorities.
     return sorted(results, key=lambda entry: (entry['lang'] != preferred, entry['lang']))
+
+
+def ai_source_candidates(providers, kind, identity, inline=None, filename='', fetcher=fetch):
+    """All Stremio subtitle results for AUTO AI fallback; target/source ranking is separate."""
+    entries = collect_subtitles(
+        providers, kind, identity, [], '', inline, filename, fetcher=fetcher
+    )
+    try:
+        from ai_subtitles import local_settings, rank_external_entries
+        settings = local_settings()
+        return rank_external_entries(entries, settings['target'])
+    except Exception:
+        return entries
 
 
 def download(entry, directory):
@@ -86,7 +99,11 @@ def download(entry, directory):
     lang = entry['lang'] if entry['lang'].isalpha() else 'und'
     target = Path(directory) / '{}.{}.{}'.format(digest, lang, extension)
     atomic_write(target, data)
-    return str(target)
+    try:
+        from ai_subtitles import maybe_translate
+        return maybe_translate(target, Path(directory).parent, lang)
+    except Exception:
+        return str(target)
 
 
 def remember_selection(profile, kind, identity, stream):

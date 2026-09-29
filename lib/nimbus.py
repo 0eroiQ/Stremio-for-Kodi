@@ -527,6 +527,17 @@ class HomeWindow(AddonsPage, NimbusWindow):
         else:
             self.update_hero()
 
+    def open_settings(self):
+        from lib.settings_page import show as show_settings
+        result = show_settings()
+        from lib.playback_settings import apply
+        apply()
+        if result.get('request_page') == 'addons':
+            self.load_addons()
+        elif result.get('appearance_changed'):
+            self.reload_appearance = True
+            self.close()
+
     def onClick(self, cid):
         self.exit_armed = False
         if cid in (9300, 9301, 9302, 9303, 9304):
@@ -564,26 +575,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
         elif cid == 205:
             self.load_addons()
         elif cid == 206:
-            choice = xbmcgui.Dialog().select('Stremio for Kodi Settings', ['Account', 'Add-on settings', 'About Nimbus', 'Browse all addon features'])
-            if choice == 0:
-                from settings_ui import account_menu
-                account_menu()
-            elif choice == 1:
-                from lib.appearance import options
-                before = options(ADDON)
-                api.CORE.openSettings()
-                from lib.playback_settings import apply
-                apply()
-                if options(ADDON) != before:
-                    self.reload_appearance = True
-                    self.close()
-            elif choice == 2:
-                xbmcgui.Dialog().textviewer('Nimbus · Stremio for Kodi',
-                    'Nimbus by Ivar Brandt\nEmbedded program adaptation for Stremio for Kodi.\nGPL-2.0-or-later.\nKodi remains the playback engine.')
-
-            elif choice == 3:
-                self.close()
-                xbmc.executebuiltin('ActivateWindow(Videos,plugin://script.stremioelec/?action=root,return)')
+            self.open_settings()
 
 
 from lib.inline_streams import InlineStreams
