@@ -108,7 +108,11 @@ class IssueRegressionTests(unittest.TestCase):
         names = {"episode_runtime", "episode_rating", "episode_date"}
         functions = [node for node in tree.body
                      if isinstance(node, ast.FunctionDef) and node.name in names]
-        scope = {"re": __import__("re")}
+        scope = {
+            "re": __import__("re"),
+            "_MONTHS": ("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
+        }
         exec(compile(ast.Module(body=functions, type_ignores=[]), "<episode-formatters>", "exec"), scope)
         self.assertEqual(scope["episode_runtime"]("65 min"), "1h 5m")
         self.assertEqual(scope["episode_runtime"]("PT58M"), "58m")
