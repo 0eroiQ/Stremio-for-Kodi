@@ -33,6 +33,12 @@ class HomeTests(unittest.TestCase):
         rows=catalogs.load_rows(addons,fetch,lambda u,r,k,i:i)
         self.assertTrue(rows[0]['failed']);self.assertEqual(rows[1]['items'][0]['id'],'title')
 
+    def test_layout_uses_bundled_template_even_if_kodi_source_path_is_unusable(self):
+        with tempfile.TemporaryDirectory() as d:
+            name, path, count = layout.build_layout('special://missing-addon-path', d, 3)
+            self.assertEqual(count, 3)
+            self.assertTrue((Path(path) / 'resources/skins/Main/1080i' / name).is_file())
+
     def test_many_rows_have_unique_controls_and_consistent_geometry(self):
         with tempfile.TemporaryDirectory() as d:
             name,path,count=layout.build_layout(ROOT,d,60)

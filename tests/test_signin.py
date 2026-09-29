@@ -70,6 +70,46 @@ class SigninTests(unittest.TestCase):
         self.assertEqual(store.save.call_args.args[0]['token'], 'test-only-token')
         window.close.assert_called_once()
 
+    def test_transient_link_poll_failure_retries_instead_of_aborting_signin(self):
+        tree = ast.parse((ROOT/'lib/signin.py').read_text())
+        cls = next(n for n in tree.body if isinstance(n, ast.ClassDef))
+        fn = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == 'link_account')
+        class AccountError(Exception):
+            pass
+        calls = {'count': 0}
+        def flaky(code):
+            calls['count'] += 1
+            if calls['count'] == 1:
+                raise AccountError('temporary')
+            return 'test-only-token'
+        class FastTime:
+            value = 0
+            @classmethod
+            def monotonic(cls):
+                cls.value += 20
+                return cls.value
+        store = Mock()
+        store.load.return_value = {}
+        window = Mock()
+        window.cancel = threading.Event()
+        window.refresh = threading.Event()
+        window.authenticated = False
+        scope = {
+            'create_link_details': lambda: ('test', 'https://link.stremio.com/test', ''),
+            'read_link': flaky, 'AccountError': AccountError,
+            'account_store': lambda: store, 'pull_addons': lambda token: ([], 0),
+            'merge_account': lambda state, addons: addons, 'pull_library': lambda token: [],
+            'time': FastTime, 'xbmc': Mock(), 'threading': threading,
+            'AccountStorageError': type('AccountStorageError', (Exception,), {}),
+        }
+        scope['xbmc'].Monitor.return_value.abortRequested.return_value = False
+        exec(compile(ast.Module(body=[fn], type_ignores=[]), '<link>', 'exec'), scope)
+        scope['link_account'](window)
+        self.assertEqual(calls['count'], 2)
+        self.assertTrue(window.authenticated)
+        self.assertEqual(store.save.call_args.args[0]['token'], 'test-only-token')
+        window.close.assert_called_once()
+
     def test_pending_link_does_not_save_login(self):
         tree = ast.parse((ROOT/'lib/signin.py').read_text())
         cls = next(n for n in tree.body if isinstance(n, ast.ClassDef))

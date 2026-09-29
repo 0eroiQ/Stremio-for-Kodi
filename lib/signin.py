@@ -5,7 +5,7 @@ import xbmc
 import xbmcgui
 import xbmcvfs
 from addon_state import get_addon
-from account import AccountStorageError, Store, create_link_details, read_link, pull_addons, pull_library
+from account import AccountError, AccountStorageError, Store, create_link_details, read_link, pull_addons, pull_library
 from addons_core import merge_account
 
 
@@ -72,6 +72,7 @@ class WelcomeWindow(xbmcgui.WindowXML):
             deadline = time.monotonic() + 300
             monitor = xbmc.Monitor()
             next_poll = 0
+            consecutive_poll_failures = 0
             while not self.cancel.is_set() and not self.refresh.is_set() and not monitor.abortRequested():
                 remaining = max(0, int(deadline - time.monotonic()))
                 self.label(111, 'Expires in {:02d}:{:02d}'.format(*divmod(remaining, 60)))
@@ -80,7 +81,20 @@ class WelcomeWindow(xbmcgui.WindowXML):
                     self.getControl(120).setImage('')
                     return
                 if time.monotonic() >= next_poll:
-                    token = read_link(code)
+                    try:
+                        token = read_link(code)
+                        consecutive_poll_failures = 0
+                    except AccountError:
+                        # Link polling is allowed to survive brief upstream/network
+                        # failures. One transient response must not abort Android sign-in
+                        # or create a false crash report.
+                        consecutive_poll_failures += 1
+                        if consecutive_poll_failures >= 5:
+                            raise
+                        self.label(111, 'Temporary connection issue. Retrying sign-in…')
+                        next_poll = time.monotonic() + min(3 + consecutive_poll_failures * 2, 10)
+                        self.cancel.wait(0.25)
+                        continue
                     if self.cancel.is_set() or self.refresh.is_set():
                         return
                     if token:

@@ -5,8 +5,28 @@ import re
 import xml.etree.ElementTree as ET
 
 
+def _template_path(source=None):
+    """Resolve the bundled template from this module, not Kodi's virtual addon path."""
+    bundled = Path(__file__).resolve().parents[1] / 'resources/skins/Main/1080i/script-stremio-nimbus.xml'
+    if bundled.is_file():
+        return bundled
+    # Compatibility fallback for source-tree callers and unusual packaging.
+    if source:
+        raw = str(source)
+        if raw.startswith('special://'):
+            try:
+                import xbmcvfs
+                raw = xbmcvfs.translatePath(raw)
+            except Exception:
+                raw = ''
+        candidate = Path(raw) / 'resources/skins/Main/1080i/script-stremio-nimbus.xml'
+        if candidate.is_file():
+            return candidate
+    raise RuntimeError('Bundled Stremio for Kodi home template is unavailable.')
+
+
 def build_layout(source, profile, count, appearance=None):
-    tree = ET.parse(Path(source)/'resources/skins/Main/1080i/script-stremio-nimbus.xml')
+    tree = ET.parse(_template_path(source))
     group = tree.find('.//control[@id="2000"]')
     template = copy.deepcopy(group.find('control'))
     for child in list(group.findall('control')):

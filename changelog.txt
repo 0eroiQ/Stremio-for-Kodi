@@ -1,3 +1,11 @@
+1.0.44 (2026-09-29)
+
+- Fix Program entry/Home startup failures on Linux/Kodi installations where Kodi's reported addon path cannot directly resolve the bundled Nimbus XML template.
+- Resolve the Home template relative to the installed Stremio for Kodi module first, with a translated-path compatibility fallback.
+- Make Android Stremio QR sign-in tolerate brief upstream/network polling failures instead of aborting after the first transient AccountError.
+- Retry temporary link polling failures with bounded backoff; only treat five consecutive failures as a real sign-in failure.
+- Add regression coverage for virtual/unusable Kodi addon paths and transient sign-in polling recovery.
+
 1.0.43 (2026-09-29)
 
 - Add optional free AI subtitle translation using the viewer's own Gemini API key.
