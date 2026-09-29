@@ -22,5 +22,9 @@
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
     <news>Embedded Nimbus menu, original poster widgets and animations, movie and series details, season and section selectors. Credit Ivar Brandt.</news>
+  <assets>
+      <icon>icon.png</icon>
+      <fanart>fanart.png</fanart>
+    </assets>
   </extension>
 </addon>

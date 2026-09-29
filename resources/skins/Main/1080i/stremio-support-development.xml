@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='utf-8'?>
+<window>
+  <defaultcontrol always="true">1</defaultcontrol>
+  <controls>
+    <control type="image">
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
+      <aspectratio>stretch</aspectratio>
+      <texture>special://home/addons/script.stremioelec/fanart.png</texture>
+    </control>
+    <control type="image">
+      <left>0</left>
+      <top>0</top>
+      <width>1920</width>
+      <height>1080</height>
+      <aspectratio>stretch</aspectratio>
+      <texture colordiffuse="CF000000">special://home/addons/script.stremioelec/resources/branding/white.png</texture>
+    </control>
+    <control type="image">
+      <left>245</left>
+      <top>115</top>
+      <width>1430</width>
+      <height>850</height>
+      <aspectratio>stretch</aspectratio>
+      <texture colordiffuse="F2242333" border="24">special://home/addons/script.stremioelec/resources/branding/rounded.png</texture>
+    </control>
+    <control type="image">
+      <left>315</left>
+      <top>180</top>
+      <width>115</width>
+      <height>115</height>
+      <aspectratio>stretch</aspectratio>
+      <texture>special://home/addons/script.stremioelec/icon.png</texture>
+    </control>
+    <control type="label">
+      <left>465</left>
+      <top>190</top>
+      <width>1060</width>
+      <height>60</height>
+      <font>font40_title</font>
+      <textcolor>FFFFFFFF</textcolor>
+      <aligny>center</aligny>
+      <label>Support Stremio for Kodi</label>
+    </control>
+    <control type="textbox">
+      <left>320</left>
+      <top>315</top>
+      <width>610</width>
+      <height>70</height>
+      <font>font27</font>
+      <textcolor>FFC4ACFF</textcolor>
+      <aligny>center</aligny>
+      <label>$INFO[Window.Property(support_mode)]</label>
+      <autoscroll>false</autoscroll>
+    </control>
+    <control type="textbox">
+      <left>320</left>
+      <top>410</top>
+      <width>610</width>
+      <height>220</height>
+      <font>font27</font>
+      <textcolor>FFE5E5E7</textcolor>
+      <aligny>center</aligny>
+      <label>$INFO[Window.Property(support_help)]</label>
+      <autoscroll>false</autoscroll>
+    </control>
+    <control type="textbox">
+      <left>320</left>
+      <top>660</top>
+      <width>610</width>
+      <height>105</height>
+      <font>font23</font>
+      <textcolor>FFADACB5</textcolor>
+      <aligny>center</aligny>
+      <label>Not a subscription or Premium purchase.
+Nothing to activate. No payment information is entered in Kodi.</label>
+      <autoscroll>false</autoscroll>
+    </control>
+    <control type="textbox">
+      <left>320</left>
+      <top>790</top>
+      <width>610</width>
+      <height>65</height>
+      <font>font23</font>
+      <textcolor>FFADACB5</textcolor>
+      <aligny>center</aligny>
+      <label>$INFO[Window.Property(support_url)]</label>
+      <autoscroll>false</autoscroll>
+    </control>
+    <control type="image" id="101">
+      <left>1050</left>
+      <top>315</top>
+      <width>490</width>
+      <height>490</height>
+      <aspectratio>keep</aspectratio>
+      <texture />
+    </control>
+    <control type="label">
+      <left>1050</left>
+      <top>818</top>
+      <width>490</width>
+      <height>45</height>
+      <font>font23</font>
+      <textcolor>FFADACB5</textcolor>
+      <aligny>center</aligny>
+      <label>Scan with your phone</label>
+    </control>
+    <control type="button" id="1">
+      <left>320</left>
+      <top>875</top>
+      <width>320</width>
+      <height>60</height>
+      <label>Back</label>
+      <font>font27</font>
+      <textcolor>FFE5E5E7</textcolor>
+      <focusedcolor>FF15161D</focusedcolor>
+      <align>center</align>
+      <aligny>center</aligny>
+      <onleft>1</onleft>
+      <onright>1</onright>
+      <onup>1</onup>
+      <ondown>1</ondown>
+      <texturenofocus border="24" colordiffuse="C0302B41">special://home/addons/script.stremioelec/resources/branding/rounded.png</texturenofocus>
+      <texturefocus border="24" colordiffuse="FFC4ACFF">special://home/addons/script.stremioelec/resources/branding/rounded.png</texturefocus>
+    </control>
+  </controls>
+</window>

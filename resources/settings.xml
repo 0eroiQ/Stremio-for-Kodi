@@ -34,6 +34,7 @@
     <setting type="lsep" label="Premium uses your verified Stremio identity. Vortexo exchanges the Stremio session for a short-lived signed Premium token; there is no separate Vortexo login inside Kodi. Checkout opens on vortexo.app. If Premium is unavailable, free features continue to work." />
   </category>
   <category label="Support">
+    <setting type="action" label="Support development" action="RunScript(special://home/addons/script.stremioelec/support_development.py)" />
     <setting id="error_reporting_auto" type="bool" label="Automatically send anonymous error reports" default="true" />
     <setting type="action" label="Report a problem now" action="RunScript(script.stremioelec,report_issue)" />
     <setting id="error_reporting_notice_shown" type="bool" label="Error reporting notice shown" default="false" visible="false" />

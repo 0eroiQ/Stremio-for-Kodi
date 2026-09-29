@@ -1,5 +1,24 @@
 # Stremio for Kodi
 
+<!-- stremio-dark-cinematic-branding -->
+<p align="center">
+  <img src="icon.png" width="112" height="112" alt="Stremio for Kodi icon">
+</p>
+
+![Stremio for Kodi — Dark Cinematic](fanart.png)
+
+### Support development
+
+Enjoying Stremio for Kodi? Leave an **optional one-time developer tip** to support development, bug fixes and improvements. Choose your own amount.
+
+**[Support Stremio for Kodi on Stripe](https://donate.stripe.com/dRm28t1sm7MQ6dnaUs7kc00)**
+
+This is not a subscription or a Premium purchase. Tipping does not unlock features.
+In builds containing this change: **Settings → Support → Support development** displays the same link as a QR code. Payments happen on Stripe, never inside Kodi.
+
+Unofficial community addon; not endorsed by Stremio or Kodi.
+<!-- /stremio-dark-cinematic-branding -->
+
 A single Kodi Program add-on combining the StremioELEC program interface and media backend. The embedded Nimbus interface retains its existing home, search, discover, library, add-ons, settings and media detail windows.
 
 <p align="center">
