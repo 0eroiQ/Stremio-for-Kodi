@@ -10,7 +10,6 @@ import re
 import shutil
 import subprocess
 import time
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, build_opener
@@ -19,19 +18,18 @@ from setup_profile import atomic_write
 
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 MODEL_CHAIN = (
-    "gemini-3.1-flash-lite",
     "gemini-3.5-flash-lite",
-    "gemini-3.6-flash",
-    "gemini-3.8-flash",
+    "gemini-3.1-flash-lite",
     "gemini-2.5-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
 )
 MAX_FILE_BYTES = 512 * 1024
 MAX_CUES = 2000
 MAX_CUE_TEXT = 8000
-TIMEOUT_SECONDS = 25
-BATCH_SIZE = 80
-BATCH_WORKERS = 2
-BATCH_DELAY_SECONDS = 0.0
+TIMEOUT_SECONDS = 120
+MAX_BATCH_CUES = 2400
+MAX_BATCH_CHARACTERS = 120000
 TRANSLATION_REVISION = "byok-v2"
 TEXT_SUBTITLE_CODECS = {"subrip", "ass", "ssa", "webvtt", "mov_text", "text"}
 FFMPEG_TIMEOUT_SECONDS = 120
@@ -50,6 +48,8 @@ TARGETS = (
 )
 TARGET_NAMES = dict(TARGETS)
 CODE_NAMES = {code: name for name, code in TARGETS}
+_preferred_model = None
+
 ISO3_TO_2 = {
     "bos": "bs", "hrv": "hr", "srp": "sr", "eng": "en", "deu": "de",
     "ger": "de", "fra": "fr", "fre": "fr", "spa": "es", "ita": "it",
@@ -279,7 +279,16 @@ def _decode_translations(text, cues):
     return result
 
 
+def _ordered_models():
+    if _preferred_model in MODEL_CHAIN:
+        return (_preferred_model,) + tuple(
+            model for model in MODEL_CHAIN if model != _preferred_model
+        )
+    return MODEL_CHAIN
+
+
 def _request_translation(cues, api_key, target_language, source_language=None, opener=None):
+    global _preferred_model
     body = json.dumps({
         "contents": [{"role": "user", "parts": [{"text": _prompt(
             cues, target_language, source_language
@@ -292,7 +301,7 @@ def _request_translation(cues, api_key, target_language, source_language=None, o
     }, ensure_ascii=False).encode("utf-8")
     client = opener or build_opener()
     last_error = None
-    for model in MODEL_CHAIN:
+    for model in _ordered_models():
         request = Request(
             BASE_URL + "/" + model + ":generateContent",
             data=body,
@@ -310,19 +319,48 @@ def _request_translation(cues, api_key, target_language, source_language=None, o
             if len(raw) > MAX_FILE_BYTES * 4:
                 raise AITranslationError("Gemini response was too large.")
             payload = json.loads(raw.decode("utf-8"))
-            return _decode_translations(_gemini_text(payload), cues)
+            translated = _decode_translations(_gemini_text(payload), cues)
+            _preferred_model = model
+            return translated
         except HTTPError as error:
             last_error = error
+            if _preferred_model == model:
+                _preferred_model = None
             if error.code in (404, 408, 429, 500, 502, 503, 504):
                 continue
             break
         except (AITranslationError, ValueError) as error:
             last_error = error
+            if _preferred_model == model:
+                _preferred_model = None
             break
         except Exception as error:
             last_error = error
+            if _preferred_model == model:
+                _preferred_model = None
             continue
     raise AITranslationError("AI subtitle translation is temporarily unavailable.") from last_error
+
+
+def _translation_batches(cues):
+    """Noiro parity: pack a normal movie/episode into one Gemini request."""
+    batches = []
+    current = []
+    characters = 0
+    for cue in cues:
+        size = len(str(cue.get("text") or ""))
+        if current and (
+            len(current) >= MAX_BATCH_CUES
+            or characters + size > MAX_BATCH_CHARACTERS
+        ):
+            batches.append(current)
+            current = []
+            characters = 0
+        current.append(cue)
+        characters += size
+    if current:
+        batches.append(current)
+    return batches
 
 
 def _rebuild(blocks, cues, translations):
@@ -370,26 +408,28 @@ def translate_subtitle_file(path, cache_directory, api_key, target_language,
     content = data.decode("utf-8-sig", errors="replace")
     blocks, cues = _parse_timed_text(content)
     translations = {}
-    batches = [cues[i:i + BATCH_SIZE] for i in range(0, len(cues), BATCH_SIZE)]
+    batches = _translation_batches(cues)
     target_name = CODE_NAMES.get(target_language, target_language)
     _progress(progress_callback, 0, "Starting " + target_name + " translation")
-    def translate_batch(batch):
-        return _request_translation(
+    for index, batch in enumerate(batches):
+        _progress(
+            progress_callback,
+            int(index * 100 / len(batches)),
+            "Translating to {} · request {}/{}".format(
+                target_name, index + 1, len(batches)
+            ),
+        )
+        result = _request_translation(
             batch, api_key.strip(), target_language, source_language, opener=opener
         )
-
-    workers = min(BATCH_WORKERS, len(batches))
-    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
-        results = pool.map(translate_batch, batches)
-        for index, result in enumerate(results):
-            translations.update(result)
-            _progress(
-                progress_callback,
-                int((index + 1) * 100 / len(batches)),
-                "Translating to {} · {}%".format(
-                    target_name, int((index + 1) * 100 / len(batches))
-                ),
-            )
+        translations.update(result)
+        _progress(
+            progress_callback,
+            int((index + 1) * 100 / len(batches)),
+            "Translating to {} · {}%".format(
+                target_name, int((index + 1) * 100 / len(batches))
+            ),
+        )
     if len(translations) != len(cues):
         raise AITranslationError("Gemini returned an incomplete subtitle translation.")
     atomic_write(destination, _rebuild(blocks, cues, translations).encode("utf-8"))

@@ -193,8 +193,7 @@ class AISubtitleTests(unittest.TestCase):
             return {cue["id"]: "HR " + cue["text"] for cue in batch}
 
         with tempfile.TemporaryDirectory() as directory, \
-                patch.object(module, "_request_translation", side_effect=fake_request) as request, \
-                patch.object(module.time, "sleep") as sleeper:
+                patch.object(module, "_request_translation", side_effect=fake_request) as request:
             source = Path(directory) / "long.srt"
             source.write_text(source_text, encoding="utf-8")
             result = Path(module.translate_subtitle_file(
@@ -203,14 +202,56 @@ class AISubtitleTests(unittest.TestCase):
             ))
             translated = result.read_text(encoding="utf-8")
 
-        self.assertEqual(module.BATCH_SIZE, 80)
-        self.assertEqual(module.BATCH_WORKERS, 2)
-        self.assertEqual(request.call_count, 5)
-        self.assertEqual(sleeper.call_count, 0)
+        self.assertEqual(module.MAX_BATCH_CUES, 2400)
+        self.assertEqual(module.MAX_BATCH_CHARACTERS, 120000)
+        self.assertEqual(request.call_count, 1)
         self.assertEqual(progress[0][0], 0)
         self.assertEqual(progress[-1][0], 100)
         self.assertIn("Translating to Croatian", progress[-1][1])
         self.assertEqual(translated.count("-->"), 321)
+
+
+    def test_noiro_batch_packer_splits_only_oversized_tracks(self):
+        module = load_module()
+        normal = [{"id": str(i), "text": "Line " + str(i)} for i in range(700)]
+        self.assertEqual(len(module._translation_batches(normal)), 1)
+        huge = [{"id": str(i), "text": "x" * 1000} for i in range(250)]
+        batches = module._translation_batches(huge)
+        self.assertGreater(len(batches), 1)
+        self.assertEqual(sum(len(batch) for batch in batches), len(huge))
+
+    def test_successful_gemini_model_is_preferred_next_time(self):
+        module = load_module()
+        module._preferred_model = None
+        cues = [{"id": "1", "text": "Hello"}]
+        good = module.MODEL_CHAIN[1]
+        calls = []
+
+        class Response:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self, limit):
+                import json
+                inner = json.dumps([{"id": "1", "text": "Bok"}])
+                return json.dumps({
+                    "candidates": [{"content": {"parts": [{"text": inner}]}}]
+                }).encode("utf-8")
+
+        class Opener:
+            def open(self, request, timeout=None):
+                model = request.full_url.split('/models/', 1)[1].split(':', 1)[0]
+                calls.append(model)
+                if model != good:
+                    from urllib.error import HTTPError
+                    raise HTTPError(request.full_url, 404, "Not Found", {}, None)
+                return Response()
+
+        result = module._request_translation(cues, "test-key", "hr", "en", opener=Opener())
+        self.assertEqual(result["1"], "Bok")
+        self.assertEqual(module._preferred_model, good)
+        calls.clear()
+        module._request_translation(cues, "test-key", "hr", "en", opener=Opener())
+        self.assertEqual(calls[0], good)
 
     def test_libreelec_ffmpeg_tools_path_is_supported(self):
         module = load_module()
