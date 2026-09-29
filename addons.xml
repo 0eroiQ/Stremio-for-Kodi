@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.47" provider-name="0eroiQ">
+<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.48" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,7 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.47: Add visible AI subtitle translation progress and speed up first-time Gemini translation with larger validated batches and shorter inter-batch delays. Cached translations still load immediately, timestamps remain unchanged, and progress also covers Stremio-addon fallback translation.</news>
+    <news>1.0.48: Keep visible AI subtitle progress while restoring the proven 80-cue Gemini batch size and translating two batches concurrently for faster, more reliable first-time translation. Preserve the original embedded/Gemini Last Error when no Stremio fallback is available.</news>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>
