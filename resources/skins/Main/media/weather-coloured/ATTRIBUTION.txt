@@ -1,0 +1,5 @@
+Weather Icons - Coloured, Team Kodi.
+Source: https://github.com/XBMC-Addons/resource.images.weathericons.coloured
+Revision: 09e8c48c73ccfb3e452ed3bac1066417e8a52fed
+License: CC BY-SA 3.0 United States (see LICENSE.txt).
+PNG assets bundled unchanged; no separate icon addon required.

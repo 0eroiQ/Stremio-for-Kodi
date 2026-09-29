@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <window>
   <defaultcontrol always="true">400</defaultcontrol>
   <backgroundcolor>background</backgroundcolor>
@@ -32,7 +32,7 @@
       <label>Search</label>
       <textcolor>unfocused_text</textcolor>
       <focusedcolor>focused_text</focusedcolor>
-      <texturefocus colordiffuse="button_focus">white.png</texturefocus>
+      <texturefocus colordiffuse="button_focus" border="28,0,28,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h56-v1.png</texturefocus>
       <texturenofocus />
       <onright>202</onright><ondown>400</ondown>
     </control>
@@ -42,7 +42,7 @@
       <label>Home</label>
       <textcolor>unfocused_text</textcolor>
       <focusedcolor>focused_text</focusedcolor>
-      <texturefocus colordiffuse="button_focus">white.png</texturefocus>
+      <texturefocus colordiffuse="button_focus" border="28,0,28,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h56-v1.png</texturefocus>
       <texturenofocus />
       <onleft>201</onleft><onright>203</onright><ondown>400</ondown>
     </control>
@@ -52,7 +52,7 @@
       <label>Discover</label>
       <textcolor>unfocused_text</textcolor>
       <focusedcolor>focused_text</focusedcolor>
-      <texturefocus colordiffuse="button_focus">white.png</texturefocus>
+      <texturefocus colordiffuse="button_focus" border="28,0,28,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h56-v1.png</texturefocus>
       <texturenofocus />
       <onleft>202</onleft><onright>204</onright><ondown>400</ondown>
     </control>
@@ -62,7 +62,7 @@
       <label>Library</label>
       <textcolor>unfocused_text</textcolor>
       <focusedcolor>focused_text</focusedcolor>
-      <texturefocus colordiffuse="button_focus">white.png</texturefocus>
+      <texturefocus colordiffuse="button_focus" border="28,0,28,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h56-v1.png</texturefocus>
       <texturenofocus />
       <onleft>203</onleft><onright>205</onright><ondown>400</ondown>
     </control>
@@ -72,7 +72,7 @@
       <label>Addons</label>
       <textcolor>unfocused_text</textcolor>
       <focusedcolor>focused_text</focusedcolor>
-      <texturefocus colordiffuse="button_focus">white.png</texturefocus>
+      <texturefocus colordiffuse="button_focus" border="28,0,28,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h56-v1.png</texturefocus>
       <texturenofocus />
       <onleft>204</onleft><onright>206</onright><ondown>400</ondown>
     </control>
@@ -82,7 +82,7 @@
       <label>Settings</label>
       <textcolor>unfocused_text</textcolor>
       <focusedcolor>focused_text</focusedcolor>
-      <texturefocus colordiffuse="button_focus">white.png</texturefocus>
+      <texturefocus colordiffuse="button_focus" border="28,0,28,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h56-v1.png</texturefocus>
       <texturenofocus />
       <onleft>205</onleft><ondown>400</ondown>
     </control>
@@ -91,21 +91,21 @@
       <font>font12</font>
       <align>right</align>
       <textcolor>grey</textcolor>
-      <label></label>
+      <label />
     </control>
     <control type="label" id="311">
       <left>60</left><top>140</top><width>1400</width><height>70</height>
       <font>font45</font>
       <textcolor>white</textcolor>
       <shadowcolor>text_shadow</shadowcolor>
-      <label></label>
+      <label />
     </control>
     <control type="label" id="312">
       <left>60</left><top>220</top><width>1100</width><height>80</height>
       <font>font13</font>
       <textcolor>unfocused_text</textcolor>
       <wrapmultiline>true</wrapmultiline>
-      <label></label>
+      <label />
     </control>
     <control type="label" id="300">
       <left>60</left><top>430</top><width>800</width><height>36</height>

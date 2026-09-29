@@ -47,3 +47,8 @@ admin code3       : 3. order subdivision (community) varchar(20)
 latitude          : estimated latitude (wgs84)
 longitude         : estimated longitude (wgs84)
 accuracy          : accuracy of lat/lng from 1=estimated, 4=geonameid, 6=centroid of addresses or shape
+
+Country / territory selector: GeoNames countryInfo.txt (CC BY 4.0).
+Source: https://download.geonames.org/export/dump/countryInfo.txt
+Location search: https://open-meteo.com/en/docs/geocoding-api
+Postal coverage varies; city-name lookup is offered for unavailable postcodes.

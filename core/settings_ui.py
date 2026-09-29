@@ -238,52 +238,19 @@ def ratings_menu():
 
 
 def weather_menu():
-    """Configure the built-in Stremio for Kodi weather provider."""
-    from weather import search, refresh
+    """Use the same country-scoped picker from every addon settings entry."""
+    from weather import refresh
+    from lib.weather_setup import configure_weather
     while True:
         location = ADDON.getSetting('weather_location').strip()
-        index = choose('Weather', [
-            'Location: ' + (location or 'Not set'),
-            'Refresh weather now'
-        ])
-        if index < 0:
-            return
-        if index == 1:
-            refresh(force=True)
-            continue
-        query = DIALOG.input('Search city or postcode', defaultt=location,
-                             type=xbmcgui.INPUT_ALPHANUM)
-        if not query.strip():
-            continue
-        try:
-            region = rpc('Settings.GetSettingValue', {'setting': 'locale.country'}).get('value', '')
-            rows = search(query.strip(), country=region)
-        except Exception:
-            DIALOG.ok('Weather', 'Location search failed. Check the network connection and retry.')
-            continue
-        if not rows:
-            DIALOG.ok('Weather', 'No matching location was found.')
-            continue
-        selected = choose('Choose location', [row['label'] for row in rows])
+        selected = choose('Weather', ['Country and location: ' + (location or 'Not set'), 'Refresh weather now'])
         if selected < 0:
-            continue
-        row = rows[selected]
-        ADDON.setSetting('weather_location', row['label'])
-        ADDON.setSetting('weather_lat', str(row['latitude']))
-        ADDON.setSetting('weather_lon', str(row['longitude']))
-        payload = refresh(force=True) or {}
-        timezone = str(payload.get('timezone') or '').strip()
-        if timezone:
-            result = rpc('Settings.SetSettingValue', {
-                'setting': 'locale.timezone',
-                'value': timezone,
-            })
-            if result is False:
-                DIALOG.notification(
-                    'Region & Location',
-                    'Weather location saved, but Kodi rejected the time zone.')
-            else:
-                sync_window()
+            return
+        if selected == 1:
+            refresh(force=True)
+        elif configure_weather(dialog=DIALOG, addon=ADDON):
+            refresh(force=True)
+            sync_window()
 
 
 def home_menu():

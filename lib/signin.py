@@ -5,11 +5,19 @@ import xbmc
 import xbmcgui
 import xbmcvfs
 from addon_state import get_addon
-from account import Store, create_link_details, read_link, pull_addons, pull_library
+from account import AccountStorageError, Store, create_link_details, read_link, pull_addons, pull_library
 from addons_core import merge_account
 
 
 from lib.theme import window as themed_window
+
+
+def sign_in_failure(error):
+    """Only static, allowlisted storage diagnostics may enter reports/UI."""
+    if isinstance(error, AccountStorageError):
+        context = 'Stremio sign-in: storage: {}: {}'.format(error.reason, error.stage)
+        return context, error.user_message + ' Existing saved account data was not replaced.'
+    return 'Stremio sign-in', 'Stremio sign-in failed on this device.'
 
 
 def account_store():
@@ -105,7 +113,9 @@ class WelcomeWindow(xbmcgui.WindowXML):
                 self.cancel.wait(0.25)
         except Exception as error:
             self.last_error = error
-            self.label(111, 'Unable to connect. Preparing an anonymous error report…')
+            self.label(111, 'Could not save the login on this device.'
+                       if isinstance(error, AccountStorageError) else
+                       'Sign-in failed. Preparing an anonymous error report…')
             self.close()
 
         finally:
@@ -133,14 +143,20 @@ class WelcomeWindow(xbmcgui.WindowXML):
 
 
 def show_signin():
+    from lib.launch_guard import mark_window, unmark_window
     window = themed_window(WelcomeWindow, 'script-stremio-welcome.xml', get_addon().getAddonInfo('path'), 'Main', '1080i')
     try:
+        mark_window(window, 'signin')
         window.doModal()
         authenticated = window.authenticated
         error = window.last_error
         if error is not None and not authenticated:
             from lib.error_report import handle_error
-            handle_error('Stremio sign-in', error, 'Stremio sign-in failed on this device.')
+            context, summary = sign_in_failure(error)
+            if isinstance(error, AccountStorageError):
+                xbmcgui.Dialog().ok('Cannot save Stremio login', summary)
+            handle_error(context, error, summary)
         return authenticated
     finally:
+        unmark_window(window)
         window.cancel.set()

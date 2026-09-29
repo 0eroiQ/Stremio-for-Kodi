@@ -1,4 +1,5 @@
 """Stremio account integration. Never log tokens or configured addon URLs."""
+import errno
 import hashlib
 import json
 import os
@@ -15,6 +16,35 @@ from protocol import base_url
 class AccountError(Exception):
     pass
 
+
+
+SAVE_ATTEMPTS = 6
+
+
+def _retryable_storage_error(error):
+    return (isinstance(error, PermissionError)
+            or getattr(error, 'errno', None) in (errno.EACCES, errno.EPERM, errno.EBUSY, errno.EAGAIN)
+            or getattr(error, 'winerror', None) in (5, 32, 33))
+
+
+class AccountStorageError(AccountError):
+    """Fixed diagnostic codes; never retain a filesystem path or OS message."""
+    def __init__(self, stage, error):
+        self.stage = stage if stage in ('prepare_profile', 'create_temp', 'write_temp', 'replace_state') else 'unknown'
+        code = getattr(error, 'errno', None)
+        if code == errno.ENOSPC:
+            self.reason = 'disk_full'
+            self.user_message = 'Kodi could not save the login because storage is full. Free some space and try again.'
+        elif code == errno.EROFS:
+            self.reason = 'read_only'
+            self.user_message = 'Kodi could not save the login because its profile storage is read-only.'
+        elif _retryable_storage_error(error):
+            self.reason = 'permission_or_locked'
+            self.user_message = 'Kodi could not save the login. Check write access to the Kodi profile folder and whether another program is locking it, then try again.'
+        else:
+            self.reason = 'io_failure'
+            self.user_message = 'Kodi could not save the login. Check the device storage and try again.'
+        super().__init__(self.user_message)
 
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs):
@@ -155,62 +185,56 @@ class Store:
             raise AccountError('Local account data cannot be read. Disconnect and reconnect.') from None
 
     def save(self, data):
-        # tempfile.mkstemp already creates a private temp file on POSIX. Some
-        # Windows Python builds do not expose os.fchmod at all, so permissions
-        # hardening must be best-effort instead of breaking a successful login.
-        fd = None
-        name = None
-        try:
-            self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
-            fd, name = tempfile.mkstemp(dir=self.directory, prefix='.account-')
-            if hasattr(os, 'fchmod'):
-                try:
-                    os.fchmod(fd, 0o600)
-                except OSError:
-                    pass
-            with os.fdopen(fd, 'w') as stream:
-                fd = None
-                json.dump(data, stream)
-                stream.flush()
-                if hasattr(os, 'fsync'):
+        # Retry the entire atomic write, including mkdir/mkstemp: a lock may
+        # occur before os.replace. Never delete the last known-good state or
+        # move credentials to a less protected fallback directory.
+        for attempt in range(SAVE_ATTEMPTS):
+            fd = None
+            name = None
+            stage = 'prepare_profile'
+            try:
+                self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+                stage = 'create_temp'
+                fd, name = tempfile.mkstemp(dir=self.directory, prefix='.account-')
+                chmod = getattr(os, 'fchmod', None)
+                if callable(chmod):
                     try:
-                        os.fsync(stream.fileno())
+                        chmod(fd, 0o600)
+                    except OSError:
+                        pass  # mkstemp already restricts permissions on POSIX.
+                stage = 'write_temp'
+                stream = os.fdopen(fd, 'w', encoding='utf-8')
+                fd = None  # stream now owns and closes the descriptor.
+                with stream:
+                    json.dump(data, stream)
+                    stream.flush()
+                    sync = getattr(os, 'fsync', None)
+                    if callable(sync):
+                        try:
+                            sync(stream.fileno())
+                        except OSError as error:
+                            unsupported = (errno.EINVAL, errno.ENOSYS, getattr(errno, 'ENOTSUP', -1))
+                            if error.errno not in unsupported:
+                                raise  # Never commit after a real disk-write failure.
+                stage = 'replace_state'
+                os.replace(name, self.path)
+                name = None
+                return
+            except OSError as error:
+                if not _retryable_storage_error(error) or attempt + 1 == SAVE_ATTEMPTS:
+                    raise AccountStorageError(stage, error) from None
+            finally:
+                if fd is not None:
+                    try:
+                        os.close(fd)
                     except OSError:
                         pass
-
-            # Windows antivirus/indexing can briefly keep the destination open.
-            # Retry any replacement-level OS error, then convert it to a stable
-            # AccountError instead of leaking PermissionError/WinError to sign-in.
-            for attempt in range(6):
-                try:
-                    os.replace(name, self.path)
-                    name = None
-                    return
-                except OSError:
-                    if attempt == 5:
-                        raise AccountError(
-                            'Could not save Stremio account data on this device. '
-                            'Check Kodi profile-folder permissions and retry.'
-                        ) from None
-                    time.sleep(0.05 * (attempt + 1))
-        except AccountError:
-            raise
-        except OSError:
-            raise AccountError(
-                'Could not save Stremio account data on this device. '
-                'Check Kodi profile-folder permissions and retry.'
-            ) from None
-        finally:
-            if fd is not None:
-                try:
-                    os.close(fd)
-                except OSError:
-                    pass
-            if name and os.path.exists(name):
-                try:
-                    os.unlink(name)
-                except OSError:
-                    pass
+                if name is not None:
+                    try:
+                        os.unlink(name)
+                    except OSError:
+                        pass
+            time.sleep(0.05 * (attempt + 1))
 
     def forget(self):
         # Clear this device only; never alter the remote collection/session.

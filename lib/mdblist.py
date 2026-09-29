@@ -32,7 +32,7 @@ def enrich(row):
     import xbmcvfs
     from pathlib import Path
     from protocol import fetch
-    from lib.disk_cache import DiskCache
+    from lib.cache_policy import read_policy, open_cache
     addon = get_addon()
     key = addon.getSetting('mdblist_api_key').strip()
     identity = str(row.get('imdb_id') or row.get('id') or '')
@@ -41,12 +41,21 @@ def enrich(row):
     kind = 'show' if row['type'] == 'series' else 'movie'
     url = 'https://api.mdblist.com/imdb/{}/{}/?{}'.format(kind, identity, urlencode({'apikey': key}))
     try:
-        cache = DiskCache(Path(xbmcvfs.translatePath(addon.getAddonInfo('profile'))) / 'cache')
-        payload = cache.get(url)
+        policy = read_policy(addon.getSetting)
+        cache = open_cache('ratings', policy)
+        payload = None
+        if cache is not None:
+            try:
+                payload = cache.get(url)
+            except Exception:
+                pass
         if payload is None:
             payload = fetch(url, timeout=8)
-            if payload.get('ratings'):
-                cache.put(url, payload, 86400)
+            if cache is not None and payload.get('ratings'):
+                try:
+                    cache.put(url, payload, policy['ratings'])
+                except Exception:
+                    pass
         text = selected_text(payload, addon.getSetting)
         result = dict(row, rating_text=text, rating_badges=badges(payload, addon.getSetting))
         if payload.get('certification'):

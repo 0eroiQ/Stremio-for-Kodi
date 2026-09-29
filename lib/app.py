@@ -11,10 +11,10 @@ APP_RUNNING = 'stremioforkodi.running'
 
 
 def run():
-    session = xbmcgui.Window(SESSION_WINDOW_ID)
-    if session.getProperty(APP_RUNNING) == 'true':
+    from lib.launch_guard import LaunchGuard, mark_window, unmark_window
+    guard = LaunchGuard()
+    if not guard.acquire():
         return
-    session.setProperty(APP_RUNNING, 'true')
     try:
         from lib.signin import signed_in, show_signin
         if not signed_in() and not show_signin():
@@ -37,13 +37,17 @@ def run():
             progress.close()
         while True:
             window = HomeWindow(filename, path, SKIN, RES, account_rows=rows, row_count=count)
-            window.doModal()
-            reload_appearance = getattr(window, 'reload_appearance', False)
-            del window
+            mark_window(window, 'home')
+            try:
+                window.doModal()
+                reload_appearance = getattr(window, 'reload_appearance', False)
+            finally:
+                unmark_window(window)
+                del window
             if not reload_appearance:
                 break
             filename, path, count = build_layout(
                 ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')),
                 max(8, len(rows)), options(ADDON))
     finally:
-        session.clearProperty(APP_RUNNING)
+        guard.release()

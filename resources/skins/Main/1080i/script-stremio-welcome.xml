@@ -83,8 +83,8 @@
       <align>center</align>
       <textcolor>FFFFFFFF</textcolor>
       <focusedcolor>FFFFFFFF</focusedcolor>
-      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
-      <texturenofocus colordiffuse="FF252333">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <texturefocus colordiffuse="FF7355DE" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturefocus>
+      <texturenofocus colordiffuse="FF252333" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturenofocus>
       <onleft>104</onleft>
       <onright>104</onright>
     </control>
@@ -98,8 +98,8 @@
       <align>center</align>
       <textcolor>FFFFFFFF</textcolor>
       <focusedcolor>FFFFFFFF</focusedcolor>
-      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
-      <texturenofocus colordiffuse="FF252333">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <texturefocus colordiffuse="FF7355DE" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturefocus>
+      <texturenofocus colordiffuse="FF252333" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturenofocus>
       <onleft>103</onleft>
       <onright>103</onright>
     </control>

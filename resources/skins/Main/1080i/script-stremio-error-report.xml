@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <window type="dialog">
   <defaultcontrol always="true">201</defaultcontrol>
   <coordinates>
@@ -37,16 +37,16 @@
       <left>700</left><top>735</top><width>300</width><height>64</height>
       <label>Report issue</label><font>font22</font><align>center</align>
       <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
-      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
-      <texturenofocus colordiffuse="FF2A2736">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <texturefocus colordiffuse="FF7355DE" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h64-v1.png</texturefocus>
+      <texturenofocus colordiffuse="FF2A2736" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h64-v1.png</texturenofocus>
       <onright>202</onright><onleft>202</onleft>
     </control>
     <control type="button" id="202">
       <left>1020</left><top>735</top><width>200</width><height>64</height>
       <label>Dismiss</label><font>font22</font><align>center</align>
       <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
-      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
-      <texturenofocus colordiffuse="FF2A2736">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <texturefocus colordiffuse="FF7355DE" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h64-v1.png</texturefocus>
+      <texturenofocus colordiffuse="FF2A2736" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h64-v1.png</texturenofocus>
       <onright>201</onright><onleft>201</onleft>
     </control>
   </controls>

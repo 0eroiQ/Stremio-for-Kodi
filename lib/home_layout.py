@@ -41,12 +41,12 @@ def build_layout(source, profile, count, appearance=None):
                 'visible':'[String.IsEqual(Window.Property(page),Discover) | String.IsEqual(Window.Property(page),Library)]',
                 'onleft':str(9199+index) if index else '9000', 'onright':str(9200+min(index+1,2)),
                 'onup':'9000', 'ondown':'SetFocus($INFO[Window.Property(first_row)])',
-                'texturefocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png',
-                'texturenofocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/masks/flixicon-filled.png'}
+                'texturefocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h60-v1.png',
+                'texturenofocus':'special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h60-v1.png'}
         for key,value in tags.items():
             node=ET.SubElement(button,key);node.text=value
             if key in ('texturefocus','texturenofocus'):
-                node.set('border','13');node.set('colordiffuse','FFF0F0F2' if key=='texturefocus' else 'FF30313B')
+                node.set('border','30,0,30,0');node.set('colordiffuse','FFF0F0F2' if key=='texturefocus' else 'FF30313B')
         button.append(copy.deepcopy(group.find('animation')))
         ET.SubElement(button, 'animation', effect='slide', start='0,0', end='0,60', time='0',
                       condition='String.IsEqual(Window.Property(page),Discover)', reversible='true').text = 'Conditional'
@@ -64,10 +64,11 @@ def build_layout(source, profile, count, appearance=None):
     preview = tree.find('.//control[@id="2001"]')
     preview.find('label').text = '$INFO[Window.Property(next_row)]'
     preview.find('visible').text = '!String.IsEmpty(Window.Property(next_row)) + !Control.HasFocus(9000)'
-    from lib.appearance import apply
-    apply(tree, appearance or {})
     from lib.addons_layout import build
     build(tree)
+    # Apply animation preferences after the addon page has been added.
+    from lib.appearance import apply
+    apply(tree, appearance or {})
     from lib.theme import apply as apply_theme
     apply_theme(tree, (appearance or {}).get('theme', 0), (appearance or {}).get('color'))
     # Unique filename ensures the active global skin cannot substitute its own XML.

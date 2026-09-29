@@ -64,7 +64,9 @@ def normalize_country(region):
 
 
 def country_code(region):
-    return COUNTRY_CODES.get(normalize_country(region).casefold(), '')
+    from lib.weather_setup import resolve_country
+    name = normalize_country(region)
+    return resolve_country(name) or COUNTRY_CODES.get(name.casefold(), '')
 
 
 def _au_postcode_search(postcode, path=GEONAMES_AU):
@@ -110,47 +112,26 @@ def _au_postcode_search(postcode, path=GEONAMES_AU):
             continue
         seen.add(key)
         output.append(row)
-        if len(output) >= 8:
+        if len(output) >= 100:
             break
     return output
 
 
-def search(query, country='', fetcher=fetch_json, postcode_path=GEONAMES_AU):
-    if not isinstance(query,str) or not query.strip():
-        return []
-    query = query.strip()
-    country_name = normalize_country(country)
-    code = country_code(country_name)
+def search(query, country='', fetcher=fetch_json, postcode_path=GEONAMES_AU, postal=False):
+    from lib.weather_setup import search_places
+    code = country_code(country)
+    if country and not code:
+        raise ValueError('Select a valid country.')
+    return search_places(query, code, fetcher, postal,
+                         lambda value: _au_postcode_search(value, postcode_path))
 
-    if code == 'AU' and re.fullmatch(r'\d{4}', query):
-        rows = _au_postcode_search(query, postcode_path)
-        if rows:
-            return rows
-
-    params = {'name': query, 'count': 8, 'language': 'en', 'format': 'json'}
-    if code:
-        params['countryCode'] = code
-    elif country_name:
-        params['name'] = query + ', ' + country_name
-    data=fetcher(GEOCODE+'?'+urlencode(params))
-    rows=[]
-    for item in data.get('results') or []:
-        lat,lon=item.get('latitude'),item.get('longitude')
-        if not isinstance(lat,(int,float)) or not isinstance(lon,(int,float)):
-            continue
-        if code and str(item.get('country_code','')).upper() not in ('', code):
-            continue
-        label=', '.join(str(v) for v in (item.get('name'),item.get('admin1'),item.get('country')) if v)
-        rows.append({'label':label or query,'latitude':float(lat),'longitude':float(lon),
-                     'country_code':str(item.get('country_code','')).upper()})
-    return rows
 
 def forecast(latitude,longitude,fetcher=fetch_json):
     lat,lon=float(latitude),float(longitude)
     if not -90<=lat<=90 or not -180<=lon<=180: raise ValueError('Invalid coordinates')
     params={
-      'latitude':lat,'longitude':lon,'timezone':'auto','forecast_days':7,
-      'current':'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m',
+      'latitude':lat,'longitude':lon,'timezone':'auto','forecast_days':7,'temperature_unit':'celsius',
+      'current':'is_day,temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m',
       'hourly':'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m',
       'daily':'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max,wind_direction_10m_dominant'}
     return fetcher(FORECAST+'?'+urlencode(params))
@@ -171,19 +152,25 @@ def number(value,fallback=''):
 def _set(window,key,value):
     window.setProperty(key,'' if value is None else str(value))
 
-def apply(payload,location,window=None):
+def apply(payload,location,window=None,temperature_unit='°C'):
     if window is None:
         import xbmcgui
         window=xbmcgui.Window(12600)
     cur=payload.get('current') or {}; daily=payload.get('daily') or {}; hourly=payload.get('hourly') or {}
     label,art=condition(cur.get('weather_code'))
+    from lib.weather_widget import colour_icon, temperature
+    icon = colour_icon(cur.get('weather_code'), cur.get('is_day', 1))
+    temp = temperature(cur.get('temperature_2m'), temperature_unit)
     for k,v in {
       'Location':location,'WeatherProvider':'Open-Meteo','Updated':cur.get('time',''),
       'Current.Condition':label,'Current.Temperature':number(cur.get('temperature_2m')),
       'Current.FeelsLike':number(cur.get('apparent_temperature')),'Current.Humidity':number(cur.get('relative_humidity_2m')),
       'Current.Precipitation':cur.get('precipitation',''),'Current.Wind':number(cur.get('wind_speed_10m')),
       'Current.WindDirection':wind_direction(cur.get('wind_direction_10m')),'Current.OutlookIcon':art+'.png',
-      'Current.FanartCode':art}.items(): _set(window,k,v)
+      'Current.FanartCode':art,
+      'Stremio.CurrentIcon':icon, 'Stremio.CurrentTemperature':temp,
+      'Stremio.TemperatureUnit':temperature_unit,
+      'Stremio.WeatherReady':'true' if icon and temp else ''}.items(): _set(window,k,v)
     dates=daily.get('time') or []; codes=daily.get('weather_code') or []; highs=daily.get('temperature_2m_max') or []
     lows=daily.get('temperature_2m_min') or []; rain=daily.get('precipitation_probability_max') or []
     winds=daily.get('wind_speed_10m_max') or []; dirs=daily.get('wind_direction_10m_dominant') or []
@@ -231,23 +218,52 @@ def apply(payload,location,window=None):
     return window
 
 def refresh(force=False):
+    import hashlib
     import xbmcgui
     from addon_state import get_addon
-    addon=get_addon(); window=xbmcgui.Window(12600)
-    try: last=float(window.getProperty('Stremio.LastRefreshEpoch') or 0)
-    except ValueError: last=0
-    if not force and time.time()-last < 900 and window.getProperty('Current.Condition'):
+    from lib.weather_units import addon_temperature_unit
+    addon = get_addon()
+    window = xbmcgui.Window(12600)
+    def location():
+        # Include the display unit so country changes invalidate the cached view
+        # and a late response cannot overwrite a newly selected unit.
+        return tuple(addon.getSetting(key).strip() for key in
+                     ('weather_location', 'weather_lat', 'weather_lon')) + (addon_temperature_unit(addon),)
+    def hide(status):
+        for key in ('Stremio.WeatherReady', 'Stremio.CurrentIcon',
+                    'Stremio.CurrentTemperature', 'Stremio.TemperatureUnit', 'Daily.IsFetched', 'Hourly.IsFetched'):
+            window.clearProperty(key)
+        _set(window, 'Stremio.WeatherStatus', status)
+    loc, lat, lon, unit = selected = location()
+    if not all(selected[:3]):
+        hide('Choose a weather location in Settings')
+        _set(window, 'Current.Condition', 'Set a location in Weather settings')
         return
-    loc=addon.getSetting('weather_location').strip(); lat=addon.getSetting('weather_lat').strip(); lon=addon.getSetting('weather_lon').strip()
-    if not loc or not lat or not lon:
-        _set(window,'Current.Condition','Set a location in Weather settings'); _set(window,'Daily.IsFetched',''); _set(window,'Hourly.IsFetched',''); return
+    key = hashlib.sha256('|'.join((lat, lon, unit)).encode()).hexdigest()
+    same = window.getProperty('Stremio.WeatherLocationKey') == key
     try:
-        payload = forecast(float(lat),float(lon))
-        apply(payload,loc,window)
-        _set(window,'Stremio.LastRefreshEpoch',time.time())
+        last = float(window.getProperty('Stremio.LastRefreshEpoch') or 0)
+    except ValueError:
+        last = 0
+    if same and not force and 0 <= time.time() - last < 900 and window.getProperty('Stremio.WeatherReady') == 'true':
+        return
+    if not same:
+        hide('Updating weather')
+    try:
+        payload = forecast(float(lat), float(lon))
+        # A late response must never overwrite a newly selected location.
+        if selected != location():
+            return
+        apply(payload, loc, window, temperature_unit=unit)
+        _set(window, 'Stremio.WeatherLocationKey', key)
+        _set(window, 'Stremio.LastRefreshEpoch', time.time())
+        _set(window, 'Stremio.WeatherStatus', '')
         return payload
     except Exception:
-        _set(window,'Current.Condition','Weather unavailable')
-        xbmcgui.Dialog().notification('Weather','Unable to refresh weather. Check the network connection.')
+        if selected == location():
+            hide('Weather unavailable')
+            _set(window, 'Current.Condition', 'Weather unavailable')
+        # No repeated popups or diagnostic reports for a weather-only outage.
+        return None
 
 if __name__=='__main__': refresh()

@@ -94,7 +94,17 @@ class AddonsPage:
             config = configuration_state(entry.get('manifest', {}))
             if config['configurable'] or config['required']:
                 window = themed_window(ConfigureWindow, 'stremio-addon-config.xml', api.CORE.getAddonInfo('path'), 'Main', '1080i', entry=entry)
-                window.doModal()
+                try:
+                    window.doModal()
+                    changed = window.changed
+                    selected_identity = window.selected_identity
+                finally:
+                    window.dispose()
+                if changed:
+                    self.load_addons(selected_identity)
+                else:
+                    self.update_addon_selection()
+                self.setFocusId(9300 if self.addon_entries else 9304)
                 del window
             return
         if cid == 9301:
@@ -109,32 +119,7 @@ class AddonsPage:
 
 
 import xbmcgui
-class ConfigureWindow(xbmcgui.WindowXMLDialog):
-    def __init__(self, *args, **kwargs):
-        self.entry = kwargs.pop('entry')
-        super().__init__(*args, **kwargs)
-
-    def onInit(self):
-        from addons_core import configure_url
-        from addons_ui import PROFILE, plain
-        self.setProperty('config_name', plain(self.entry.get('manifest', {}).get('name'),120))
-        try:
-            import qrcode
-            path = PROFILE / 'addon-configure-qr.png'
-            qrcode.make(configure_url(self.entry['transportUrl'])).save(str(path))
-            self.setProperty('config_qr', str(path))
-            self.setProperty('config_help', 'Scan with your phone to configure this addon. After saving on your Stremio account, sync addons in Settings.')
-        except Exception:
-            self.setProperty('config_help', 'Configuration is unavailable. Configure this addon in Stremio, then sync addons in Settings.')
-        self.setFocusId(1)
-
-    def onClick(self, cid):
-        if cid == 1:
-            self.close()
-
-    def onAction(self, action):
-        if action.getId() in (10,92,216,247):
-            self.close()
+from lib.addon_config_dialog import ConfigureWindow
 
 
 class AddWindow(xbmcgui.WindowXMLDialog):
@@ -176,7 +161,10 @@ class AddWindow(xbmcgui.WindowXMLDialog):
                     self.setProperty('add_error', 'This addon needs configuration. Configure it first, then paste the configured manifest URL.')
                     progress.close()
                     window = themed_window(ConfigureWindow, 'stremio-addon-config.xml', api.CORE.getAddonInfo('path'), 'Main', '1080i', entry=descriptor)
-                    window.doModal()
+                    try:
+                        window.doModal()
+                    finally:
+                        window.dispose()
                     del window
                     return
                 api.STORE.save(state)

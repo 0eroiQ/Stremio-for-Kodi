@@ -24,19 +24,15 @@ def resource_url(manifest, resource, kind, identity, extras=None):
 
 
 def _browse_cache(url):
-    # Restrict caching to immutable metadata and short-lived browsing catalogs.
-    # Account API calls, streams, subtitles and manifests are never cached here.
-    path = urlsplit(url).path
-    ttl = 86400 if '/meta/' in path else (900 if '/catalog/' in path else 0)
-    if not ttl:
-        return None, 0
+    # Configurable browsing data only, never account or playback credentials.
     try:
-        import xbmcaddon
-        import xbmcvfs
-        from lib.disk_cache import DiskCache
-        profile = xbmcvfs.translatePath(xbmcaddon.Addon('script.stremioelec').getAddonInfo('profile'))
-        from pathlib import Path
-        return DiskCache(Path(profile) / 'cache'), ttl
+        from lib.cache_policy import resource_category, read_policy, open_cache
+        group = resource_category(url)
+        if group is None:
+            return None, 0
+        policy = read_policy()
+        cache = open_cache(group, policy)
+        return (cache, policy[group]) if cache is not None else (None, 0)
     except Exception:
         return None, 0
 

@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="script.stremioelec"
-       name="Stremio for Kodi"
-       version="1.0.41"
-       provider-name="0eroiQ">
+<?xml version='1.0' encoding='utf-8'?>
+<addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.42" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -21,10 +18,14 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>Embedded Nimbus menu, original poster widgets and animations, movie and series details, season and section selectors. Credit Ivar Brandt.</news>
-  <assets>
+    <news>1.0.42: Inline theme-coloured stream panel with reversible flip transitions; readable episode cards and fully visible last episode; rounded controls, compact icon sidebar and country-based weather; configurable cache lifetimes and limits; manual bug/feature reports and last-error retry; private addon configuration QR with explicit sync; stronger account saves and launch recovery; Dark Cinematic branding, previews and optional live developer support. Native Stremio watch-progress write-back is not included.</news>
+    <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>
+      <screenshot>resources/previews/home.jpg</screenshot>
+      <screenshot>resources/previews/episodes.jpg</screenshot>
+      <screenshot>resources/previews/streams.jpg</screenshot>
+      <screenshot>resources/previews/addons.jpg</screenshot>
     </assets>
   </extension>
 </addon>

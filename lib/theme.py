@@ -68,7 +68,10 @@ def window(cls, filename, source, *args, **kwargs):
         original=Path(addon.getAddonInfo('path'))/'resources/skins/Main/1080i'/filename
     tree=ET.parse(original)
     from lib.appearance import options
-    apply(tree,selected,options(addon)['color'])
+    appearance = options(addon)
+    apply(tree,selected,appearance['color'])
+    from lib.appearance import apply as apply_appearance
+    apply_appearance(tree, appearance)
     base=Path(xbmcvfs.translatePath(addon.getAddonInfo('profile')))/'theme-layout'/str(selected)
     dest=base/'resources/skins/Main/1080i'
     dest.mkdir(parents=True,exist_ok=True)

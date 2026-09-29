@@ -364,7 +364,7 @@
       <orientation>vertical</orientation>
       <itemgap>0</itemgap>
       <scrolltime>500</scrolltime>
-      <animation effect="slide" end="490,0" time="500" tween="cubic" easing="inout" condition="Control.HasFocus(9000)">Conditional</animation>
+      <animation effect="slide" end="256,0" time="500" tween="cubic" easing="inout" condition="Control.HasFocus(9000)">Conditional</animation>
       <control type="group">
         <height>440</height>
         <visible>!String.IsEmpty(Window.Property(has400))</visible>
@@ -1097,156 +1097,48 @@
       </control>
     </control>
     <control type="group">
-      <left>-540</left>
+      <left>-276</left>
       <animation type="Conditional" condition="Control.HasFocus(9000)" reversible="true">
-        <effect type="slide" start="0" end="540" time="500" tween="cubic" easing="inout" />
+        <effect type="slide" start="0" end="276" time="500" tween="cubic" easing="inout" />
       </animation>
       <control type="image">
         <texture flipx="false" colordiffuse="FF121212">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture>
-        <bordersize>40</bordersize>
-        <width>549</width>
-        <left>-40</left>
-        <right />
+        <bordersize>0</bordersize>
+        <width>276</width>
+        <left>0</left>
         <top>-40</top>
         <height>1160</height>
       </control>
       <control type="fixedlist" id="9000">
-        <left>25</left>
-        <top>215</top>
-        <width>825</width>
-        <height>605</height>
-        <movement>7</movement>
+        <left>12</left>
+        <top>324</top>
+        <width>252</width>
+        <height>432</height>
+        <movement>6</movement>
         <focusposition>0</focusposition>
         <scrolltime tween="cubic" easing="out">500</scrolltime>
         <onright>400</onright>
         <onup>9000</onup>
         <ondown>9000</ondown>
-        <focusedlayout height="75" infoupdate="300">
-          <control type="group">
-            <animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
-          </control>
-          <control type="group">
-            <control type="image">
-              <top>0</top>
-              <bottom>7</bottom>
-              <width>5</width>
-              <left>47</left>
-              <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture>
-              <visible>Control.HasFocus(9000) + true</visible>
-            </control>
-            <control type="group">
-              <control type="label">
-                <left>65</left>
-                <top>0</top>
-                <height>70</height>
-                <width>380</width>
-                <aligny>center</aligny>
-                <font>font37</font>
-                <textcolor>FFAAAAAA</textcolor>
-                <label>$INFO[ListItem.Label]</label>
-                <shadowcolor>66000000</shadowcolor>
-                <visible>!Control.HasFocus(9000) | !true</visible>
-              </control>
-              <control type="label">
-                <left>65</left>
-                <top>0</top>
-                <height>70</height>
-                <width>380</width>
-                <aligny>center</aligny>
-                <font>font52_title</font>
-                <label>$INFO[ListItem.Label]</label>
-                <textcolor>FFE5E5E5</textcolor>
-                <shadowcolor>66000000</shadowcolor>
-                <visible>Control.HasFocus(9000) + true</visible>
-                <scrollspeed>150</scrollspeed>
-                <scroll>true</scroll>
-              </control>
-              <control type="label">
-                <left>65</left>
-                <top>0</top>
-                <height>70</height>
-                <width>380</width>
-                <aligny>center</aligny>
-                <font>font37</font>
-                <textcolor>FFAAAAAA</textcolor>
-                <label>$INFO[ListItem.Label]</label>
-                <shadowcolor>66000000</shadowcolor>
-                <visible>!Control.HasFocus(9000) | !true</visible>
-              </control>
-            </control>
-          </control>
-        </focusedlayout>
-        <itemlayout height="75">
-          <control type="group">
-            <control type="image">
-              <top>0</top>
-              <bottom>7</bottom>
-              <width>5</width>
-              <left>47</left>
-              <texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture>
-              <visible>Control.HasFocus(9000) + false</visible>
-            </control>
-            <control type="group">
-              <control type="label">
-                <left>65</left>
-                <top>0</top>
-                <height>70</height>
-                <width>380</width>
-                <aligny>center</aligny>
-                <font>font37</font>
-                <textcolor>FFAAAAAA</textcolor>
-                <label>$INFO[ListItem.Label]</label>
-                <shadowcolor>66000000</shadowcolor>
-                <visible>!Control.HasFocus(9000) | !false</visible>
-              </control>
-              <control type="label">
-                <left>65</left>
-                <top>0</top>
-                <height>70</height>
-                <width>380</width>
-                <aligny>center</aligny>
-                <font>font52_title</font>
-                <label>$INFO[ListItem.Label]</label>
-                <textcolor>FFE5E5E5</textcolor>
-                <shadowcolor>66000000</shadowcolor>
-                <visible>Control.HasFocus(9000) + false</visible>
-                <scrollspeed>150</scrollspeed>
-                <scroll>false</scroll>
-              </control>
-              <control type="label">
-                <left>65</left>
-                <top>0</top>
-                <height>70</height>
-                <width>380</width>
-                <aligny>center</aligny>
-                <font>font37</font>
-                <textcolor>FFAAAAAA</textcolor>
-                <label>$INFO[ListItem.Label]</label>
-                <shadowcolor>66000000</shadowcolor>
-                <visible>!Control.HasFocus(9000) | !false</visible>
-              </control>
-            </control>
-          </control>
-        </itemlayout>
-      </control>
+        <itemlayout width="252" height="72"><control type="image"><left>20</left><top>18</top><width>36</width><height>36</height><aspectratio>keep</aspectratio><texture colordiffuse="FFAAAAAA">$INFO[ListItem.Art(icon)]</texture></control><control type="label"><left>68</left><top>0</top><width>178</width><height>72</height><aligny>center</aligny><font>font37</font><textcolor>FFAAAAAA</textcolor><label>$INFO[ListItem.Label]</label><shadowcolor>66000000</shadowcolor><scroll>false</scroll></control></itemlayout><focusedlayout width="252" height="72"><control type="image"><left>2</left><top>17</top><width>4</width><height>38</height><visible>Control.HasFocus(9000)</visible><texture colordiffuse="FFFFFFFF">special://home/addons/script.stremioelec/resources/skins/Main/media/colors/white.png</texture></control><control type="image"><left>20</left><top>18</top><width>36</width><height>36</height><aspectratio>keep</aspectratio><texture colordiffuse="FFFFFFFF">$INFO[ListItem.Art(icon)]</texture></control><control type="label"><left>68</left><top>0</top><width>178</width><height>72</height><aligny>center</aligny><font>font40_title</font><textcolor>FFE5E5E5</textcolor><label>$INFO[ListItem.Label]</label><shadowcolor>66000000</shadowcolor><scroll>false</scroll></control></focusedlayout></control>
       <control type="label">
-        <left>90</left>
-        <top>900</top>
-        <width>380</width>
-        <height>55</height>
+        <left>32</left>
+        <top>52</top>
+        <width>218</width>
+        <height>62</height>
         <font>font37</font>
         <textcolor>FFE5E5E5</textcolor>
         <label>$INFO[System.Time]</label>
       </control>
       <control type="label">
-        <left>90</left>
-        <top>950</top>
-        <width>400</width>
+        <left>32</left>
+        <top>118</top>
+        <width>218</width>
         <height>40</height>
         <font>font23</font>
         <textcolor>FFAAAAAA</textcolor>
-        <label>$INFO[System.Date]</label>
+        <label>$INFO[System.Date(ddd d mmm)]</label>
       </control>
-    </control>
+    <control type="group" id="9901"><visible>String.IsEqual(Window(12600).Property(Stremio.WeatherReady),true)</visible><control type="image"><left>0</left><top>0</top><width>64</width><height>64</height><aspectratio>keep</aspectratio><texture>$INFO[Window(12600).Property(Stremio.CurrentIcon)]</texture></control><control type="label"><left>76</left><top>0</top><width>136</width><height>64</height><font>font37</font><textcolor>FFE5E5E5</textcolor><aligny>center</aligny><label>$INFO[Window(12600).Property(Stremio.CurrentTemperature)]</label></control><left>32</left><top>954</top><width>212</width><height>76</height></control></control>
   </controls>
 </window>

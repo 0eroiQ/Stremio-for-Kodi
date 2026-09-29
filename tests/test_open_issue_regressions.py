@@ -92,13 +92,13 @@ class IssueRegressionTests(unittest.TestCase):
         episodes = tree.find('.//control[@id="501"]')
         self.assertIsNotNone(episodes)
         xml = ET.tostring(episodes, encoding="unicode")
-        for prop in ("episode_heading", "episode_runtime", "episode_imdb", "episode_date"):
+        for prop in ("episode_code", "episode_title", "episode_runtime", "episode_imdb", "episode_date"):
             self.assertIn("ListItem.Property({})".format(prop), xml)
         self.assertIn("ratings/imdb.png", xml)
-        self.assertIn('colordiffuse="99171920"', xml)
+        self.assertIn("episode-card-local/pill.png", xml)
 
         source = (ROOT / "lib/nimbus.py").read_text()
-        for prop in ("episode_heading", "episode_runtime", "episode_imdb", "episode_date"):
+        for prop in ("episode_code", "episode_title", "episode_runtime", "episode_imdb", "episode_date"):
             self.assertIn("setProperty('{}'".format(prop), source)
 
     def test_episode_card_metadata_formatters(self):

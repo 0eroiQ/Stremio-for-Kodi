@@ -156,13 +156,21 @@ def _report_window_class():
         sent = False
 
         def onInit(self):
-            self.getControl(101).setLabel('Something went wrong')
+            manual = self.payload.get('feedback')
+            heading = 'Feature request' if manual and manual['kind'] == 'feature' else 'Bug report' if manual else 'Something went wrong'
+            if getattr(self, 'replay', False):
+                heading = 'Report last error'
+            self.getControl(101).setLabel(heading)
+            if manual or getattr(self, 'replay', False):
+                self.getControl(201).setLabel('Send to GitHub')
             self.getControl(102).setText(self.summary)
             self.getControl(103).setLabel('Error ID: ' + self.payload['fingerprint'])
             self.getControl(104).setText(
                 'Only anonymous technical diagnostics are sent. '
                 'No tokens, addon URLs, API keys, media URLs, account details or local paths.')
-            self.setFocusId(201)
+            if manual:
+                self.getControl(104).setText('Your reviewed title and description will be public on GitHub. Cancel sends nothing.')
+            self.setFocusId(202 if getattr(self, 'replay', False) else 201)
 
         def onClick(self, control_id):
             if control_id == 201:
@@ -179,7 +187,7 @@ def _report_window_class():
                         pass
                     self.close()
                 else:
-                    self.getControl(105).setLabel('Could not send. Check your connection and try again.')
+                    self.getControl(105).setLabel('Report not sent. The reporting service could not accept it. Please try again later.')
             elif control_id == 202:
                 self.close()
 
@@ -190,7 +198,7 @@ def _report_window_class():
     return ReportWindow, get_addon
 
 
-def show_report_dialog(payload, summary):
+def show_report_dialog(payload, summary, replay=False):
     try:
         ReportWindow, get_addon = _report_window_class()
         window = themed_window(ReportWindow,
@@ -199,9 +207,13 @@ def show_report_dialog(payload, summary):
             'Main',
             '1080i')
         window.payload = payload
+        window.replay = replay
         window.summary = summary
         window.sent = False
         window.doModal()
+        if window.sent and not payload.get('feedback'):
+            from lib.last_error import mark_sent
+            mark_sent(payload['fingerprint'])
         return window.sent
     except Exception:
         return False
@@ -223,8 +235,13 @@ def _safe_log(payload):
 def handle_error(context, error=None, summary='Stremio for Kodi encountered an unexpected error.'):
     """Auto-submit when enabled; otherwise show the one-click in-skin report dialog."""
     payload = build_payload(context, error)
+    if error is not None:
+        from lib.last_error import remember_error
+        remember_error(payload)
     _safe_log(payload)
     if automatic_enabled() and send_report(payload):
+        from lib.last_error import mark_sent
+        mark_sent(payload['fingerprint'])
         try:
             import xbmcgui
             xbmcgui.Dialog().notification(
@@ -237,10 +254,102 @@ def handle_error(context, error=None, summary='Stremio for Kodi encountered an u
     return show_report_dialog(payload, summary)
 
 
-def manual_report():
-    """Settings action: show the same in-skin, one-click report dialog."""
-    payload = build_payload('Manual report')
-    _safe_log(payload)
-    return show_report_dialog(
-        payload,
-        'Send a small anonymous technical report to help diagnose a problem on this device.')
+def report_last_error(dialog=None):
+    """Review and explicitly resend the last captured v1 diagnostic, not a log."""
+    import time
+    from lib.last_error import load_last_error
+    from lib.report_feedback import report_labels
+    if dialog is None:
+        import xbmcgui
+        dialog = xbmcgui.Dialog()
+    record = load_last_error()
+    if record is None:
+        dialog.ok('Report last error',
+            'No saved error is available. This option records errors caught after this update. '
+            'Reproduce the problem, or choose Bug report to describe it manually.')
+        return False
+    payload = record['payload']
+    captured = time.strftime('%d %b %Y %H:%M', time.localtime(record['savedAt']))
+    sent = 'Already sent. Sending again updates the same Error ID.' if record['sentAt'] else 'Not confirmed as sent.'
+    labels = ', '.join(report_labels(payload))
+    review = '\n'.join([
+        'Last captured error: ' + captured, sent,
+        'Context: ' + payload['context'], 'Error type: ' + payload['errorType'],
+        'Original addon version: ' + payload['addonVersion'],
+        'Original Kodi version: ' + payload['kodiVersion'],
+        'Platform: ' + payload['platform'], 'Python: ' + payload['pythonVersion'],
+        'Error ID: ' + payload['fingerprint'], 'Labels: ' + labels, '',
+        'Sanitized stack:', '\n'.join(payload['stack']) or 'No stack was captured.', '',
+        'Only this anonymous diagnostic will be sent for a public GitHub issue. '
+        'No raw exception message, log file, login, provider URLs or account data is included.',
+        'Close this preview to choose Send to GitHub or Cancel.'])
+    dialog.textviewer('Review last error', review)
+    return show_report_dialog(payload,
+        '{}\n{}: {}\nAddon {} | {}\n{}'.format(
+            captured, payload['context'], payload['errorType'],
+            payload['addonVersion'], payload['platform'], sent), replay=True)
+
+
+def _valid_choice(value, choices):
+    return type(value) is int and 0 <= value < len(choices)
+
+
+def _feedback_input(dialog, heading, minimum, maximum):
+    from lib.report_feedback import feedback_text
+    previous = ''
+    while True:
+        value = dialog.input(heading, defaultt=previous)
+        if not value or not value.strip():
+            return None
+        try:
+            return feedback_text(value, minimum, maximum)
+        except ValueError as error:
+            dialog.ok('Check your message', str(error))
+            previous = value[:maximum]
+
+
+def manual_report(dialog=None):
+    """Explicit public feedback: cancel at any step sends nothing."""
+    from lib.report_feedback import CATEGORIES, attach_feedback, report_labels
+    if dialog is None:
+        import xbmcgui
+        dialog = xbmcgui.Dialog()
+    types = ('Bug report', 'Feature request', 'Report last error')
+    selected = dialog.select('Stremio for Kodi - feedback', list(types))
+    if not _valid_choice(selected, types):
+        return False
+    if selected == 2:
+        return report_last_error(dialog)
+    category = dialog.select('Choose a category', [label for key, label in CATEGORIES])
+    if not _valid_choice(category, CATEGORIES):
+        return False
+    if not dialog.yesno('Public GitHub feedback',
+            'Your title, description, category and device versions will be public on GitHub. '
+            'Do not include personal details, passwords, account keys, links or logs. '
+            'You can review the message before sending.', nolabel='Cancel', yeslabel='Continue'):
+        return False
+    title = _feedback_input(dialog, 'Feature request title (5-100 characters)' if selected else
+                            'Bug title (5-100 characters)', 5, 100)
+    if title is None:
+        return False
+    description = _feedback_input(dialog,
+        'Describe the idea and why it helps' if selected else
+        'Steps to reproduce, expected result and what happens instead', 10, 1000)
+    if description is None:
+        return False
+    frequency = 'not-applicable'
+    if not selected:
+        choices = ('Every time', 'Sometimes', 'After restart', 'Not retested')
+        repeat = dialog.select('How often does it happen?', list(choices))
+        if not _valid_choice(repeat, choices):
+            return False
+        frequency = ('always', 'sometimes', 'after-restart', 'not-retested')[repeat]
+    payload = attach_feedback(build_payload('Manual report'), {
+        'kind': 'feature' if selected else 'bug', 'category': CATEGORIES[category][0],
+        'title': title, 'description': description, 'frequency': frequency})
+    labels = ', '.join(report_labels(payload, initial=True))
+    review = '{}\n\n{}\n\nLabels: {}\nFrequency: {}\n\nNo account data or raw logs are attached.'.format(
+        title, description, labels, frequency)
+    dialog.textviewer('Review public ' + types[selected].lower(), review)
+    # The existing addon-owned dialog performs the final, explicit Send action.
+    return show_report_dialog(payload, '{}\n{}\n\n{}'.format(types[selected], title, labels))

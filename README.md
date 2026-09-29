@@ -22,44 +22,56 @@ Unofficial community addon; not endorsed by Stremio or Kodi.
 A single Kodi Program add-on combining the StremioELEC program interface and media backend. The embedded Nimbus interface retains its existing home, search, discover, library, add-ons, settings and media detail windows.
 
 <p align="center">
-  <img src="docs/screenshots/home-brothers.png" alt="Stremio for Kodi Home — Brothers" width="100%">
+  <img src="resources/previews/home.jpg" alt="Stremio for Kodi Home — Brothers" width="100%">
 </p>
 
 ## Screenshots
 
-### Home — New & Latest
+### Home
 
-Remote-friendly Home browsing with poster badges, cinematic artwork and clear focus states.
+![Home](resources/previews/home.jpg)
 
-![Stremio for Kodi Home — The Deputy](docs/screenshots/home-deputy.png)
+### Episodes — complete final card
 
-### Library
+![Episodes — complete final card](resources/previews/episodes.jpg)
 
-Browse your library with type filters, sorting and refresh controls while keeping the same hero-driven interface.
+### Inline stream selection
 
-![Stremio for Kodi Library](docs/screenshots/library.png)
+![Inline stream selection](resources/previews/streams.jpg)
 
-### Addons
+### Addons and configuration
 
-Manage installed Stremio addons directly from the interface, including Configure, Disable, Remove and Add addon actions.
-
-![Stremio for Kodi Addons](docs/screenshots/addons.png)
-
-### Episodes
-
-Browse seasons and episodes with SxxExx/title overlays, compact runtime/IMDb/date metadata pills, watched-state checkmarks and TV-friendly horizontal navigation.
-
-![Stremio for Kodi Episodes](docs/screenshots/episodes.png)
+![Addons and configuration](resources/previews/addons.jpg)
 
 ## Install
 
-For installation and automatic updates, download [repository.stremioforkodi-1.0.0.zip](https://github.com/0eroiQ/Stremio-for-Kodi/releases/latest/download/repository.stremioforkodi-1.0.0.zip). In Kodi, choose **Add-ons → Install from zip file**, select that ZIP, then **Install from repository → Stremio for Kodi Repository → Program add-ons → Stremio for Kodi**. Enable automatic updates for the addon if desired.
+For installation and automatic updates, download [repository.stremioforkodi-1.0.1.zip](https://github.com/0eroiQ/Stremio-for-Kodi/releases/latest/download/repository.stremioforkodi-1.0.1.zip). In Kodi, choose **Add-ons → Install from zip file**, select that ZIP, then **Install from repository → Stremio for Kodi Repository → Program add-ons → Stremio for Kodi**. Enable automatic updates for the addon if desired.
 
-For a standalone installation, download `script.stremioelec-1.0.41.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
+For a standalone installation, download `script.stremioelec-1.0.42.zip` from [Releases](https://github.com/0eroiQ/Stremio-for-Kodi/releases), then choose **Add-ons → Install from zip file** in Kodi. Launch **Stremio for Kodi** from Program add-ons.
 
 The stable add-on ID is `script.stremioelec`. Its media resolver and subtitle service are included in the same package; `plugin.video.stremioelec` is no longer required. Existing legacy profile data is copied non-destructively on first use. Existing destination settings take precedence.
 
 Requires Kodi with the Python 3 add-on API. QR code support is optional. The add-on does not change the global Kodi skin. The bundled Nimbus masks and overlays load directly from the addon, independently of the global skin. Kodi still supplies the active font definitions, so typography can vary between global skins.
+
+## Changes in 1.0.42
+
+This release consolidates the locally reviewed interface, support and reliability updates.
+
+- Replace the cramped Sources popup with a theme-coloured, translucent stream panel over the hero, with reversible 3D transitions and readable source rows.
+- Hide any active lower row while choosing a stream, then restore its section, season, selection and scroll position on Back.
+- Remove the redundant Quality and All Sources controls; retain Refresh and Back inside the stream panel.
+- Add rounded episode cards with code, title and available runtime/rating/date badges. Keep the final episode fully visible instead of focusing the clipped teaser.
+- Add rounded controls, a narrower icon sidebar with Search above Home, top clock/date and bottom coloured weather.
+- Add country-scoped ZIP/postal-code and city selection; temperature units follow the addon's selected country.
+- Add configurable catalog, search, metadata and ratings cache lifetimes, custom values, Unlimited/off and separate size limits, with safe category clearing.
+- Add manual bug/feature submissions, review before sending, Report last error, and consistent issue-label classification.
+- Add stream-style addon cards/buttons, an automatically closing sidebar, and a private local QR configuration dialog with Refresh QR, Sync addons, Done and Back.
+- Improve launch recovery and account-save retries, including transient Windows folder/temporary-file locks; retain the previous account state on storage failures.
+- Add Dark Cinematic branding, optional live Stripe developer support, and four in-Kodi preview images.
+- Update the Kodi repository installer to 1.0.1 and publish all declared artwork beside the package, so both installed and repository information screens can load it.
+
+
+Native Stremio watch-progress write-back (#23) is not included. The empty historical manual report (#24) still needs diagnostic information. The previous repository installer remains attached for older shared links.
 
 ## Startup shell mode
 
@@ -77,11 +89,14 @@ Anonymous automatic error reporting is enabled by default and can be disabled un
 
 Reports contain only the Stremio for Kodi version, Kodi/Python versions, broad platform, error type, Error ID and sanitized basename/function/line stack frames. They exclude Stremio tokens, addon/provider URLs, API keys, media URLs, account details, device identifiers, local filesystem paths and raw exception messages. Matching reports are aggregated by Error ID. A scheduled GitHub Action in this repository turns those aggregates into GitHub issues using the repository's short-lived GitHub Actions token; no GitHub credential is shipped in the Kodi addon.
 
-You can also use **Settings → Support → Report a problem now** at any time.
+You can also use **Settings → Support → Report a bug / request a feature** at any time.
 
 ## Project layout
 
-- `addon.xml` plus the small `default.py`, `plugin.py`, `service.py` and `subtitle_service.py` bootstraps: Kodi entry points kept at the add-on root.\n- `core/`: Stremio account, protocol, metadata, stream, subtitle and supporting runtime modules.\n- `lib/`: Nimbus UI, browsing, settings, caching, Premium client and other application modules.\n- `resources/`: embedded Nimbus skin assets, settings and runtime data.
+- `addon.xml` plus the small `default.py`, `plugin.py`, `service.py` and `subtitle_service.py` bootstraps: Kodi entry points kept at the add-on root.
+- `core/`: Stremio account, protocol, metadata, stream, subtitle and supporting runtime modules.
+- `lib/`: Nimbus UI, browsing, settings, caching, Premium client and other application modules.
+- `resources/`: embedded Nimbus skin assets, settings and runtime data.
 - `tools/build-stremio-addon.py`: builds the installation ZIP from source.
 - `tests/test_stremio_addon.py`: packaging, syntax, migration and launch-route regressions.
 
@@ -96,7 +111,7 @@ ZIP packages are distributed through GitHub Releases. The `kodi-repository` bran
 
 ## Validation
 
-Version 1.0.37 is the current public release. The project has been launched and visually checked in local macOS Kodi. Catalog loading and sidebar navigation were visually checked; media details were also checked in an isolated Kodi profile. These checks do not establish playback compatibility on every device or provider.
+Version 1.0.42 consolidates the reviewed local UI and reliability changes. The project has been launched and visually checked in local macOS Kodi. Catalog loading and sidebar navigation were visually checked; media details were also checked in an isolated Kodi profile. These checks do not establish playback compatibility on every device or provider.
 
 ## Credits and license
 
@@ -122,7 +137,7 @@ The number of rows is generated from the account collection. Each selected row s
 
 Discover uses the signed-in account addons and their supported catalog filters. Press Up from the first row to change filters or browse another page where supported. Library shows saved account titles grouped by type, with sorting and account refresh from the same filter bar. Both use the Home hero and poster layout.
 
-Browsing responses are cached in the addon Kodi profile across restarts: catalogs for 15 minutes and metadata for 24 hours, with a 64 MiB response-data budget. Kodi manages artwork caching. Account synchronization, stream and subtitle responses are not cached by this layer.
+Browsing responses are cached in the addon Kodi profile across restarts: catalogs/search for 15 minutes and metadata/ratings for 24 hours by default, with a 64 MiB response-data budget. Settings → Cache and maintenance provides custom lifetimes (minutes/hours/days), Unlimited/off, a separate size limit and category clearing. Unlimited lifetime still respects the size limit; unlimited size may fill the disk. Kodi manages artwork caching. Account synchronization, stream and subtitle responses are not cached by this layer.
 
 Optional MDbList ratings: open addon Settings > Ratings, enter an API key or use Import API key from Nimbus, and select a rating source. Reopen the addon after changing these settings. Lookup supports IMDb movie/show IDs; unavailable ratings retain the original Stremio rating.
 

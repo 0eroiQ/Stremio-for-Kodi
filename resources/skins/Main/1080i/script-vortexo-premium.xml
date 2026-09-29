@@ -38,16 +38,16 @@
       <left>620</left><top>940</top><width>440</width><height>65</height>
       <label>Refresh Premium status</label><font>font25</font><align>center</align>
       <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
-      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
-      <texturenofocus colordiffuse="FF252333">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <texturefocus colordiffuse="FF7355DE" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturefocus>
+      <texturenofocus colordiffuse="FF252333" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturenofocus>
       <onleft>104</onleft><onright>104</onright>
     </control>
     <control type="button" id="104">
       <left>1090</left><top>940</top><width>210</width><height>65</height>
       <label>Close</label><font>font25</font><align>center</align>
       <textcolor>FFFFFFFF</textcolor><focusedcolor>FFFFFFFF</focusedcolor>
-      <texturefocus colordiffuse="FF7355DE">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturefocus>
-      <texturenofocus colordiffuse="FF252333">special://home/addons/script.stremioelec/resources/skins/Main/media/solid.png</texturenofocus>
+      <texturefocus colordiffuse="FF7355DE" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturefocus>
+      <texturenofocus colordiffuse="FF252333" border="32,0,32,0">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-pill-h65-v1.png</texturenofocus>
       <onleft>103</onleft><onright>103</onright>
     </control>
   </controls>

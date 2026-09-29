@@ -1,0 +1,5 @@
+Segno 1.6.6 by Lars Heuer. BSD-3-Clause license; see LICENSE.
+Source: https://pypi.org/project/segno/1.6.6/
+Wheel SHA256: 28c7d081ed0cf935e0411293a465efd4d500704072cdb039778a2ab8736190c7
+Bundled encoder and PNG writer; CLI/helpers omitted. One utils import made relative for namespacing.
+No installed system package or external QR service required.

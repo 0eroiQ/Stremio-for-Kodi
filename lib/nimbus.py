@@ -13,6 +13,7 @@ import xbmcgui
 from lib import backend as api
 from lib import mdblist
 from lib.trailer_options import imdb_id, autoplay_delay, autoplay_enabled
+from lib.sidebar_nav import menu_items, menu_action, home_index
 
 ADDON = get_addon()
 PATH = ADDON.getAddonInfo('path')
@@ -35,7 +36,12 @@ def episode_runtime(value):
     if value in (None, ''):
         return ''
     if isinstance(value, (int, float)) and not isinstance(value, bool):
-        minutes = int(round(value / 60.0)) if value > 300 else int(round(value))
+        if value > 10000:
+            minutes = int(round(value / 60000.0))
+        elif value > 300:
+            minutes = int(round(value / 60.0))
+        else:
+            minutes = int(round(value))
     else:
         text = str(value).strip()
         iso = re.fullmatch(r'PT(?:(\d+)H)?(?:(\d+)M)?', text, re.I)
@@ -74,7 +80,7 @@ def episode_rating(row):
         rating = float(match.group(0))
     except ValueError:
         return ''
-    if not 0 <= rating <= 10:
+    if not 0 < rating <= 10:
         return ''
     return '{:.1f}'.format(rating)
 
@@ -231,13 +237,16 @@ class NimbusWindow(xbmcgui.WindowXML):
             self.setProperty(key, value)
 
     def details(self, row):
+        from lib.launch_guard import mark_window, unmark_window
         self.preview_suspended = True
         self.cancel_trailer()
+        window = None
         try:
             window = themed_window(InfoWindow, 'script-stremio-info.xml', PATH, 'Main', '1080i', meta=row)
+            mark_window(window, 'info')
             window.doModal()
-            del window
         finally:
+            unmark_window(window)
             self.preview_suspended = False
 
 
@@ -267,10 +276,12 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.initialized = True
         self.rows = {400+i: [] for i in range(self.row_count)}
         self.hero_key = None
-        self.getControl(9000).addItems([xbmcgui.ListItem(label) for label in
-                                      ('Home', 'Search', 'Discover', 'Library', 'Addons', 'Settings')])
+        self.getControl(9000).addItems(menu_items(xbmcgui))
+        self.getControl(9000).selectItem(home_index())
         self.load_home()
         self.setFocusId(9000)
+        from lib.weather_widget import request_refresh
+        request_refresh()
 
     def load_home(self):
         self.populate_rows('Home', self.account_rows)
@@ -487,6 +498,9 @@ class HomeWindow(AddonsPage, NimbusWindow):
     def onFocus(self, control_id):
         if getattr(self, 'initialized', False):
             self.update_hero()
+            if control_id == 9000:
+                from lib.weather_widget import request_refresh
+                request_refresh()
 
     def onAction(self, action):
         aid = action.getId()
@@ -525,7 +539,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
             return
         if cid == 9000:
             pos = self.getControl(9000).getSelectedPosition()
-            cid = (202, 201, 203, 204, 205, 206)[pos] if 0 <= pos < 6 else 202
+            cid = menu_action(pos)
         if cid in self.rows:
             pos = self.getControl(cid).getSelectedPosition()
             if 0 <= pos < len(self.rows[cid]):
@@ -572,7 +586,10 @@ class HomeWindow(AddonsPage, NimbusWindow):
                 xbmc.executebuiltin('ActivateWindow(Videos,plugin://script.stremioelec/?action=root,return)')
 
 
-class InfoWindow(NimbusWindow):
+from lib.inline_streams import InlineStreams
+
+
+class InfoWindow(InlineStreams, NimbusWindow):
     def __init__(self, *args, **kwargs):
         self.preview = kwargs.pop('meta')
         super().__init__(*args, **kwargs)
@@ -583,6 +600,7 @@ class InfoWindow(NimbusWindow):
         self.cards = []
         self.play_target = ''
         self.resume_ms = 0
+        self.init_streams()
 
     def onInit(self):
         if self.initialized:
@@ -633,6 +651,7 @@ class InfoWindow(NimbusWindow):
             self.trailer_timer.start()
 
     def close(self):
+        self.stop_streams()
         self.cancel_trailer()
         super().close()
 
@@ -731,7 +750,13 @@ class InfoWindow(NimbusWindow):
         if current in self.menu_entries:
             listing.selectItem(self.menu_entries.index(current))
 
+    def onFocus(self, control_id):
+        if self.initialized:
+            self.streams_focus(control_id)
+
     def onAction(self, action):
+        if self.streams_action(action):
+            return
         was_preview = bool(self.preview_url)
         self.cancel_trailer()
         aid = action.getId()
@@ -745,10 +770,12 @@ class InfoWindow(NimbusWindow):
                 self.setFocusId(target)
             else:
                 self.close()
-        elif aid == 4 and self.getFocusId() in (21001, 21002, 21003, 21004, 21005):
+        elif aid == 4 and self.getFocusId() in (21001, 21002, 21005):
             self.setFocusId(22001)
 
     def onClick(self, cid):
+        if self.streams_click(cid):
+            return
         self.cancel_trailer()
         if cid == 22001:
             self.open_menu('sections')
@@ -763,9 +790,9 @@ class InfoWindow(NimbusWindow):
                 else:
                     self.select_section(self.menu_entries[pos])
                 self.setFocusId(self.active_list if self.cards else 22001)
-        elif cid in (21001, 21003, 21004):
+        elif cid == 21001:
             if self.play_target:
-                self.choose_source(self.play_target, quality=(cid == 21003), resume_ms=self.resume_ms)
+                self.choose_source(self.play_target, resume_ms=self.resume_ms)
             else:
                 self.report('Select an episode when episode metadata is available.')
         elif cid == 21002:
@@ -784,34 +811,7 @@ class InfoWindow(NimbusWindow):
             if self.section == 'Similar':
                 self.details(row)
             elif self.section == 'Episodes':
-                self.choose_source(row['id'])
+                self.choose_source(row['id'], resume_ms=self.resume_ms if row['id'] == self.play_target else 0)
             elif self.section in ('Cast', 'Crew'):
                 xbmcgui.Dialog().ok(row['name'], row.get('job', self.section))
 
-    def choose_source(self, identity, quality=False, resume_ms=0):
-        cache_key = 'streams:' + identity
-        if cache_key not in self.section_cache:
-            result = self.busy('Finding sources', lambda: api.source_rows(self.meta, identity))
-            if result is None:
-                return
-            self.section_cache[cache_key] = result
-        rows, skipped, failed = self.section_cache[cache_key]
-        if not rows:
-            self.report('No supported sources. {} unsupported · {} providers unavailable.'.format(skipped, failed))
-            return
-        if quality:
-            choices = sorted({r['card']['quality'] for r in rows})
-            pos = xbmcgui.Dialog().select('Quality', choices)
-            if pos < 0:
-                return
-            rows = [r for r in rows if r['card']['quality'] == choices[pos]]
-        labels = ['{} · {}'.format(r['card']['quality'], clean(r.get('label'))) for r in rows]
-        choice = xbmcgui.Dialog().select('Sources', labels)
-        if choice >= 0:
-            play_meta = dict(self.meta)
-            if self.meta['type'] == 'series':
-                video = next((v for v in self.meta.get('videos', []) if v.get('id') == identity), {})
-                play_meta.update(id=identity, name=video.get('name') or video.get('title') or self.meta.get('name'),
-                                 season=video.get('season'), episode=video.get('episode'),
-                                 tvshowtitle=self.meta.get('name'), _media_type='episode')
-            api.play(play_meta, identity, rows[choice], resume_ms)

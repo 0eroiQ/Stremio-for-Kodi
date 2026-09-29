@@ -83,7 +83,7 @@ class ErrorReportTests(unittest.TestCase):
         settings = (ROOT / 'resources' / 'settings.xml').read_text()
         self.assertIn('id="error_reporting_auto"', settings)
         self.assertIn('default="true"', settings)
-        self.assertIn('Report a problem now', settings)
+        self.assertIn('Report a bug / request a feature', settings)
 
 
 if __name__ == '__main__':

@@ -39,11 +39,13 @@ class SigninTests(unittest.TestCase):
             'APP_RUNNING': 'stremioforkodi.running'
         }
         exec(compile(ast.Module(body=[run], type_ignores=[]), '<app>', 'exec'), scope)
-        with patch.dict('sys.modules', {'lib.signin': module}):
+        guard = Mock()
+        guard.acquire.return_value = True
+        with patch.dict('sys.modules', {'lib.signin': module}), patch('lib.launch_guard.LaunchGuard', return_value=guard):
             scope['run']()
             home.assert_not_called()
-            session.setProperty.assert_called_once_with('stremioforkodi.running', 'true')
-            session.clearProperty.assert_called_once_with('stremioforkodi.running')
+            guard.acquire.assert_called_once_with()
+            guard.release.assert_called_once_with()
 
 
     def test_confirmed_link_saves_token_and_opens_home(self):
