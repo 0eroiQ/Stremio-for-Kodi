@@ -42,9 +42,24 @@ jobs:
           RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
         run: |
           python3 tools/build-kodi-repository.py --package dist/release/script.stremioelec-*.zip --output dist/feed
+          find dist/feed -maxdepth 1 -type f -name 'repository.stremioforkodi-*.zip' -delete
+          INSTALLER="$(find dist/feed/repository.stremioforkodi -maxdepth 1 -type f -name 'repository.stremioforkodi-*.zip' | sort -V | tail -1)"
+          cp "$INSTALLER" dist/feed/
+          INSTALLER_NAME="$(basename "$INSTALLER")"
+          cat > dist/feed/index.html <<EOF
+          <!doctype html>
+          <html>
+          <head><meta charset="utf-8"><title>Stremio for Kodi Repository</title></head>
+          <body>
+            <h1>Stremio for Kodi Repository</h1>
+            <p><a href="$INSTALLER_NAME">$INSTALLER_NAME</a></p>
+          </body>
+          </html>
+          EOF
+          touch dist/feed/.nojekyll
           git -C dist/feed config user.name 'github-actions[bot]'
           git -C dist/feed config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git -C dist/feed add addons.xml addons.xml.sha256 README.md script.stremioelec repository.stremioforkodi
+          git -C dist/feed add -A addons.xml addons.xml.sha256 README.md index.html .nojekyll script.stremioelec repository.stremioforkodi 'repository.stremioforkodi-'*.zip
           if ! git -C dist/feed diff --cached --quiet; then
             git -C dist/feed commit -m "Publish ${RELEASE_TAG} to Kodi repository"
             git -C dist/feed push origin kodi-repository
