@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, build_opener
@@ -28,8 +29,9 @@ MAX_FILE_BYTES = 512 * 1024
 MAX_CUES = 2000
 MAX_CUE_TEXT = 8000
 TIMEOUT_SECONDS = 25
-BATCH_SIZE = 160
-BATCH_DELAY_SECONDS = 0.25
+BATCH_SIZE = 80
+BATCH_WORKERS = 2
+BATCH_DELAY_SECONDS = 0.0
 TRANSLATION_REVISION = "byok-v2"
 TEXT_SUBTITLE_CODECS = {"subrip", "ass", "ssa", "webvtt", "mov_text", "text"}
 FFMPEG_TIMEOUT_SECONDS = 120
@@ -371,25 +373,23 @@ def translate_subtitle_file(path, cache_directory, api_key, target_language,
     batches = [cues[i:i + BATCH_SIZE] for i in range(0, len(cues), BATCH_SIZE)]
     target_name = CODE_NAMES.get(target_language, target_language)
     _progress(progress_callback, 0, "Starting " + target_name + " translation")
-    for index, batch in enumerate(batches):
-        if index:
-            time.sleep(BATCH_DELAY_SECONDS)
-        _progress(
-            progress_callback,
-            int(index * 100 / len(batches)),
-            "Translating to {} · batch {}/{}".format(target_name, index + 1, len(batches)),
-        )
-        result = _request_translation(
+    def translate_batch(batch):
+        return _request_translation(
             batch, api_key.strip(), target_language, source_language, opener=opener
         )
-        translations.update(result)
-        _progress(
-            progress_callback,
-            int((index + 1) * 100 / len(batches)),
-            "Translating to {} · {}%".format(
-                target_name, int((index + 1) * 100 / len(batches))
-            ),
-        )
+
+    workers = min(BATCH_WORKERS, len(batches))
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+        results = pool.map(translate_batch, batches)
+        for index, result in enumerate(results):
+            translations.update(result)
+            _progress(
+                progress_callback,
+                int((index + 1) * 100 / len(batches)),
+                "Translating to {} · {}%".format(
+                    target_name, int((index + 1) * 100 / len(batches))
+                ),
+            )
     if len(translations) != len(cues):
         raise AITranslationError("Gemini returned an incomplete subtitle translation.")
     atomic_write(destination, _rebuild(blocks, cues, translations).encode("utf-8"))

@@ -203,9 +203,10 @@ class AISubtitleTests(unittest.TestCase):
             ))
             translated = result.read_text(encoding="utf-8")
 
-        self.assertEqual(module.BATCH_SIZE, 160)
-        self.assertEqual(request.call_count, 3)
-        self.assertEqual(sleeper.call_count, 2)
+        self.assertEqual(module.BATCH_SIZE, 80)
+        self.assertEqual(module.BATCH_WORKERS, 2)
+        self.assertEqual(request.call_count, 5)
+        self.assertEqual(sleeper.call_count, 0)
         self.assertEqual(progress[0][0], 0)
         self.assertEqual(progress[-1][0], 100)
         self.assertIn("Translating to Croatian", progress[-1][1])

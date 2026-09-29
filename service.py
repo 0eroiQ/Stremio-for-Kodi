@@ -122,6 +122,7 @@ class PlaybackWatcher(xbmc.Player):
 
         progress.create("AI Subtitles", "Checking subtitles from the video…")
         progress.update(2, "Checking subtitles from the video…")
+        embedded_error = None
         try:
             # Priority 1: embedded text subtitle from the exact video/stream.
             if settings.get("source") != "2":
@@ -135,6 +136,7 @@ class PlaybackWatcher(xbmc.Player):
                     ):
                         return
                 except Exception as error:
+                    embedded_error = error
                     _remember_ai_error("AI subtitles embedded source", error)
                     if settings.get("source") == "1":
                         _notify(
@@ -190,7 +192,7 @@ class PlaybackWatcher(xbmc.Player):
                     continue
 
             if self._matches(digest):
-                if not entries:
+                if not entries and embedded_error is None:
                     from ai_subtitles import AITranslationError
                     _remember_ai_error(
                         "AI subtitles source selection",

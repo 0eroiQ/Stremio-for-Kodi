@@ -1,3 +1,12 @@
+1.0.48 (2026-09-30)
+
+- Keep the themed AI subtitle preparation and translation progress indicator.
+- Restore the proven 80-cue Gemini batch size after real N60 testing showed that 160-cue batches could fail on a full subtitle track.
+- Translate up to two validated 80-cue batches concurrently to reduce first-translation time without increasing per-request payload size.
+- Remove the old deliberate inter-batch wait.
+- Preserve the real embedded/Gemini diagnostic when no Stremio subtitle fallback exists instead of overwriting it with a generic source-selection error.
+- Keep exact cue IDs, cue count, original timestamps and translation caching unchanged.
+
 1.0.47 (2026-09-30)
 
 - Add a themed background progress indicator for AI subtitle preparation and translation.
