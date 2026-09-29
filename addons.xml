@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.45" provider-name="0eroiQ">
+<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.46" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,7 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.45: Restore native Stremio watch-progress and resume sync, faster cached Home startup, state-aware long-press media actions including Mark Here as Watched/Unwatched, Continue Watching actions, and addon-owned themed dialogs. Includes the 1.0.44 Linux Home and Android sign-in fixes.</news>
+    <news>1.0.46: Fix AI subtitle video-first translation on LibreELEC by detecting the official FFmpeg Tools addon binaries. AI extraction, source-selection and translation failures are now saved as a sanitized Last Error so Support can report the real failure without exposing API keys or stream URLs.</news>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>
