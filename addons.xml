@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.43" provider-name="0eroiQ">
+<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.44" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,7 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.43: Add free BYOK Gemini AI subtitle translation with Auto video-first subtitle selection and Stremio-addon fallback, batched translation, exact timestamp preservation and caching. Add a full Stremio for Kodi Settings interface for account, playback, subtitles/AI, appearance, weather, ratings, cache, support and the Premium placeholder. Vortexo Premium hosted AI remains in construction.</news>
+    <news>1.0.44: Fix Home startup on Linux/Kodi installations where the bundled Nimbus layout could not be resolved from Kodi's addon path. Improve Android Stremio QR sign-in by retrying brief upstream/network polling failures instead of aborting the login after one transient error.</news>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>
