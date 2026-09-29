@@ -1,3 +1,19 @@
+1.0.45 (2026-09-30)
+
+- Restore native Stremio playback progress write-back on Stop/End while keeping playback independent of sync failures.
+- Preserve real watched time separately from seek position, resume partial playback, and advance completed series playback to the next aired episode.
+- Keep completed final episodes and completed movies out of Continue Watching while preserving partial rewatches.
+- Add fast stale-while-revalidate Home startup using a local display-only snapshot, useful on slower devices such as Raspberry Pi.
+- Add theme-aware poster progress bars and native Kodi resume points.
+- Add state-aware long-press menus for episodes and Continue Watching.
+- Episode actions include Resume/Play, Play from Beginning, Mark as Watched/Unwatched, Mark Here as Watched/Unwatched and More Info.
+- Mark Here actions update every regular episode from the start of the series through the selected episode and never show both directions at once.
+- Continue Watching actions include Watch from Beginning, series navigation where applicable, watched-state toggle, Remove from Continue Watching and More Info.
+- Add addon-owned themed message, confirmation, select, text, input, notification and progress dialogs.
+- Run native watch-progress observation and AUTO AI subtitle preparation together in the persistent Kodi service.
+- Avoid unnecessary Python-window probing on a fresh Kodi session during cold startup.
+- Retain the 1.0.44 Linux Home-template resolution fix and Android Stremio sign-in retry hardening.
+
 1.0.44 (2026-09-29)
 
 - Fix Program entry/Home startup failures on Linux/Kodi installations where Kodi's reported addon path cannot directly resolve the bundled Nimbus XML template.
