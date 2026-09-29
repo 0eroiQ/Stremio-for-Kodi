@@ -3,3 +3,5 @@ __pycache__/
 .DS_Store
 /dist/
 .venv/
+
+dist-v1042/
