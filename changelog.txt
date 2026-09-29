@@ -1,3 +1,11 @@
+1.0.41
+- Redesign episode cards to match the approved TV layout.
+- Overlay "SxxExx - Episode title" directly on the episode thumbnail.
+- Add small dark translucent metadata pills for runtime, IMDb rating and release date when providers supply those fields.
+- Keep watched-state indicators and remote focus behavior.
+- Do not add episode descriptions to the cards.
+- Add regression coverage for episode metadata formatting and card XML.
+
 1.0.40
 - Fix Windows sign-in crashes on Python builds without os.fchmod.
 - Keep account-state permission hardening best-effort and convert persistent write failures into a stable account error.
