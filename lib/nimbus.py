@@ -26,6 +26,71 @@ def clean(value):
     return re.sub(r'<[^>]+>', '', str(value or ''))
 
 
+_MONTHS = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+
+
+def episode_runtime(value):
+    """Return compact TV-card runtime text without inventing missing metadata."""
+    if value in (None, ''):
+        return ''
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        minutes = int(round(value / 60.0)) if value > 300 else int(round(value))
+    else:
+        text = str(value).strip()
+        iso = re.fullmatch(r'PT(?:(\d+)H)?(?:(\d+)M)?', text, re.I)
+        if iso:
+            minutes = int(iso.group(1) or 0) * 60 + int(iso.group(2) or 0)
+        else:
+            hm = re.fullmatch(r'(?:(\d+)\s*h(?:ours?)?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?)?', text, re.I)
+            if hm and (hm.group(1) or hm.group(2)):
+                minutes = int(hm.group(1) or 0) * 60 + int(hm.group(2) or 0)
+            else:
+                plain = re.fullmatch(r'(\d+)\s*(?:m|min|mins|minutes)?', text, re.I)
+                if not plain:
+                    return text[:16]
+                minutes = int(plain.group(1))
+    if minutes <= 0:
+        return ''
+    hours, mins = divmod(minutes, 60)
+    if hours and mins:
+        return '{}h {}m'.format(hours, mins)
+    if hours:
+        return '{}h'.format(hours)
+    return '{}m'.format(mins)
+
+
+def episode_rating(row):
+    """Use only provider-supplied episode rating metadata."""
+    value = row.get('imdbRating')
+    if value in (None, ''):
+        value = row.get('rating')
+    if value in (None, ''):
+        return ''
+    match = re.search(r'\d+(?:\.\d+)?', str(value))
+    if not match:
+        return ''
+    try:
+        rating = float(match.group(0))
+    except ValueError:
+        return ''
+    if not 0 <= rating <= 10:
+        return ''
+    return '{:.1f}'.format(rating)
+
+
+def episode_date(row):
+    """Format provider release dates like '20 Dec 2019'."""
+    value = str(row.get('released') or row.get('releaseInfo') or '').strip()
+    match = re.match(r'^(\d{4})-(\d{2})-(\d{2})(?:T|$)', value)
+    if not match:
+        return value[:16] if re.fullmatch(r'\d{4}', value) else ''
+    year, month, day = map(int, match.groups())
+    if not 1 <= month <= 12 or not 1 <= day <= 31:
+        return ''
+    return '{} {} {}'.format(day, _MONTHS[month - 1], year)
+
+
 def item(row):
     li = xbmcgui.ListItem(clean(row.get('name') or row.get('title') or ''))
     li.setArt({'poster': row.get('poster', ''), 'thumb': row.get('thumbnail') or row.get('poster', ''),
@@ -624,7 +689,12 @@ class InfoWindow(NimbusWindow):
                     episode_code = 'Ep. {}'.format(number) if number != '' else 'Episode'
                 li.setProperty('episode_code', episode_code)
                 li.setProperty('episode_title', title)
-                li.setLabel('{} · {}'.format(episode_code, title))
+                li.setProperty('episode_heading', '{} - {}'.format(episode_code, title))
+                li.setProperty('episode_runtime', episode_runtime(
+                    row.get('runtime') if row.get('runtime') not in (None, '') else row.get('duration')))
+                li.setProperty('episode_imdb', episode_rating(row))
+                li.setProperty('episode_date', episode_date(row))
+                li.setLabel('{} - {}'.format(episode_code, title))
                 li.setArt({'thumb': row.get('thumbnail') or self.meta.get('background', '')})
             elif section == 'Similar':
                 li.setArt({'thumb': row.get('background') or row.get('poster', '')})

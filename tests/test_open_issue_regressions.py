@@ -1,4 +1,5 @@
 """Regression coverage for GitHub issues #11, #14, #15, #16 and #17."""
+import ast
 import importlib.util
 import os
 from pathlib import Path
@@ -86,17 +87,37 @@ class IssueRegressionTests(unittest.TestCase):
         self.assertEqual([row["catalog_id"] for row in rows], ["one", "two"])
         self.assertFalse(any(row["failed"] for row in rows))
 
-    def test_episode_cards_show_code_and_title(self):
+    def test_episode_cards_show_code_title_and_metadata_pills(self):
         tree = ET.parse(ROOT / "resources/skins/Main/1080i/script-stremio-info.xml")
         episodes = tree.find('.//control[@id="501"]')
         self.assertIsNotNone(episodes)
         xml = ET.tostring(episodes, encoding="unicode")
-        self.assertIn("ListItem.Property(episode_code)", xml)
-        self.assertIn("ListItem.Property(episode_title)", xml)
+        for prop in ("episode_heading", "episode_runtime", "episode_imdb", "episode_date"):
+            self.assertIn("ListItem.Property({})".format(prop), xml)
+        self.assertIn("ratings/imdb.png", xml)
+        self.assertIn('colordiffuse="99171920"', xml)
 
         source = (ROOT / "lib/nimbus.py").read_text()
-        self.assertIn("setProperty('episode_code'", source)
-        self.assertIn("setProperty('episode_title'", source)
+        for prop in ("episode_heading", "episode_runtime", "episode_imdb", "episode_date"):
+            self.assertIn("setProperty('{}'".format(prop), source)
+
+    def test_episode_card_metadata_formatters(self):
+        # Load only the helper functions so the test stays Kodi-independent.
+        source = (ROOT / "lib/nimbus.py").read_text()
+        tree = ast.parse(source)
+        names = {"episode_runtime", "episode_rating", "episode_date"}
+        functions = [node for node in tree.body
+                     if isinstance(node, ast.FunctionDef) and node.name in names]
+        scope = {
+            "re": __import__("re"),
+            "_MONTHS": ("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
+        }
+        exec(compile(ast.Module(body=functions, type_ignores=[]), "<episode-formatters>", "exec"), scope)
+        self.assertEqual(scope["episode_runtime"]("65 min"), "1h 5m")
+        self.assertEqual(scope["episode_runtime"]("PT58M"), "58m")
+        self.assertEqual(scope["episode_rating"]({"imdbRating": "8.2"}), "8.2")
+        self.assertEqual(scope["episode_date"]({"released": "2019-12-20T00:00:00.000Z"}), "20 Dec 2019")
 
 
 if __name__ == "__main__":
