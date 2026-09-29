@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.42" provider-name="0eroiQ">
+<addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.43" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,7 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.42: Inline theme-coloured stream panel with reversible flip transitions; readable episode cards and fully visible last episode; rounded controls, compact icon sidebar and country-based weather; configurable cache lifetimes and limits; manual bug/feature reports and last-error retry; private addon configuration QR with explicit sync; stronger account saves and launch recovery; Dark Cinematic branding, previews and optional live developer support. Native Stremio watch-progress write-back is not included.</news>
+    <news>1.0.43: Add optional free BYOK Gemini AI subtitle translation with local API-key settings, whole-track SRT/WebVTT translation, exact cue/timestamp preservation, translated-file caching and original-subtitle fallback. Vortexo Premium hosted AI is shown as in construction; planned at $4.99 USD/month with no API key required.</news>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>

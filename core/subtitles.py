@@ -86,7 +86,11 @@ def download(entry, directory):
     lang = entry['lang'] if entry['lang'].isalpha() else 'und'
     target = Path(directory) / '{}.{}.{}'.format(digest, lang, extension)
     atomic_write(target, data)
-    return str(target)
+    try:
+        from ai_subtitles import maybe_translate
+        return maybe_translate(target, Path(directory).parent, lang)
+    except Exception:
+        return str(target)
 
 
 def remember_selection(profile, kind, identity, stream):
