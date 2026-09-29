@@ -5,7 +5,7 @@ Contains display rows only: never auth keys or configured addon transport URLs.
 import time
 from account import Store, library_rows
 
-MAX_ROWS = 100
+MAX_ROWS = 40
 CONTINUE = 'Continue Watching'
 
 

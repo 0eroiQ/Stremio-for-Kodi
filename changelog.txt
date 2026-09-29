@@ -1,3 +1,11 @@
+1.0.50 (2026-09-30)
+
+- Reduce Home row materialization from 100 to 40 items so Kodi creates far fewer ListItems on constrained devices.
+- Limit account Home catalog refresh to two workers to avoid CPU/network contention on Raspberry Pi-class hardware.
+- Remove per-series network metadata verification from the Home refresh path; native Stremio progress state remains local and details playback verifies metadata when needed.
+- Keep the existing stale-while-revalidate Home snapshot so cached Home remains immediately usable while the bounded refresh runs in the background.
+- Add regression coverage for the low-power Home performance budget.
+
 1.0.49 (2026-09-30)
 
 - Port Noiro's whole-track Gemini batching strategy to Stremio for Kodi.

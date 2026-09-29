@@ -109,5 +109,24 @@ class ResumeSentinelTests(unittest.TestCase):
         self.assertEqual(offset,0)
 
 
+class HomePerformanceBudgetTests(unittest.TestCase):
+    def test_home_snapshot_caps_each_row_for_low_power_ui(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            items=[{'id':'tt{}'.format(i),'type':'movie','name':str(i)} for i in range(100)]
+            rows=home_snapshot.save(directory,[{'label':'Big','items':items,'failed':False}])
+            self.assertEqual(len(rows[0]['items']),40)
+
+    def test_catalog_loader_uses_bounded_defaults(self):
+        from lib import home_catalogs
+        self.assertEqual(home_catalogs.HOME_ITEM_LIMIT,40)
+        self.assertEqual(home_catalogs.MAX_WORKERS,2)
+
+    def test_home_refresh_does_not_verify_continue_with_network_metadata(self):
+        text=(ROOT/'lib/backend.py').read_text()
+        self.assertIn('_continue_rows(state, catalog_rows, False)',text)
+        self.assertNotIn('_continue_rows(state, catalog_rows, True)',text)
+
+
 if __name__=='__main__':
     unittest.main()

@@ -224,7 +224,11 @@ def account_home(refresh=True):
     except Exception:
         pass
 
-    continuing = _continue_rows(state, catalog_rows, True)
+    # Keep Home refresh bounded. Series metadata verification can fan out into
+    # many extra provider requests and made the background refresh CPU/network
+    # heavy on Pi-class hardware. Native playback sync already updates the local
+    # Stremio state; details playback can verify episode metadata when needed.
+    continuing = _continue_rows(state, catalog_rows, False)
     return ([continuing] if continuing else []) + catalog_rows
 
 
