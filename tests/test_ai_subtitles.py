@@ -170,8 +170,46 @@ class AISubtitleTests(unittest.TestCase):
     def test_download_path_is_ai_translation_hook(self):
         source = (CORE / "subtitles.py").read_text(encoding="utf-8")
         self.assertIn("from ai_subtitles import maybe_translate", source)
-        self.assertIn("return maybe_translate(target, Path(directory).parent, lang)", source)
+        self.assertIn("return maybe_translate(", source)
+        self.assertIn("progress_callback=progress_callback", source)
         self.assertIn("def ai_source_candidates", source)
+
+    def test_translation_uses_larger_batches_and_reports_progress(self):
+        module = load_module()
+        cues = []
+        for index in range(321):
+            cues.append(
+                "{}\n00:{:02d}:{:02d},000 --> 00:{:02d}:{:02d},500\nLine {}".format(
+                    index + 1,
+                    (index // 60) % 60, index % 60,
+                    (index // 60) % 60, index % 60,
+                    index + 1,
+                )
+            )
+        source_text = "\n\n".join(cues) + "\n"
+        progress = []
+
+        def fake_request(batch, api_key, target_language, source_language=None, opener=None):
+            return {cue["id"]: "HR " + cue["text"] for cue in batch}
+
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(module, "_request_translation", side_effect=fake_request) as request, \
+                patch.object(module.time, "sleep") as sleeper:
+            source = Path(directory) / "long.srt"
+            source.write_text(source_text, encoding="utf-8")
+            result = Path(module.translate_subtitle_file(
+                source, Path(directory) / "cache", "test-user-key", "hr", "en",
+                progress_callback=lambda percent, message: progress.append((percent, message))
+            ))
+            translated = result.read_text(encoding="utf-8")
+
+        self.assertEqual(module.BATCH_SIZE, 160)
+        self.assertEqual(request.call_count, 3)
+        self.assertEqual(sleeper.call_count, 2)
+        self.assertEqual(progress[0][0], 0)
+        self.assertEqual(progress[-1][0], 100)
+        self.assertIn("Translating to Croatian", progress[-1][1])
+        self.assertEqual(translated.count("-->"), 321)
 
     def test_libreelec_ffmpeg_tools_path_is_supported(self):
         module = load_module()
@@ -190,6 +228,8 @@ class AISubtitleTests(unittest.TestCase):
         self.assertIn("threading.Thread", source)
         self.assertLess(source.index("prepare_embedded_auto"), source.index("ai_source_candidates("))
         self.assertIn("_remember_ai_error", source)
+        self.assertIn("progress_bg", source)
+        self.assertIn("progress_callback=update", source)
         self.assertIn("Report last error is available", source)
 
 

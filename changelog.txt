@@ -1,3 +1,12 @@
+1.0.47 (2026-09-30)
+
+- Add a themed background progress indicator for AI subtitle preparation and translation.
+- Show video-source detection, source language, target language and translation percentage instead of appearing idle during the first translation.
+- Increase validated Gemini translation batches from 80 to 160 subtitle cues to reduce request count on full-length tracks.
+- Reduce the deliberate inter-batch delay from 2.0 seconds to 0.25 seconds.
+- Keep exact cue IDs, cue count and original timestamps unchanged.
+- Show cached translations as ready immediately and apply the same progress reporting to Stremio-addon fallback translation.
+
 1.0.46 (2026-09-30)
 
 - Detect the official LibreELEC FFmpeg Tools addon binaries for embedded subtitle extraction on LibreELEC/Kodi boxes.

@@ -28,8 +28,8 @@ MAX_FILE_BYTES = 512 * 1024
 MAX_CUES = 2000
 MAX_CUE_TEXT = 8000
 TIMEOUT_SECONDS = 25
-BATCH_SIZE = 80
-BATCH_DELAY_SECONDS = 2.0
+BATCH_SIZE = 160
+BATCH_DELAY_SECONDS = 0.25
 TRANSLATION_REVISION = "byok-v2"
 TEXT_SUBTITLE_CODECS = {"subrip", "ass", "ssa", "webvtt", "mov_text", "text"}
 FFMPEG_TIMEOUT_SECONDS = 120
@@ -334,8 +334,17 @@ def _rebuild(blocks, cues, translations):
         lines = block.split("\n")
         output.append("\n".join(lines[:cue["timing"] + 1] + translated.splitlines()))
     return "\n\n".join(output).rstrip() + "\n"
+def _progress(callback, percent, message):
+    if callback is None:
+        return
+    try:
+        callback(max(0, min(100, int(percent))), str(message or ""))
+    except Exception:
+        pass
+
+
 def translate_subtitle_file(path, cache_directory, api_key, target_language,
-                            source_language=None, opener=None):
+                            source_language=None, opener=None, progress_callback=None):
     source = Path(path)
     if source.suffix.lower() not in (".srt", ".vtt"):
         raise AITranslationError("AI translation currently supports SRT and WebVTT.")
@@ -353,19 +362,34 @@ def translate_subtitle_file(path, cache_directory, api_key, target_language,
         digest + "." + target_language + source.suffix.lower()
     )
     if destination.exists() and destination.stat().st_size:
+        _progress(progress_callback, 100, "Cached translation ready")
         return str(destination)
 
     content = data.decode("utf-8-sig", errors="replace")
     blocks, cues = _parse_timed_text(content)
     translations = {}
     batches = [cues[i:i + BATCH_SIZE] for i in range(0, len(cues), BATCH_SIZE)]
+    target_name = CODE_NAMES.get(target_language, target_language)
+    _progress(progress_callback, 0, "Starting " + target_name + " translation")
     for index, batch in enumerate(batches):
         if index:
             time.sleep(BATCH_DELAY_SECONDS)
+        _progress(
+            progress_callback,
+            int(index * 100 / len(batches)),
+            "Translating to {} · batch {}/{}".format(target_name, index + 1, len(batches)),
+        )
         result = _request_translation(
             batch, api_key.strip(), target_language, source_language, opener=opener
         )
         translations.update(result)
+        _progress(
+            progress_callback,
+            int((index + 1) * 100 / len(batches)),
+            "Translating to {} · {}%".format(
+                target_name, int((index + 1) * 100 / len(batches))
+            ),
+        )
     if len(translations) != len(cues):
         raise AITranslationError("Gemini returned an incomplete subtitle translation.")
     atomic_write(destination, _rebuild(blocks, cues, translations).encode("utf-8"))
@@ -384,20 +408,26 @@ def local_settings():
     }
 
 
-def prepare_embedded_auto(stream_url, profile):
+def prepare_embedded_auto(stream_url, profile, progress_callback=None):
     """Video-first AUTO source. Returns translated/exact-target subtitle + metadata."""
     settings = local_settings()
     if not settings["enabled"] or settings["provider"] != "0" or not settings["api_key"]:
         return None
     cache = Path(profile) / "ai-subtitles"
+    _progress(progress_callback, 5, "Checking subtitles embedded in the video")
     source_path, source_language, track = extract_best_embedded(
         stream_url, cache / "embedded", settings["target"]
     )
+    source_name = CODE_NAMES.get(source_language, source_language or "Auto")
+    _progress(progress_callback, 15, source_name + " subtitle ready · preserving original sync")
     if source_language == settings["target"]:
         final_path = source_path
     else:
+        def translation_progress(percent, message):
+            _progress(progress_callback, 20 + int(percent * 0.75), message)
         final_path = translate_subtitle_file(
-            source_path, cache, settings["api_key"], settings["target"], source_language
+            source_path, cache, settings["api_key"], settings["target"], source_language,
+            progress_callback=translation_progress
         )
     return {
         "path": final_path,
@@ -408,17 +438,17 @@ def prepare_embedded_auto(stream_url, profile):
     }
 
 
-def translate_external_auto(path, profile, source_language=None):
+def translate_external_auto(path, profile, source_language=None, progress_callback=None):
     settings = local_settings()
     if not settings["enabled"] or settings["provider"] != "0" or not settings["api_key"]:
         return str(path)
     return translate_subtitle_file(
         path, Path(profile) / "ai-subtitles", settings["api_key"],
-        settings["target"], source_language
+        settings["target"], source_language, progress_callback=progress_callback
     )
 
 
-def maybe_translate(path, profile, source_language=None):
+def maybe_translate(path, profile, source_language=None, progress_callback=None):
     try:
         from addon_state import get_addon
         addon = get_addon()
@@ -432,7 +462,8 @@ def maybe_translate(path, profile, source_language=None):
             return str(path)
         target = target_code(addon.getSetting("ai_subtitles_target"))
         return translate_subtitle_file(
-            path, Path(profile) / "ai-subtitles", api_key, target, source_language
+            path, Path(profile) / "ai-subtitles", api_key, target, source_language,
+            progress_callback=progress_callback
         )
     except Exception:
         # Translation is optional. Original subtitles must always keep playback usable.

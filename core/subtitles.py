@@ -81,7 +81,7 @@ def ai_source_candidates(providers, kind, identity, inline=None, filename='', fe
         return entries
 
 
-def download(entry, directory):
+def download(entry, directory, progress_callback=None):
     with urlopen(Request(entry['url'], headers={'User-Agent': 'StremioELEC/0.5'}), timeout=10) as response:
         data = response.read(2 * 1024 * 1024 + 1)
     if len(data) > 2 * 1024 * 1024:
@@ -102,7 +102,10 @@ def download(entry, directory):
     atomic_write(target, data)
     try:
         from ai_subtitles import maybe_translate
-        return maybe_translate(target, Path(directory).parent, lang)
+        return maybe_translate(
+            target, Path(directory).parent, lang,
+            progress_callback=progress_callback
+        )
     except Exception:
         return str(target)
 
