@@ -295,6 +295,9 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.hero_loading = False
         self.closed = False
         self.home_refreshing = False
+        self.home_row_specs = {}
+        self.home_row_loading = set()
+        self.home_row_exhausted = set()
         super().__init__(*args, **kwargs)
 
     def onInit(self):
@@ -382,6 +385,8 @@ class HomeWindow(AddonsPage, NimbusWindow):
             rows = list(catalog.get('items', []))
             self.rows[cid] = rows
             self.row_labels[cid] = catalog.get('label', '')
+            if section == 'Home':
+                self.home_row_specs[cid] = {k:catalog.get(k) for k in ('url','kind','catalog_id','provider') if catalog.get(k) is not None}
             listing = self.getControl(cid)
             listing.reset()
             listing.addItems([item(row) for row in rows])
@@ -400,6 +405,30 @@ class HomeWindow(AddonsPage, NimbusWindow):
         selected = available[0] if available else 9000
         self.setFocusId(selected)
         self.update_hero()
+
+    def maybe_load_more_home(self):
+        if self.getProperty('page') != 'Home':return
+        cid=self.getFocusId()
+        if cid not in self.rows or cid in self.home_row_loading or cid in self.home_row_exhausted:return
+        rows=self.rows[cid];spec=self.home_row_specs.get(cid) or {}
+        if not rows or len(rows)<12 or len(rows)-self.getControl(cid).getSelectedPosition()>4:return
+        if not all(spec.get(k) for k in ('url','kind','catalog_id')):return
+        self.home_row_loading.add(cid);skip=len(rows)
+        def work():
+            try:
+                from core.protocol import fetch,resource_url
+                from lib.home_catalogs import load_more
+                more=load_more(spec,fetch,resource_url,skip)
+                if self.closed:return
+                known={(r.get('type'),r.get('id')) for r in self.rows.get(cid,[])}
+                fresh=[r for r in more if (r.get('type'),r.get('id')) not in known]
+                if not fresh:self.home_row_exhausted.add(cid);return
+                self.rows[cid].extend(fresh)
+                self.getControl(cid).addItems([item(r) for r in fresh])
+                if len(more)<16:self.home_row_exhausted.add(cid)
+            except Exception:pass
+            finally:self.home_row_loading.discard(cid)
+        threading.Thread(target=work,daemon=True).start()
 
     def update_hero(self):
         if self.getProperty('page') == 'Addons':
@@ -668,6 +697,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
             self.onClick(self.getFocusId())
         else:
             self.update_hero()
+            self.maybe_load_more_home()
 
     def open_settings(self):
         from lib.settings_page import show as show_settings

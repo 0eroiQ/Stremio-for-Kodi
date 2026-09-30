@@ -49,3 +49,11 @@ def load_rows(addons, fetch, resource_url, item_limit=HOME_ITEM_LIMIT, max_worke
             return list(pool.map(load, specs))
     except RuntimeError:
         return [load(spec) for spec in specs]
+
+
+def load_more(spec, fetch, resource_url, skip, item_limit=HOME_ITEM_LIMIT):
+    """Fetch one bounded continuation page for a Home row using Stremio skip."""
+    extras={'skip':str(max(0,int(skip or 0)))}
+    payload=fetch(resource_url(spec['url'],'catalog',spec['kind'],spec['catalog_id'],extras))
+    items=[dict(item,type=item.get('type') or spec['kind']) for item in payload.get('metas',[]) if isinstance(item,dict) and item.get('id')]
+    return items[:max(1,int(item_limit))]
