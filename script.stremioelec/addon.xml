@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.49" provider-name="0eroiQ">
+<addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.50" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,7 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.49: Bring Kodi AI subtitle translation in line with Noiro: normal movie/episode tracks now use one large validated Gemini request when possible, oversized tracks split only at 2,400 cues or 120k text characters, the proven Noiro Flash-Lite model order is used, and the last successful model is preferred on the next translation.</news>
+    <news>1.0.50: Make Home lighter on constrained devices and add privacy-safe local startup timing markers for cached Home, account sync, catalog refresh, library sync and Kodi UI population.</news>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>
