@@ -1,3 +1,8 @@
+v1.0.54
+- Move Stremio for Kodi Premium/session/entitlement control-plane URLs from the retired Vortexo site to MKGA.TV.
+- Move the anonymous report sync feed from Vortexo to MKGA Lab.
+- Keep existing free functionality intact if MKGA Premium services are unavailable.
+
 1.0.51 (2026-09-30)
 
 - Make legacy StremioELEC profile migration best-effort so malformed/read-only old profile data cannot block current addon startup or Stremio sign-in.
