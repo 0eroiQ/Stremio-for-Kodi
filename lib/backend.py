@@ -239,7 +239,10 @@ def account_home(refresh=True):
     catalog_rows = load_rows(remote, fetch, resource_url)
     perf_log('home.refresh.catalogs', catalogs_started, profile=STORE.directory, rows=len(catalog_rows),
              items=sum(len(row.get('items') or []) for row in catalog_rows))
-    catalog_rows = save_snapshot(STORE.directory, catalog_rows)
+    # Persist only the display-safe snapshot, but keep the live catalog specs
+    # (transport URL/kind/catalog id) in memory so Home lazy pagination can
+    # request skip=16/32/... without ever writing provider URLs to disk.
+    save_snapshot(STORE.directory, catalog_rows)
 
     library_started = perf_now()
     try:
