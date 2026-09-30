@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, build_opener
 
 from setup_profile import atomic_write
@@ -27,12 +27,12 @@ MODEL_CHAIN = (
 MAX_FILE_BYTES = 512 * 1024
 MAX_CUES = 2000
 MAX_CUE_TEXT = 8000
-TIMEOUT_SECONDS = 120
+TIMEOUT_SECONDS = 35
 MAX_BATCH_CUES = 2400
 MAX_BATCH_CHARACTERS = 120000
 TRANSLATION_REVISION = "byok-v2"
 TEXT_SUBTITLE_CODECS = {"subrip", "srt", "ass", "ssa", "webvtt", "mov_text", "text", "subviewer", "microdvd"}
-FFMPEG_TIMEOUT_SECONDS = 120
+FFMPEG_TIMEOUT_SECONDS = 35
 FFPROBE_TIMEOUT_SECONDS = 25
 TARGETS = (
     ("Bosnian", "bs"), ("Croatian", "hr"), ("Serbian", "sr"),
@@ -357,7 +357,14 @@ def _request_translation(cues, api_key, target_language, source_language=None, o
             last_error = error
             if _preferred_model == model:
                 _preferred_model = None
-            break
+            # A malformed/partial model response may be model-specific. Try the
+            # next compatible Gemini model instead of failing AUTO translation.
+            continue
+        except (URLError, TimeoutError, OSError) as error:
+            last_error = error
+            if _preferred_model == model:
+                _preferred_model = None
+            continue
         except Exception as error:
             last_error = error
             if _preferred_model == model:

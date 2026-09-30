@@ -287,3 +287,21 @@ class EmbeddedKodi22Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d, patch.object(module,'_binary',return_value='ffmpeg'), patch.object(module,'embedded_tracks',return_value=tracks), patch.object(module.subprocess,'run',side_effect=[R(1,b''),R(0,b'1\\n00:00:01,000 --> 00:00:02,000\\nHello\\n')]) as run:
             path,lang,track=module.extract_best_embedded('https://example/video.mkv',Path(d),'bs')
             self.assertEqual(track['index'],3);self.assertEqual(lang,'en');self.assertTrue(Path(path).exists());self.assertIn('-nostdin',run.call_args_list[0].args[0])
+
+class GeminiFallbackTests(unittest.TestCase):
+    def test_invalid_first_model_response_falls_back(self):
+        module=load_module(); module._preferred_model=None
+        cues=[{'id':'1','text':'Hello'}]; calls=[]
+        class Response:
+            def __init__(self,payload):self.payload=payload
+            def __enter__(self):return self
+            def __exit__(self,*args):return False
+            def read(self,limit):return json.dumps(self.payload).encode()
+        class Opener:
+            def open(self,request,timeout=None):
+                calls.append((request.full_url,timeout))
+                if len(calls)==1:return Response({'candidates':[{'content':{'parts':[{'text':'not-json'}]}}]})
+                inner=json.dumps([{'id':'1','text':'Zdravo'}])
+                return Response({'candidates':[{'content':{'parts':[{'text':inner}]}}]})
+        self.assertEqual(module._request_translation(cues,'key','bs','en',Opener())['1'],'Zdravo')
+        self.assertEqual(len(calls),2);self.assertEqual(calls[0][1],35)
