@@ -13,7 +13,7 @@ import sys
 import traceback
 from urllib.request import Request, urlopen
 
-REPORT_ENDPOINT = 'https://vortexo.app/api/stremio-kodi/v1/report'
+REPORT_ENDPOINT = 'https://mkga.tv/api/stremio-kodi/v1/report'
 REPORT_VERSION = 1
 MAX_FRAMES = 8
 
