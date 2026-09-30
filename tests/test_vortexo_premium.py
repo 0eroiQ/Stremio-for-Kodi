@@ -1,4 +1,4 @@
-"""Vortexo Premium client boundary tests; no real network requests."""
+"""MKGA Premium client boundary tests; no real network requests."""
 import importlib.util
 import io
 import json
@@ -118,7 +118,7 @@ class PremiumTests(unittest.TestCase):
         self.assertEqual(json.loads(request.data), {"authKey": "test-only-auth"})
         self.assertEqual(
             request.full_url,
-            "https://vortexo.app/api/stremio-for-kodi/v1/session"
+            "https://mkga.tv/api/stremio-for-kodi/v1/session"
         )
         self.assertNotIn("Authorization", request.headers)
         self.assertEqual(opener.timeouts[0], module.TIMEOUT_SECONDS)
@@ -132,7 +132,7 @@ class PremiumTests(unittest.TestCase):
         self.assertEqual(request.data, b"")
         self.assertEqual(
             request.full_url,
-            "https://vortexo.app/api/stremio-for-kodi/v1/entitlements"
+            "https://mkga.tv/api/stremio-for-kodi/v1/entitlements"
         )
         self.assertEqual(request.headers.get("Authorization"), "Bearer signed.vortexo.token")
         self.assertNotIn("authKey", (request.data or b"").decode("utf-8"))
@@ -233,7 +233,7 @@ class PremiumTests(unittest.TestCase):
         request = opener.requests[0]
         self.assertEqual(
             request.full_url,
-            "https://vortexo.app/api/stremio-for-kodi/v1/features/ai-translation"
+            "https://mkga.tv/api/stremio-for-kodi/v1/features/ai-translation"
         )
         self.assertEqual(request.headers.get("Authorization"), "Bearer cached.vortexo.token")
         body = json.loads(request.data)
@@ -281,13 +281,13 @@ class PremiumTests(unittest.TestCase):
         self.assertFalse(result["already_owned"])
         self.assertEqual(
             result["purchase_session"]["checkout_url"],
-            "https://vortexo.app/account.html?section=shop&kodiPurchase=purchase-session-123"
+            "https://mkga.tv/account.html?section=shop&kodiPurchase=purchase-session-123"
         )
         request = opener.requests[0]
         self.assertEqual(request.data, b"")
         self.assertEqual(
             request.full_url,
-            "https://vortexo.app/api/stremio-for-kodi/v1/purchase-sessions"
+            "https://mkga.tv/api/stremio-for-kodi/v1/purchase-sessions"
         )
         self.assertEqual(request.headers.get("Authorization"), "Bearer signed.vortexo.token")
         self.assertNotIn("authKey", (request.data or b"").decode("utf-8"))
@@ -328,7 +328,7 @@ class PremiumTests(unittest.TestCase):
         self.assertIn("'premium_buy'", default_source)
         self.assertIn("show_purchase", default_source)
         self.assertNotIn('label="Get Premium"', settings_source)
-        self.assertIn("Vortexo Premium - In construction", settings_source)
+        self.assertIn("MKGA Premium - In construction", settings_source)
         self.assertIn("$4.99 USD/month", settings_source)
         self.assertIn("script-vortexo-premium.xml", (ROOT / "lib" / "vortexo_premium.py").read_text(encoding="utf-8"))
         self.assertIn("<label>Get Premium</label>", window_source)

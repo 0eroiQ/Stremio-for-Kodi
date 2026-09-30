@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 ENDPOINT = os.environ.get(
     "REPORTS_ENDPOINT",
-    "https://vortexo.app/api/stremio-kodi/v1/reports"
+    "https://mkga.tv/api/stremio-kodi/v1/reports"
 )
 REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "0eroiQ/Stremio-for-Kodi")
 TOKEN = os.environ.get("GITHUB_TOKEN", "")

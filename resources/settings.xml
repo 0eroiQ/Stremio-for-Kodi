@@ -26,17 +26,17 @@
   </category>
   <category label="AI Subtitles">
     <setting id="ai_subtitles_enabled" type="bool" label="Enable AI subtitle translation" default="false" />
-    <setting id="ai_subtitles_provider" type="enum" label="Translation provider" values="My Gemini API key - Free|Vortexo Premium - In construction" default="0" />
+    <setting id="ai_subtitles_provider" type="enum" label="Translation provider" values="My Gemini API key - Free|MKGA Premium - In construction" default="0" />
     <setting id="ai_subtitles_source" type="enum" label="Subtitle source" values="Auto - Video first, then Stremio addons|Video subtitles only|Stremio addons only" default="0" />
     <setting id="ai_subtitles_gemini_api_key" type="text" option="hidden" label="Gemini API key (stored locally)" default="" />
     <setting id="ai_subtitles_target" type="enum" label="Translate subtitles to" values="Bosnian|Croatian|Serbian|English|German|French|Spanish|Italian|Portuguese|Dutch|Polish|Czech|Slovak|Slovenian|Macedonian|Albanian|Turkish|Greek|Romanian|Hungarian|Bulgarian|Russian|Ukrainian|Arabic|Hebrew|Hindi|Chinese|Japanese|Korean" default="0" />
-    <setting type="lsep" label="Free BYOK mode sends subtitle dialogue directly from this Kodi device to Google Gemini using your key. The key is stored in Kodi add-on settings on this device and is never sent to Vortexo." />
+    <setting type="lsep" label="Free BYOK mode sends subtitle dialogue directly from this Kodi device to Google Gemini using your key. The key is stored in Kodi add-on settings on this device and is never sent to MKGA." />
     <setting type="lsep" label="If AI translation is unavailable or a subtitle is unsupported, Stremio for Kodi keeps the original subtitle." />
   </category>
-  <category label="Vortexo Premium">
-    <setting type="lsep" label="Vortexo Premium - In construction" />
+  <category label="MKGA Premium">
+    <setting type="lsep" label="MKGA Premium - In construction" />
     <setting type="lsep" label="Planned: $4.99 USD/month with hosted AI subtitle translation and no Gemini API key required." />
-    <setting type="lsep" label="Premium will use your verified Stremio identity on vortexo.app. Until it launches, choose My Gemini API key - Free under AI Subtitles." />
+    <setting type="lsep" label="Premium will use your verified Stremio identity on mkga.tv. Until it launches, choose My Gemini API key - Free under AI Subtitles." />
   </category>
   <category label="Support">
     <setting type="action" label="Support development" action="RunScript(special://home/addons/script.stremioelec/support_development.py)" />

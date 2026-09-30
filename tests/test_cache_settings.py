@@ -61,7 +61,7 @@ class PolicyTests(unittest.TestCase):
                  'https://provider/subtitles/movie/tt1.json': None,
                  'https://provider/manifest.json': None,
                  'https://api.strem.io/api/datastoreGet': None,
-                 'https://vortexo.app/api/stremio-for-kodi/v1/entitlements': None,
+                 'https://mkga.tv/api/stremio-for-kodi/v1/entitlements': None,
                  'https://provider/meta/private/config/stream/movie/tt1.json': None,
                  'https://api.mdblist.com/imdb/movie/tt1/?apikey=synthetic': None}
         for url, group in cases.items():

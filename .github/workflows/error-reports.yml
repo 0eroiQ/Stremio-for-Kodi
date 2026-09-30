@@ -26,5 +26,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          REPORTS_ENDPOINT: https://vortexo.app/api/stremio-kodi/v1/reports
+          REPORTS_ENDPOINT: https://mkga.tv/api/stremio-kodi/v1/reports
         run: python3 tools/sync-error-reports.py

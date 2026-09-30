@@ -20,7 +20,7 @@ START_DELAYS = ("Immediately", "1 second", "2 seconds", "3 seconds", "5 seconds"
 TRAILER_QUALITY = ("1080p", "720p", "480p")
 TRAILER_SCOPE = ("Home and Media info hero", "Home hero only", "Media info hero only")
 TRAILER_DELAY = ("3 seconds", "5 seconds", "10 seconds", "15 seconds", "30 seconds", "1 second")
-AI_PROVIDERS = ("My Gemini API key - Free", "Vortexo Premium - In construction")
+AI_PROVIDERS = ("My Gemini API key - Free", "MKGA Premium - In construction")
 AI_SOURCES = ("Auto - Video first, then Stremio addons", "Video subtitles only", "Stremio addons only")
 AI_TARGETS = ("Bosnian", "Croatian", "Serbian", "English", "German", "French", "Spanish",
               "Italian", "Portuguese", "Dutch", "Polish", "Czech", "Slovak", "Slovenian",
@@ -240,7 +240,7 @@ def rows_for(category):
         ]
     if category == "premium":
         return [
-            _info("Vortexo Premium", "In construction", "Hosted AI translation is not enabled yet."),
+            _info("MKGA Premium", "In construction", "Hosted AI translation is not enabled yet."),
             _info("Planned price", "$4.99 USD / month", "Planned hosted AI option with no Gemini API key required."),
             _info("Identity", "Verified Stremio account", "Premium will use the existing verified Stremio identity; no second Kodi login."),
             _info("Free AI subtitles", "Available now", "Use your own Gemini API key without Premium."),

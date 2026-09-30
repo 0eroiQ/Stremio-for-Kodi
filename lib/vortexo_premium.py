@@ -1,8 +1,8 @@
-"""Vortexo Premium entitlement client.
+"""MKGA Premium entitlement client.
 
 The Kodi source may be public. Premium authority stays server-side at
-https://vortexo.app. The client exchanges its existing Stremio authKey for a
-short-lived Vortexo access token; Premium APIs receive only that Vortexo token.
+https://mkga.tv. The client exchanges its existing Stremio authKey for a
+short-lived MKGA access token; Premium APIs receive only that MKGA token.
 The client never sends or trusts a caller-supplied Stremio UID, product, price,
 feature grant, or payment state.
 """
@@ -12,7 +12,7 @@ import time
 from urllib.parse import parse_qs, urlsplit
 from urllib.request import Request, HTTPRedirectHandler, build_opener
 
-BASE_URL = "https://vortexo.app"
+BASE_URL = "https://mkga.tv"
 SESSION_PATH = "/api/stremio-for-kodi/v1/session"
 ENTITLEMENTS_PATH = "/api/stremio-for-kodi/v1/entitlements"
 PURCHASE_PATH = "/api/stremio-for-kodi/v1/purchase-sessions"
@@ -33,7 +33,7 @@ class PremiumError(Exception):
 
 class _NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs):
-        raise PremiumError("Vortexo endpoint redirected; request stopped.")
+        raise PremiumError("MKGA endpoint redirected; request stopped.")
 
 
 def _opener():
@@ -42,11 +42,11 @@ def _opener():
 
 def _validated_url(path):
     if path not in _ALLOWED_PATHS:
-        raise PremiumError("Unsupported Vortexo endpoint.")
+        raise PremiumError("Unsupported MKGA endpoint.")
     url = BASE_URL + path
     parsed = urlsplit(url)
-    if parsed.scheme != "https" or parsed.netloc != "vortexo.app":
-        raise PremiumError("Invalid Vortexo endpoint.")
+    if parsed.scheme != "https" or parsed.netloc != "mkga.tv":
+        raise PremiumError("Invalid MKGA endpoint.")
     return url
 
 
@@ -105,7 +105,7 @@ def _checkout_url(path):
     if not isinstance(path, str) or not path.startswith("/account.html?"):
         raise PremiumError("Invalid Premium checkout address.")
     parsed = urlsplit(BASE_URL + path)
-    if parsed.scheme != "https" or parsed.netloc != "vortexo.app" or parsed.path != "/account.html":
+    if parsed.scheme != "https" or parsed.netloc != "mkga.tv" or parsed.path != "/account.html":
         raise PremiumError("Invalid Premium checkout address.")
     query = parse_qs(parsed.query, keep_blank_values=False)
     purchase_ids = query.get("kodiPurchase", [])
@@ -177,7 +177,7 @@ def fetch_session(auth_key, opener=None):
 def fetch_entitlements(access_token, opener=None):
     access_token = access_token.strip() if isinstance(access_token, str) else ""
     if not access_token or len(access_token) > 4096:
-        raise PremiumError("A valid Vortexo Premium session is required.")
+        raise PremiumError("A valid MKGA Premium session is required.")
     request = Request(
         _validated_url(ENTITLEMENTS_PATH),
         data=b"",
@@ -272,7 +272,7 @@ def translate_segments(store, segments, target_language, source_language=None, o
 def create_purchase_session(access_token, opener=None):
     access_token = access_token.strip() if isinstance(access_token, str) else ""
     if not access_token or len(access_token) > 4096:
-        raise PremiumError("A valid Vortexo Premium session is required.")
+        raise PremiumError("A valid MKGA Premium session is required.")
     request = Request(
         _validated_url(PURCHASE_PATH),
         data=b"",
@@ -404,7 +404,7 @@ def show_status():
     else:
         themed_dialog().ok(
             "Stremio for Kodi Premium",
-            "This Stremio account is currently on the free plan. Premium checkout will be enabled separately on vortexo.app."
+            "This Stremio account is currently on the free plan. Premium checkout will be enabled separately on mkga.tv."
         )
 
 
@@ -423,8 +423,8 @@ def _purchase_window_class():
             self.getControl(120).setImage(self.qr_path or "")
             self.getControl(110).setLabel(checkout_url)
             self.getControl(112).setText(
-                "Scan the QR code with your phone, sign in to the same Vortexo customer, "
-                "and complete Premium checkout on vortexo.app."
+                "Scan the QR code with your phone, sign in to the same MKGA customer, "
+                "and complete Premium checkout on mkga.tv."
             )
             self.getControl(111).setLabel("Waiting for Premium activation…")
             self.setFocusId(103)

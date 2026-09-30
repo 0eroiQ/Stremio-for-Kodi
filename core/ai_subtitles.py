@@ -1,7 +1,7 @@
 """Free BYOK Gemini subtitle translation for Stremio for Kodi.
 
 The viewer's Gemini key stays in Kodi add-on settings and is sent only to
-Google's Generative Language API. Vortexo Premium hosted translation is a
+Google's Generative Language API. MKGA Premium hosted translation is a
 separate future path and is never silently substituted here.
 """
 import hashlib
@@ -527,7 +527,7 @@ def maybe_translate(path, profile, source_language=None, progress_callback=None)
             return str(path)
         provider = addon.getSetting("ai_subtitles_provider").strip() or "0"
         if provider != "0":
-            return str(path)  # Vortexo Premium hosted AI is still in construction.
+            return str(path)  # MKGA Premium hosted AI is still in construction.
         api_key = addon.getSetting("ai_subtitles_gemini_api_key").strip()
         if not api_key:
             return str(path)

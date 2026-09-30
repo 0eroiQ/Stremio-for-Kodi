@@ -162,7 +162,7 @@ class AISubtitleTests(unittest.TestCase):
         self.assertIn('id="ai_subtitles_gemini_api_key"', settings)
         self.assertIn("My Gemini API key - Free", settings)
         self.assertIn("Auto - Video first, then Stremio addons", settings)
-        self.assertIn("Vortexo Premium - In construction", settings)
+        self.assertIn("MKGA Premium - In construction", settings)
         self.assertIn("$4.99 USD/month", settings)
         self.assertNotIn('label="Get Premium"', settings)
         self.assertIsNotNone(root)

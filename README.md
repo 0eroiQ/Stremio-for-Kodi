@@ -127,11 +127,11 @@ GPL-2.0-or-later; see `LICENSE`. Nimbus layouts, artwork and fonts are by Ivar B
 
 ## Public client and Premium boundary
 
-The Kodi client is designed to be safe to publish as open source. Free playback, browsing and account features remain client-side. Premium authority, customer records, payment state and entitlement grants stay server-side on `vortexo.app`.
+The Kodi client is designed to be safe to publish as open source. Free playback, browsing and account features remain client-side. Premium authority, customer records, payment state and entitlement grants stay server-side on `mkga.tv`.
 
-Kodi does not use a second Vortexo login. The client sends its existing Stremio `authKey` only to the fixed HTTPS Vortexo session endpoint. Vortexo verifies that session with Stremio, derives the stable Stremio UID server-side, and returns a short-lived signed Vortexo access token. Premium API calls then use only that Vortexo token; they do not repeatedly send the Stremio auth key. The client never supplies a UID, price, payment result or feature grant. If Vortexo is unavailable or Premium is disabled, free Stremio for Kodi functionality continues to work.
+Kodi does not use a second MKGA login. The client sends its existing Stremio `authKey` only to the fixed HTTPS MKGA session endpoint. MKGA verifies that session with Stremio, derives the stable Stremio UID server-side, and returns a short-lived signed MKGA access token. Premium API calls then use only that MKGA token; they do not repeatedly send the Stremio auth key. The client never supplies a UID, price, payment result or feature grant. If MKGA is unavailable or Premium is disabled, free Stremio for Kodi functionality continues to work.
 
-The client also contains a bounded **Get Premium** handoff. It asks the private Vortexo backend for a customer-bound purchase session using the short-lived Vortexo token, then displays the returned `vortexo.app` checkout URL as a QR code. The client cannot choose the product, price, payment result, customer UID or feature grants. Pricing and production commerce remain controlled by the private Vortexo backend, and free functionality continues to work if Premium checkout is unavailable.
+The client also contains a bounded **Get Premium** handoff. It asks the private MKGA backend for a customer-bound purchase session using the short-lived MKGA token, then displays the returned `mkga.tv` checkout URL as a QR code. The client cannot choose the product, price, payment result, customer UID or feature grants. Pricing and production commerce remain controlled by the private MKGA backend, and free functionality continues to work if Premium checkout is unavailable.
 
 ## Account setup
 
@@ -151,11 +151,11 @@ Optional MDbList ratings: open addon Settings > Ratings, enter an API key or use
 
 ### Premium service boundary
 
-Premium authority is never a local boolean. The public client exchanges the existing Stremio session for a short-lived signed Vortexo token, then uses that token for private Vortexo Premium APIs.
+Premium authority is never a local boolean. The public client exchanges the existing Stremio session for a short-lived signed MKGA token, then uses that token for private MKGA Premium APIs.
 
-The first server-gated feature client is **AI Translation**. Translation requests contain only bounded subtitle/dialogue text, language codes and local segment IDs. The Stremio auth key, Stremio UID, Vortexo customer ID, provider API key and payment state are not sent in the translation payload. The private Vortexo backend verifies the signed token and current Premium entitlement before a translation provider can be invoked.
+The first server-gated feature client is **AI Translation**. Translation requests contain only bounded subtitle/dialogue text, language codes and local segment IDs. The Stremio auth key, Stremio UID, MKGA customer ID, provider API key and payment state are not sent in the translation payload. The private MKGA backend verifies the signed token and current Premium entitlement before a translation provider can be invoked.
 
-The built-in direct IMDb trailer resolver described below is currently a **free local feature** because its implementation is already public in this repository. The server-side `trailers` Premium entitlement is reserved for future Vortexo-hosted trailer enhancements; the project does not pretend that public local trailer code can be securely paywalled.
+The built-in direct IMDb trailer resolver described below is currently a **free local feature** because its implementation is already public in this repository. The server-side `trailers` Premium entitlement is reserved for future MKGA-hosted trailer enhancements; the project does not pretend that public local trailer code can be securely paywalled.
 
 ### Built-in trailers
 

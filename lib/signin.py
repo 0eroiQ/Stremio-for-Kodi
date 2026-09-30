@@ -114,7 +114,7 @@ class WelcomeWindow(xbmcgui.WindowXML):
                             # Authentication succeeded; a failed sync must not invent a logout.
                             xbmc.log('Stremio for Kodi: account linked; initial sync incomplete', xbmc.LOGWARNING)
                         try:
-                            # Premium uses the same verified Stremio session. Vortexo is
+                            # Premium uses the same verified Stremio session. MKGA is
                             # optional here: an unavailable backend must never block free use.
                             from lib.vortexo_premium import refresh_quiet
                             refresh_quiet(store)
