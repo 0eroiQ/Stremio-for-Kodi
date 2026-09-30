@@ -678,7 +678,6 @@ class HomeWindow(AddonsPage, NimbusWindow):
             # The previous two-press arm state made TV remotes appear trapped
             # because the first Back silently moved focus to the sidebar.
             self.exit_armed = False
-            self.cancel_trailer()
             if themed_dialog().yesno(
                     'Exit Stremio for Kodi',
                     'Do you want to exit Stremio for Kodi?',
