@@ -15,6 +15,7 @@
     <setting id="ui_theme" type="enum" label="Theme" values="Purple|Black|Blue|Green|Gold" default="0" />
     <setting id="ui_focus_color" type="enum" label="Poster focus color" values="Original|Purple|Blue|Green|Gold|Theme" default="5" />
     <setting id="ui_animations" type="bool" label="Enable animations" default="true" />
+    <setting id="search_native_keyboard" type="bool" label="Use native Kodi keyboard for Search" default="false" />
     <setting id="ui_dim_rows" type="bool" label="Dim rows while the side menu is open" default="false" />
     <setting id="ui_show_logo" type="bool" label="Use title logo (otherwise show text)" default="true" />
     <setting id="ui_show_plot" type="bool" label="Show description" default="true" />

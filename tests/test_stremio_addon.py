@@ -70,6 +70,26 @@ class AddonTests(unittest.TestCase):
             self.assertFalse((new/'account.json').exists())
             self.assertTrue((old/'account.json').exists())
 
+    def test_get_addon_survives_broken_legacy_profile(self):
+        addon = Mock()
+        addon.getAddonInfo.return_value = '/current'
+        xbmcaddon = types.SimpleNamespace(Addon=Mock(return_value=addon))
+        xbmcvfs = types.SimpleNamespace(translatePath=lambda value: value)
+        with patch.dict(sys.modules, {'xbmcaddon': xbmcaddon, 'xbmcvfs': xbmcvfs}):
+            migration = load('addon_state_fail_safe', CORE / 'addon_state.py')
+            with patch.object(migration, 'migrate_profile', side_effect=OSError('read only')):
+                self.assertIs(migration.get_addon(), addon)
+
+    def test_migration_survives_malformed_legacy_settings(self):
+        addon = Mock()
+        addon.getAddonInfo.return_value = '/current'
+        xbmcaddon = types.SimpleNamespace(Addon=Mock(return_value=addon))
+        xbmcvfs = types.SimpleNamespace(translatePath=lambda value: value)
+        with patch.dict(sys.modules, {'xbmcaddon': xbmcaddon, 'xbmcvfs': xbmcvfs}):
+            migration = load('addon_state_bad_xml', CORE / 'addon_state.py')
+            with patch.object(migration, 'migrate_profile', side_effect=ET.ParseError('bad xml')):
+                self.assertIs(migration.get_addon(), addon)
+
     def test_embedded_texture_paths_exist(self):
         prefix = 'special://home/addons/script.stremioelec/'
         for path in (SOURCE/'resources/skins/Main/1080i').glob('*.xml'):

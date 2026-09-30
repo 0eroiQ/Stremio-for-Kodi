@@ -59,11 +59,12 @@ class SidebarTests(unittest.TestCase):
                 window.getControl.return_value.getSelectedPosition.return_value=index
                 dialog=Mock();dialog.input.return_value='';dialog.select.return_value=-1
                 gui=Mock();gui.Dialog.return_value=dialog
-                scope={'menu_action':menu_action,'xbmcgui':gui,'api':Mock()}
+                scope={'menu_action':menu_action,'xbmcgui':gui,'xbmc':Mock(),'ADDON':Mock(),'api':Mock()}
                 code=ast.Module(body=[self.function('onClick')],type_ignores=[])
                 exec(compile(code,'<sidebar-click>','exec'),scope)
                 scope['onClick'](window,9000)
                 if target=='search':
+                    scope['ADDON'].getSetting.return_value = 'false'
                     dialog.input.assert_called_once_with('Search movies and series')
                     window.load_home.assert_not_called()
                 elif target=='settings':
@@ -72,6 +73,13 @@ class SidebarTests(unittest.TestCase):
                 else:
                     getattr(window,target).assert_called_once_with()
                     dialog.input.assert_not_called()
+
+    def test_search_supports_native_kodi_keyboard_setting(self):
+        text=(ROOT/'lib/nimbus.py').read_text()
+        self.assertIn("ADDON.getSetting('search_native_keyboard')", text)
+        self.assertIn("xbmc.Keyboard('', 'Search movies and series')", text)
+        settings=(ROOT/'resources/settings.xml').read_text()
+        self.assertIn('id="search_native_keyboard"', settings)
 
     def test_initialization_keeps_home_selected(self):
         window=Mock();window.initialized=False;window.row_count=2

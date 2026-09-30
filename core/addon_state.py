@@ -48,6 +48,15 @@ def migrate_profile(source, target, set_setting):
 
 def get_addon():
     addon = xbmcaddon.Addon(ADDON_ID)
-    migrate_profile(xbmcvfs.translatePath('special://profile/addon_data/plugin.video.stremioelec'),
-                    xbmcvfs.translatePath(addon.getAddonInfo('profile')), addon.setSetting)
+    # Legacy migration is best-effort only. A malformed/read-only former profile
+    # must never prevent the current addon from starting or signing in.
+    try:
+        migrate_profile(xbmcvfs.translatePath('special://profile/addon_data/plugin.video.stremioelec'),
+                        xbmcvfs.translatePath(addon.getAddonInfo('profile')), addon.setSetting)
+    except (OSError, ValueError, ET.ParseError):
+        try:
+            import xbmc
+            xbmc.log('Stremio for Kodi: legacy profile migration skipped', xbmc.LOGWARNING)
+        except Exception:
+            pass
     return addon

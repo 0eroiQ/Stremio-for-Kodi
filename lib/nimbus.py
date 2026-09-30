@@ -707,7 +707,12 @@ class HomeWindow(AddonsPage, NimbusWindow):
         if cid == 202:
             self.load_home()
         elif cid == 201:
-            query = themed_dialog().input('Search movies and series').strip()
+            if ADDON.getSetting('search_native_keyboard') == 'true':
+                keyboard = xbmc.Keyboard('', 'Search movies and series')
+                keyboard.doModal()
+                query = keyboard.getText().strip() if keyboard.isConfirmed() else ''
+            else:
+                query = themed_dialog().input('Search movies and series').strip()
             if query:
                 result = self.busy('Searching', lambda: api.search(query, api.providers())) or []
                 self.populate('Search: ' + query, [r for r in result if r.get('type') == 'movie'],

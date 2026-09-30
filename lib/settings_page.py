@@ -170,6 +170,7 @@ def rows_for(category):
             _enum("ui_theme", "Theme", THEMES, "Changes the colors of addon-owned windows."),
             _enum("ui_focus_color", "Poster focus color", FOCUS, "Focus border color for posters and cards."),
             _bool("ui_animations", "Animations", "Enable addon interface animations."),
+            _bool("search_native_keyboard", "Use native Kodi keyboard for Search", "Improves physical/Bluetooth keyboard and Yatse/Kore mobile keyboard support."),
             _bool("ui_dim_rows", "Dim rows with side menu", "Dim content rows while the side menu is open."),
             _bool("ui_show_logo", "Title logos", "Use title logos when available."),
             _bool("ui_show_plot", "Descriptions", "Show title descriptions in hero areas."),

@@ -1,3 +1,9 @@
+1.0.51 (2026-09-30)
+
+- Make legacy StremioELEC profile migration best-effort so malformed/read-only old profile data cannot block current addon startup or Stremio sign-in.
+- Add optional native Kodi Search keyboard support for Yatse/Kore, physical keyboards and Bluetooth HID input while keeping the Nimbus input as default.
+- Add regression coverage for broken legacy profiles and native Search keyboard wiring.
+
 1.0.50 (2026-09-30)
 
 - Reduce Home row materialization from 100 to 40 items so Kodi creates far fewer ListItems on constrained devices.
