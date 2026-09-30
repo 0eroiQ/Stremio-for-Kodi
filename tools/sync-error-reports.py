@@ -56,13 +56,23 @@ def issue_body(report):
     feedback = report.get('feedback')
     if feedback is not None:
         feedback = validate_feedback(feedback)
+    performance = report.get('errorType') == 'PerformanceReport'
     manual = report.get('errorType') in ('ManualReport', 'FeatureRequest')
-    heading = ('Feature request' if feedback and feedback['kind'] == 'feature' else
+    heading = ('Performance report' if performance else
+               'Feature request' if feedback and feedback['kind'] == 'feature' else
                'Manual bug report' if feedback else 'Manual report - details needed' if manual else
                'Automatic anonymous error report')
     stack = '\n'.join(report.get('stack') or []) or 'No automatic stack was captured.'
     content = ''
-    if feedback:
+    if performance:
+        timings = report.get('performance') if isinstance(report.get('performance'), dict) else {}
+        safe = []
+        for stage in sorted(timings):
+            values = timings.get(stage) if isinstance(timings.get(stage), dict) else {}
+            safe.append('- `{}`: **{} ms** · rows={} · items={}'.format(
+                stage, int(values.get('ms') or 0), int(values.get('rows') or 0), int(values.get('items') or 0)))
+        content = '\n### Home performance timings\n\n' + ('\n'.join(safe) or 'No timing samples were supplied.') + '\n'
+    elif feedback:
         content = ('\n### User-submitted feedback\n\n```text\n' + feedback['title'] + '\n\n' +
                    feedback['description'] + '\n```\n\nCategory: ' + feedback['category'] +
                    '\n\nFrequency: ' + feedback['frequency'] + '\n')
@@ -87,11 +97,13 @@ def title(report):
         prefix = 'Feature Request' if feedback['kind'] == 'feature' else 'Bug Report'
         return '[{}] {} - {}'.format(prefix, feedback['title'][:85], report['fingerprint'])
     context = re.sub(r'[^A-Za-z0-9 ._+()\-]', '', str(report.get('context') or 'Unknown error')).strip()
-    prefix = 'Manual Report' if report.get('errorType') == 'ManualReport' else 'Auto Report'
+    prefix = ('Performance' if report.get('errorType') == 'PerformanceReport' else
+              'Manual Report' if report.get('errorType') == 'ManualReport' else 'Auto Report')
     return '[{}] {} - {}'.format(prefix, context[:70], report['fingerprint'])
 
 
 LABELS = {'bug': ('d73a4a', 'Something is not working'),
+          'performance': ('5319e7', 'Performance report from Stremio for Kodi'),
           'feature-request': ('a2eeef', 'User-requested improvement'),
           'needs-triage': ('fbca04', 'New report awaiting maintainer review'),
           'needs-info': ('d4c5f9', 'Insufficient detail to diagnose'),

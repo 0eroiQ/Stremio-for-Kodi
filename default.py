@@ -30,6 +30,23 @@ def main():
     elif 'locale' in sys.argv[1:]:
         from lib.settings import locale_menu
         locale_menu()
+    elif 'send_performance_report' in sys.argv[1:]:
+        import xbmcvfs
+        from pathlib import Path
+        from addon_state import get_addon
+        from lib.perf_report import build_payload
+        from lib.error_report import show_report_dialog
+        addon = get_addon()
+        profile = Path(xbmcvfs.translatePath(addon.getAddonInfo('profile')))
+        payload = build_payload(profile)
+        if payload:
+            timings = payload.get('performance') or {}
+            lines = ['{}: {} ms'.format(stage, values.get('ms', 0))
+                     for stage, values in timings.items() if 'ms' in values]
+            show_report_dialog(payload, 'Home performance report\n' + '\n'.join(lines), replay=True)
+        else:
+            from lib.ui_dialogs import dialog
+            dialog().notification('Performance report', 'No Home performance sample is available yet. Open Home first.')
     elif 'report_last_error' in sys.argv[1:]:
         from lib.error_report import report_last_error
         report_last_error()

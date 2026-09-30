@@ -147,5 +147,25 @@ class PerformanceTraceWiringTests(unittest.TestCase):
         self.assertIn('value = int(counts[key])',text)
 
 
+class PerformanceReportTests(unittest.TestCase):
+    def test_performance_payload_contains_only_allowlisted_timings(self):
+        from lib.perf_report import record, build_payload
+        with tempfile.TemporaryDirectory() as tmp:
+            profile=Path(tmp)
+            record(profile,'home.refresh.catalogs',1234,rows=7,items=88,secret='nope')
+            payload=build_payload(profile,{'addonVersion':'1.0.50','kodiVersion':'21','platform':'Linux','pythonVersion':'3.11'})
+            self.assertEqual(payload['errorType'],'PerformanceReport')
+            self.assertEqual(payload['performance']['home.refresh.catalogs'],{'ms':1234,'rows':7,'items':88})
+            raw=str(payload).lower()
+            for forbidden in ('token','url','title','api_key','device'):
+                self.assertNotIn(forbidden,raw)
+
+    def test_support_exposes_explicit_performance_report(self):
+        settings=(ROOT/'resources/settings.xml').read_text()
+        page=(ROOT/'lib/settings_page.py').read_text()
+        self.assertIn('send_performance_report',settings)
+        self.assertIn('Send performance report',page)
+
+
 if __name__=='__main__':
     unittest.main()

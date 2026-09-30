@@ -68,6 +68,7 @@ def attach_feedback(payload, feedback):
 def report_labels(report, initial=False):
     """Never accept client-supplied labels, priorities or lifecycle changes."""
     feedback = report.get('feedback')
+    performance = report.get('errorType') == 'PerformanceReport'
     legacy_manual = feedback is None and report.get('errorType') == 'ManualReport'
     if feedback is not None:
         feedback = validate_feedback(feedback)
@@ -86,8 +87,9 @@ def report_labels(report, initial=False):
         kind, source = ('unknown', 'manual') if legacy_manual else ('bug', 'auto')
     platform = {'Windows': 'windows', 'Android': 'android', 'macOS': 'macos',
                 'Linux': 'linux', 'iOS': 'ios', 'tvOS': 'tvos'}.get(report.get('platform'), 'unknown')
-    labels = ['feature-request' if kind == 'feature' else 'bug' if kind == 'bug' else 'needs-info',
-              'area:' + category, 'platform:' + platform, 'source:' + source]
+    labels = (['performance', 'area:catalogs', 'platform:' + platform, 'source:manual'] if performance else
+              ['feature-request' if kind == 'feature' else 'bug' if kind == 'bug' else 'needs-info',
+               'area:' + category, 'platform:' + platform, 'source:' + source])
     if initial and not legacy_manual:
         labels.append('needs-triage')
     return labels

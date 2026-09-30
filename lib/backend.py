@@ -203,9 +203,9 @@ def account_home(refresh=True):
         rows = load_snapshot(STORE.directory)
         continuing = _continue_rows(state, rows, False)
         result = ([continuing] if continuing else []) + rows
-        perf_log('home.cached', stage_started, rows=len(result),
+        perf_log('home.cached', stage_started, profile=STORE.directory, rows=len(result),
                  items=sum(len(row.get('items') or []) for row in result))
-        perf_log('home.cached.total', total_started)
+        perf_log('home.cached.total', total_started, profile=STORE.directory)
         return result
 
     from account import pull_addons, pull_library
@@ -222,11 +222,11 @@ def account_home(refresh=True):
     except Exception:
         xbmc.log('Stremio for Kodi: using saved account catalog order; sync unavailable', xbmc.LOGWARNING)
 
-    perf_log('home.refresh.account', addons_started)
+    perf_log('home.refresh.account', addons_started, profile=STORE.directory)
     remote = [a for a in state.get('addons', []) if a.get('account') is True]
     catalogs_started = perf_now()
     catalog_rows = load_rows(remote, fetch, resource_url)
-    perf_log('home.refresh.catalogs', catalogs_started, rows=len(catalog_rows),
+    perf_log('home.refresh.catalogs', catalogs_started, profile=STORE.directory, rows=len(catalog_rows),
              items=sum(len(row.get('items') or []) for row in catalog_rows))
     catalog_rows = save_snapshot(STORE.directory, catalog_rows)
 
@@ -241,10 +241,10 @@ def account_home(refresh=True):
     # many extra provider requests and made the background refresh CPU/network
     # heavy on Pi-class hardware. Native playback sync already updates the local
     # Stremio state; details playback can verify episode metadata when needed.
-    perf_log('home.refresh.library', library_started)
+    perf_log('home.refresh.library', library_started, profile=STORE.directory)
     continuing = _continue_rows(state, catalog_rows, False)
     result = ([continuing] if continuing else []) + catalog_rows
-    perf_log('home.refresh.total', total_started, rows=len(result),
+    perf_log('home.refresh.total', total_started, profile=STORE.directory, rows=len(result),
              items=sum(len(row.get('items') or []) for row in result))
     return result
 

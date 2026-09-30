@@ -42,6 +42,7 @@
     <setting id="error_reporting_auto" type="bool" label="Automatically send anonymous error reports" default="true" />
     <setting type="action" label="Report a bug / request a feature" action="RunScript(script.stremioelec,report_issue)" />
     <setting type="action" label="Report last error" action="RunScript(script.stremioelec,report_last_error)" />
+    <setting type="action" label="Send performance report" action="RunScript(script.stremioelec,send_performance_report)" />
     <setting id="error_reporting_notice_shown" type="bool" label="Error reporting notice shown" default="false" visible="false" />
     <setting type="lsep" label="Anonymous reports include only addon/Kodi/Python versions, platform, error type, Error ID and sanitized file/function/line stack frames. Tokens, addon/provider URLs, API keys, media URLs, account details, device IDs and local paths are excluded." />
   </category>

@@ -162,7 +162,7 @@ def _report_window_class():
             if getattr(self, 'replay', False):
                 heading = 'Report last error'
             self.getControl(101).setLabel(heading)
-            if manual or getattr(self, 'replay', False):
+            if manual or getattr(self, 'replay', False) or self.payload.get('errorType') == 'PerformanceReport':
                 self.getControl(201).setLabel('Send to GitHub')
             self.getControl(102).setText(self.summary)
             self.getControl(103).setLabel('Error ID: ' + self.payload['fingerprint'])
@@ -171,6 +171,9 @@ def _report_window_class():
                 'No tokens, addon URLs, API keys, media URLs, account details or local paths.')
             if manual:
                 self.getControl(104).setText('Your reviewed title and description will be public on GitHub. Cancel sends nothing.')
+            elif self.payload.get('errorType') == 'PerformanceReport':
+                self.getControl(104).setText('Only Home stage timings, item/row counts and broad software/platform versions are sent. No Kodi log, URLs, account data, titles, API keys or device IDs.')
+
             self.setFocusId(202 if getattr(self, 'replay', False) else 201)
 
         def onClick(self, control_id):

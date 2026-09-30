@@ -235,6 +235,7 @@ def rows_for(category):
             _bool("error_reporting_auto", "Anonymous error reports", "Automatically send sanitized anonymous crash reports."),
             _action("report_issue", "Report a bug / request a feature", "Send a reviewed bug report or feature request.", "Open"),
             _action("report_last_error", "Report last error", "Review and retry the most recent sanitized error report.", "Open"),
+            _action("send_performance_report", "Send performance report", "Review and send Home timing data only; no Kodi log, account data, URLs or keys.", "Send"),
         ]
     if category == "premium":
         return [
@@ -363,6 +364,17 @@ def run_action(action, owner=None):
         owner.open_feedback_type()
     elif action == "report_last_error" and owner is not None:
         owner.open_last_error_custom()
+    elif action == "send_performance_report":
+        from lib.perf_report import build_payload
+        from lib.error_report import show_report_dialog
+        payload = build_payload(PROFILE)
+        if payload:
+            timings = payload.get("performance") or {}
+            lines = ["{}: {} ms".format(stage, values.get("ms", 0))
+                     for stage, values in timings.items() if "ms" in values]
+            show_report_dialog(payload, "Home performance report\n" + "\n".join(lines), replay=True)
+        else:
+            themed_dialog().notification("Performance report", "No Home performance sample is available yet. Open Home first.")
 
 
 class SettingsWindow(xbmcgui.WindowXMLDialog):

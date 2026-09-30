@@ -308,12 +308,17 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.getControl(9000).addItems(menu_items(xbmcgui))
         self.getControl(9000).selectItem(home_index())
         self.load_home()
+        perf_profile = None
+        try:
+            perf_profile = api.STORE.directory
+        except (NameError, AttributeError):
+            pass
         if isinstance(self.account_rows, (list, tuple)):
-            perf_log('ui.home.initial', init_started, rows=len(self.account_rows),
+            perf_log('ui.home.initial', init_started, profile=perf_profile, rows=len(self.account_rows),
                      items=sum(len(row.get('items') or []) for row in self.account_rows
                                if isinstance(row, dict)))
         else:
-            perf_log('ui.home.initial', init_started)
+            perf_log('ui.home.initial', init_started, profile=perf_profile)
         self.setFocusId(9000)
         self.refresh_home_async()
         from lib.weather_widget import request_refresh
@@ -344,9 +349,9 @@ class HomeWindow(AddonsPage, NimbusWindow):
                     position = self.getControl(focus).getSelectedPosition()
                 populate_started = perf_now()
                 self.populate_rows('Home', fresh)
-                perf_log('ui.home.repopulate', populate_started, rows=len(fresh),
+                perf_log('ui.home.repopulate', populate_started, profile=api.STORE.directory, rows=len(fresh),
                          items=sum(len(row.get('items') or []) for row in fresh))
-                perf_log('ui.home.background.total', refresh_started)
+                perf_log('ui.home.background.total', refresh_started, profile=api.STORE.directory)
                 if focus == 9000:
                     self.setFocusId(9000)
                 elif focus in self.rows and self.rows[focus]:
