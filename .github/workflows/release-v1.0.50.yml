@@ -28,6 +28,7 @@ jobs:
       - name: Validate source
         run: |
           python3 -m unittest discover -s tests
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
           python3 tools/audit-public-source.py --history
 
       - name: Verify release version
