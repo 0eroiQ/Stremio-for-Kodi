@@ -20,6 +20,21 @@ class InlineStreams:
         self._streams_visible = []
         self._streams_positions = {}
         self._streams_launching = False
+        self._streams_prefetch_identity = None
+
+    def prefetch_streams(self, identity):
+        """Media Info trigger: show cached data later, refresh this title once in background."""
+        if not identity or self._streams_dead or self._streams_prefetch_identity == identity:return
+        self._streams_prefetch_identity=identity
+        cached=api.cached_source_rows(self.meta,identity)
+        if cached and cached[0]:self.section_cache['streams:'+identity]=cached
+        def refresh():
+            try:
+                result=api.source_rows(self.meta,identity)
+                if not self._streams_dead and result and result[0]:self.section_cache['streams:'+identity]=result
+            except Exception:pass
+        try:threading.Thread(target=refresh,daemon=True).start()
+        except RuntimeError:pass
 
     def choose_source(self, identity, resume_ms=0):
         if self._streams_dead or self._streams_open:

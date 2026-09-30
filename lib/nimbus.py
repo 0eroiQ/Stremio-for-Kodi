@@ -812,6 +812,7 @@ class InfoWindow(InlineStreams, NimbusWindow):
             self.play_target = self.meta['id']
             self.resume_ms = (saved.get('state') or {}).get('timeOffset') or 0
         self.setProperty('playlabel', 'Resume' if api.resume_seconds(self.resume_ms) else 'Play')
+        self.prefetch_streams(self.play_target)
         self.setProperty('hastrailer', 'true' if ADDON.getSetting('trailers_enabled') != 'false' and imdb_id(self.meta) else '')
         self.refresh_library()
         self.select_section('Episodes' if series else 'Similar')
@@ -1039,6 +1040,7 @@ class InfoWindow(InlineStreams, NimbusWindow):
         else:
             self.resume_ms = state.get('timeOffset') or 0
         self.setProperty('playlabel', 'Resume' if api.resume_seconds(self.resume_ms) else 'Play')
+        self.prefetch_streams(self.play_target)
 
     def onFocus(self, control_id):
         if self.initialized:

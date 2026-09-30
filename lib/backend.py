@@ -111,11 +111,22 @@ def languages(meta):
     return rows
 
 
+def cached_source_rows(meta, identity):
+    from lib.stream_index import get
+    cached=get(STORE.directory,meta['type'],identity)
+    if not cached:return None
+    rows,skipped,failed,_=cached
+    for row in rows:row['card']=stream_card(row)
+    return rows,skipped,failed
+
 def source_rows(meta, identity):
+    from lib.stream_index import put
     rows, skipped, failed = collect(providers(), meta['type'], identity)
     for row in rows:
         row['card'] = stream_card(row)
-    return rows, skipped, failed
+    result=(rows,skipped,failed)
+    if rows:put(STORE.directory,meta['type'],identity,result)
+    return result
 
 
 def play(meta, identity, stream, resume_ms=0):
