@@ -31,7 +31,7 @@ TIMEOUT_SECONDS = 120
 MAX_BATCH_CUES = 2400
 MAX_BATCH_CHARACTERS = 120000
 TRANSLATION_REVISION = "byok-v2"
-TEXT_SUBTITLE_CODECS = {"subrip", "ass", "ssa", "webvtt", "mov_text", "text"}
+TEXT_SUBTITLE_CODECS = {"subrip", "srt", "ass", "ssa", "webvtt", "mov_text", "text", "subviewer", "microdvd"}
 FFMPEG_TIMEOUT_SECONDS = 120
 FFPROBE_TIMEOUT_SECONDS = 25
 TARGETS = (
@@ -211,9 +211,13 @@ def extract_best_embedded(stream_url, cache_directory, target_language):
     )
     if destination.exists() and destination.stat().st_size:
         return str(destination), language, track
+    # Map by the absolute ffprobe stream index. Kodi 22 ships newer FFmpeg
+    # builds where subtitle codec handling changed; keep extraction text-only
+    # and explicitly disable unrelated streams for predictable Windows output.
     command = [
-        ffmpeg, "-v", "error", "-i", stream_url,
-        "-map", "0:" + str(stream_index), "-c:s", "srt", "-f", "srt", "-",
+        ffmpeg, "-nostdin", "-v", "error", "-i", stream_url,
+        "-map", "0:" + str(stream_index), "-vn", "-an", "-dn",
+        "-c:s", "srt", "-f", "srt", "pipe:1",
     ]
     try:
         result = subprocess.run(
@@ -222,7 +226,27 @@ def extract_best_embedded(stream_url, cache_directory, target_language):
     except Exception as error:
         raise AITranslationError("Could not extract embedded subtitles.") from error
     if result.returncode != 0 or not result.stdout or len(result.stdout) > MAX_FILE_BYTES:
-        raise AITranslationError("Could not extract embedded subtitles.")
+        # Some containers expose a text subtitle to ffprobe but FFmpeg cannot
+        # transcode that particular stream. Try other ranked text tracks before
+        # failing the whole AUTO translation.
+        for alternate in sorted(tracks, key=lambda item: _embedded_rank(item, target_language))[1:]:
+            alternate_index = alternate.get("index")
+            if not isinstance(alternate_index, int):
+                continue
+            alternate_cmd = [ffmpeg, "-nostdin", "-v", "error", "-i", stream_url,
+                "-map", "0:" + str(alternate_index), "-vn", "-an", "-dn",
+                "-c:s", "srt", "-f", "srt", "pipe:1"]
+            try:
+                alternate_result = subprocess.run(alternate_cmd, capture_output=True, timeout=FFMPEG_TIMEOUT_SECONDS, check=False)
+            except Exception:
+                continue
+            if alternate_result.returncode == 0 and alternate_result.stdout and len(alternate_result.stdout) <= MAX_FILE_BYTES:
+                track, stream_index, result = alternate, alternate_index, alternate_result
+                language = _source_code(track.get("lang")) or "und"
+                destination = Path(cache_directory) / (digest + ".embedded-" + str(stream_index) + "." + language + ".srt")
+                break
+        else:
+            raise AITranslationError("Could not extract embedded text subtitles from this video.")
     atomic_write(destination, result.stdout)
     return str(destination), language, track
 

@@ -277,3 +277,13 @@ class AISubtitleTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class EmbeddedKodi22Tests(unittest.TestCase):
+    def test_kodi22_extraction_falls_back_to_second_text_track(self):
+        module=load_module()
+        tracks=[{'index':2,'codec':'ass','lang':'eng','label':'Full','forced':False,'impaired':False,'default':True},{'index':3,'codec':'subrip','lang':'eng','label':'Backup','forced':False,'impaired':False,'default':False}]
+        class R:
+            def __init__(self,code,data):self.returncode=code;self.stdout=data
+        with tempfile.TemporaryDirectory() as d, patch.object(module,'_binary',return_value='ffmpeg'), patch.object(module,'embedded_tracks',return_value=tracks), patch.object(module.subprocess,'run',side_effect=[R(1,b''),R(0,b'1\\n00:00:01,000 --> 00:00:02,000\\nHello\\n')]) as run:
+            path,lang,track=module.extract_best_embedded('https://example/video.mkv',Path(d),'bs')
+            self.assertEqual(track['index'],3);self.assertEqual(lang,'en');self.assertTrue(Path(path).exists());self.assertIn('-nostdin',run.call_args_list[0].args[0])
