@@ -26,6 +26,8 @@ class DiskCacheTests(unittest.TestCase):
 
     def test_protocol_second_fetch_avoids_network(self):
         import io
+        from lib import memory_cache
+        memory_cache.clear()
         import protocol
         with tempfile.TemporaryDirectory() as directory:
             cache = DiskCache(directory)

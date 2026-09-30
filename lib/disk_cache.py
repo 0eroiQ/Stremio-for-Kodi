@@ -35,8 +35,14 @@ class DiskCache:
 
     @contextmanager
     def connect(self):
-        db = sqlite3.connect(self.path, timeout=10)
+        db = sqlite3.connect(self.path, timeout=2)
         try:
+            try:
+                db.execute('PRAGMA journal_mode=WAL')
+                db.execute('PRAGMA synchronous=NORMAL')
+                db.execute('PRAGMA temp_store=MEMORY')
+            except sqlite3.Error:
+                pass
             with db:
                 yield db
         finally:

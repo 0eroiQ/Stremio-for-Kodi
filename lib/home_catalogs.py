@@ -1,7 +1,7 @@
 """Account Home catalogs in server order, without UI or Kodi dependencies."""
 from concurrent.futures import ThreadPoolExecutor
 
-HOME_ITEM_LIMIT = 40
+HOME_ITEM_LIMIT = 16
 MAX_WORKERS = 2
 
 

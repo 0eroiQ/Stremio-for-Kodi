@@ -39,10 +39,21 @@ def _browse_cache(url):
 
 def fetch(url, timeout=15):
     cache, ttl = _browse_cache(url)
+    memory = None
+    if cache is not None:
+        try:
+            from lib import memory_cache as memory
+            hot = memory.get(url)
+            if hot is not None:
+                return hot
+        except Exception:
+            memory = None
     if cache is not None:
         try:
             cached = cache.get(url)
             if cached is not None:
+                if memory is not None:
+                    memory.put(url, cached, ttl)
                 return cached
         except Exception:
             pass
@@ -58,6 +69,8 @@ def fetch(url, timeout=15):
     if cache is not None and not result.get('error') and (result.get('meta') or result.get('metas')):
         try:
             cache.put(url, result, ttl)
+            if memory is not None:
+                memory.put(url, result, ttl)
         except Exception:
             pass
     return result
