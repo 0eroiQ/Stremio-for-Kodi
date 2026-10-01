@@ -14,6 +14,9 @@ SERVICE_TOKEN = os.environ["MKGA_LAB_AUTOPILOT_TOKEN"]
 REPO = Path(__file__).resolve().parents[1]
 ACTIVE_JOB = None
 
+class FreeCapacityError(RuntimeError):
+    pass
+
 def api(path, method="GET", payload=None, token=None):
     data = None if payload is None else json.dumps(payload).encode()
     req = urllib.request.Request(
@@ -77,7 +80,14 @@ def ai_chat(ai_token, messages, model="mkga-free", max_tokens=1400):
     }
     try:
         return api("/api/lab/ai/v1/chat/completions", "POST", payload, ai_token)["choices"][0]["message"]["content"]
-    except Exception:
+    except urllib.error.HTTPError as exc:
+        if exc.code == 429:
+            raise FreeCapacityError("free AI capacity exhausted; waiting for quota reset") from exc
+        if model != "mkga-free" and exc.code >= 500:
+            payload["model"] = "mkga-free"
+            return api("/api/lab/ai/v1/chat/completions", "POST", payload, ai_token)["choices"][0]["message"]["content"]
+        raise
+    except (urllib.error.URLError, TimeoutError):
         if model != "mkga-free":
             payload["model"] = "mkga-free"
             return api("/api/lab/ai/v1/chat/completions", "POST", payload, ai_token)["choices"][0]["message"]["content"]
@@ -100,7 +110,7 @@ def analyze(task_id, agent, statement, context, ai_token):
         + statement + "\n\n" + context
     )
     answer = ai_chat(ai_token, [{"role": "user", "content": prompt}], "mkga-free", 1200)
-    update_agent(task_id, agent, "completed", "ANALYZED", answer[:8000], "cloudflare-glm")
+    update_agent(task_id, agent, "completed", "ANALYZED", answer[:8000], "cloudflare-gemma")
     return f"[{role}]\n{answer}"
 
 def _extract_command(answer):
@@ -135,6 +145,7 @@ def run_coder(statement, analyses, ai_token, feedback=""):
     )
     messages = [{"role":"system","content":system},{"role":"user","content":task}]
     transcript=[]
+    seen_commands=[]
     clean_env={k:v for k,v in os.environ.items() if not (k.startswith('MKGA_') or k in {'GH_TOKEN','GITHUB_TOKEN','OPENAI_API_KEY'})}
     for step in range(1,9):
         answer=ai_chat(ai_token,messages,"mkga-free-coder",1000)
@@ -146,6 +157,12 @@ def run_coder(statement, analyses, ai_token, feedback=""):
             continue
         if command.strip()=="echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT":
             return subprocess.CompletedProcess(["mkga-free-coder"],0,"\\n\\n".join(transcript),"")
+        normalized=re.sub(r"\\s+"," ",command.strip())
+        if normalized in seen_commands:
+            messages.append({"role":"assistant","content":answer})
+            messages.append({"role":"user","content":"REPEATED COMMAND: you already ran that exact command. Do not repeat it. Use the previous output and take the next concrete step; edit the relevant file if the cause is understood."})
+            continue
+        seen_commands.append(normalized)
         if not _safe_coder_command(command):
             messages.append({"role":"assistant","content":answer})
             messages.append({"role":"user","content":"That command is blocked by MKGA safety policy. Choose a safe local repository command instead."})
@@ -316,6 +333,14 @@ def main():
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
+    except FreeCapacityError as exc:
+        print(f"MKGA Autopilot waiting: {exc}")
+        try:
+            if ACTIVE_JOB:
+                lab_reply(ACTIVE_JOB["task_id"], ACTIVE_JOB["id"], "Free AI quota is temporarily exhausted. Job is safely queued and will retry automatically after free capacity resets.", "waiting_free")
+        except Exception:
+            pass
+        raise SystemExit(0)
     except Exception as exc:
         print(f"MKGA Autopilot failed: {exc}", file=sys.stderr)
         try:
