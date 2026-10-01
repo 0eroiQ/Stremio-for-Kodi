@@ -1,8 +1,7 @@
 """Free BYOK Gemini subtitle translation for Stremio for Kodi.
 
 The viewer's Gemini key stays in Kodi add-on settings and is sent only to
-Google's Generative Language API. MKGA Premium hosted translation is a
-separate future path and is never silently substituted here.
+Google's Generative Language API. MKGA account sync is separate from the local BYOK translation path.
 """
 import hashlib
 import json
@@ -25,7 +24,7 @@ MODEL_CHAIN = (
     "gemini-3.5-flash",
 )
 MAX_FILE_BYTES = 512 * 1024
-MAX_CUES = 2000
+MAX_CUES = 2400
 MAX_CUE_TEXT = 8000
 TIMEOUT_SECONDS = 35
 MAX_BATCH_CUES = 2400

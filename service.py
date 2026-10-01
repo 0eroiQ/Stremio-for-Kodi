@@ -124,73 +124,55 @@ class PlaybackWatcher(xbmc.Player):
         progress.create("AI Subtitles", "Checking subtitles from the video…")
         progress.update(2, "Checking subtitles from the video…")
         embedded_error = None
+        last_fallback_error = None
         try:
-            # Priority 1: embedded text subtitle from the exact video/stream.
-            if settings.get("source") != "2":
+            # Noiro-style fast path: ask subtitle addons first. Remote 4K MKV
+            # embedded extraction can require reading/seeking the whole stream on
+            # LibreELEC, so it must never block a ready text subtitle.
+            if settings.get("source") != "1":
+                progress.update(8, "Checking Stremio subtitle addons…")
                 try:
-                    result = prepare_embedded_auto(
-                        current, PROFILE, progress_callback=update
+                    providers = active_addons(Store(PROFILE).load())
+                    entries = ai_source_candidates(
+                        providers, context["kind"], context["id"],
+                        context.get("subtitles"), context.get("filename", "")
                     )
-                    if result and self._apply(
-                        result["path"], digest, "video",
-                        result["source_language"], result["target_language"]
-                    ):
-                        return
                 except Exception as error:
-                    embedded_error = error
-                    _remember_ai_error("AI subtitles embedded source", error)
-                    if settings.get("source") == "1":
-                        _notify(
-                            "Video subtitle extraction failed. "
-                            "See Support → Report last error.", 5000
-                        )
+                    _remember_ai_error("AI subtitles Stremio fallback", error)
+                    entries = []
 
-            if not self._matches(digest) or settings.get("source") == "1":
+                for entry in entries[:3]:
+                    if not self._matches(digest):
+                        return
+                    try:
+                        source_language = entry.get("lang")
+                        source_name = CODE_NAMES.get(source_language, source_language or "Auto")
+                        progress.update(15, "Using {} subtitle from Stremio addon…".format(source_name))
+                        def fallback_progress(percent, message):
+                            update(18 + int(percent * 0.78), message)
+                        path = download(entry, PROFILE / "subtitles", progress_callback=fallback_progress)
+                        if self._apply(path, digest, "Stremio addon", source_language, target):
+                            return
+                    except Exception as error:
+                        last_fallback_error = error
+                        _remember_ai_error("AI subtitles Stremio translation", error)
+
+            if not self._matches(digest) or settings.get("source") == "2":
                 return
 
-            # Priority 2: best subtitle returned by the user's Stremio addons.
-            progress.update(12, "Checking Stremio subtitle addons…")
+            # Embedded is fallback, not the fast path. This preserves support for
+            # files with no subtitle addon result without making every playback
+            # wait on FFmpeg extraction first.
+            progress.update(25, "Checking subtitles embedded in the video…")
             try:
-                providers = active_addons(Store(PROFILE).load())
-                entries = ai_source_candidates(
-                    providers, context["kind"], context["id"],
-                    context.get("subtitles"), context.get("filename", "")
-                )
-            except Exception as error:
-                _remember_ai_error("AI subtitles Stremio fallback", error)
-                entries = []
-
-            last_fallback_error = None
-            for entry_index, entry in enumerate(entries[:3]):
-                if not self._matches(digest):
+                result = prepare_embedded_auto(current, PROFILE, progress_callback=update)
+                if result and self._apply(result["path"], digest, "video", result["source_language"], result["target_language"]):
                     return
-                try:
-                    source_language = entry.get("lang")
-                    source_name = CODE_NAMES.get(
-                        source_language, source_language or "Auto"
-                    )
-                    progress.update(
-                        18,
-                        "Using {} subtitle from Stremio addon…".format(source_name)
-                    )
-
-                    def fallback_progress(percent, message):
-                        update(20 + int(percent * 0.75), message)
-
-                    path = download(
-                        entry, PROFILE / "subtitles",
-                        progress_callback=fallback_progress
-                    )
-                    if self._apply(
-                        path, digest, "Stremio addon", source_language, target
-                    ):
-                        return
-                except Exception as error:
-                    last_fallback_error = error
-                    _remember_ai_error(
-                        "AI subtitles Stremio translation", error
-                    )
-                    continue
+            except Exception as error:
+                embedded_error = error
+                _remember_ai_error("AI subtitles embedded source", error)
+                if settings.get("source") == "1":
+                    _notify("Video subtitle extraction failed. See Support → Report last error.", 5000)
 
             if self._matches(digest):
                 if not entries and embedded_error is None:
