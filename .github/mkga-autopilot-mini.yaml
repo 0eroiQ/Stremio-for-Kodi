@@ -25,7 +25,7 @@ agent:
     ```
 
     Do not run git push, gh pr create, release commands, or destructive repository cleanup.
-  step_limit: 18
+  step_limit: 12
   cost_limit: 1
   mode: yolo
 environment:
