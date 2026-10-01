@@ -171,11 +171,18 @@ def rows_for(category):
                     "Always stored locally in Kodi and sent only to Google's Gemini API in Free BYOK mode."),
         ]
         if mode == 0:
+            try:
+                hub_state_data = Store(PROFILE).load()
+                synced_at = int(hub_state_data.get("mkga_stremio_hub_checked_at") or 0)
+                import time as _time
+                sync_summary = "Never synced" if not synced_at else ("{}s ago".format(max(0, int(_time.time())-synced_at)) if int(_time.time())-synced_at < 120 else "{}m ago".format(max(1,(int(_time.time())-synced_at)//60)))
+            except Exception:
+                sync_summary = "Unknown"
             return common + [
                 _info("MKGA.TV subtitle profile", "Synced automatically",
                       "Language priority, Smart Subtitles, translation/generation behavior, source priority, timing, size, position and color are managed in Account > Stremio > Subtitles on MKGA.TV."),
-                _info("Sync interval", "About 30 seconds",
-                      "The Kodi background service checks for saved MKGA.TV subtitle profile changes without requiring an addon restart."),
+                _info("Last MKGA sync", sync_summary, "Background sync checks about every 30 seconds."),
+                _action("subtitle_sync_now", "Sync from MKGA.TV now", "Force an immediate refresh of the linked Stremio subtitle profile.", "Sync now"),
             ]
         return common + [
             _enum("ai_subtitles_source", "Subtitle source", AI_SOURCES,
@@ -350,6 +357,20 @@ def run_action(action, owner=None):
         if owner is not None:
             owner.request_page = "addons"
             owner.close()
+    elif action == "subtitle_sync_now":
+        try:
+            from lib.signin import account_store
+            from lib.vortexo_premium import hub_state
+            hub = hub_state(account_store(), refresh_remote=True, max_age=0)
+            if not hub.get("linked") or not isinstance(hub.get("settings"), dict):
+                themed_dialog().notification("MKGA.TV", "No linked MKGA Stremio profile found.")
+            else:
+                from ai_subtitles import _apply_remote_style
+                remote = hub["settings"]
+                _apply_remote_style({"remote": True, "subtitle_size": remote.get("subtitleSize", "medium"), "subtitle_position": remote.get("subtitlePosition", "bottom"), "subtitle_color": remote.get("subtitleColor", "white")})
+                themed_dialog().notification("MKGA.TV", "Subtitle profile synced.")
+        except Exception:
+            themed_dialog().notification("MKGA.TV", "Subtitle sync unavailable.")
     elif action == "weather_postal" and owner is not None:
         owner.open_weather_search(True)
     elif action == "weather_city" and owner is not None:
