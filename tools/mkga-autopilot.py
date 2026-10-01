@@ -117,6 +117,7 @@ def run_coder(statement, analyses, ai_token, feedback=""):
     env["MSWEA_CONFIGURED"] = "true"
     env["MSWEA_SILENT_STARTUP"] = "1"
     env["MSWEA_COST_TRACKING"] = "ignore_errors"
+    env["MSWEA_MODEL_RETRY_STOP_AFTER_ATTEMPT"] = "2"
     env.pop("GH_TOKEN", None)
     env.pop("GITHUB_TOKEN", None)
     env.pop("MKGA_LAB_AUTOPILOT_TOKEN", None)
