@@ -1,3 +1,10 @@
+v1.0.56
+- Make MKGA.TV Account the recommended subtitle settings source for linked Stremio users.
+- Keep a This device - Local mode that restores the existing Kodi subtitle and AI preference controls.
+- Keep the local AI master switch, provider selection and Gemini API key on the Kodi device in both modes.
+- Never upload the user's Gemini API key to MKGA.TV.
+- Preserve existing local subtitle settings during upgrades so switching back to Local mode does not lose configuration.
+
 v1.0.55
 - Sync MKGA.TV Stremio Account Hub subtitle preferences into Stremio for Kodi.
 - Refresh linked subtitle settings in the background about every 30 seconds without requiring an addon restart.
