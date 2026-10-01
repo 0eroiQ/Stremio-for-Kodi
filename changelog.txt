@@ -1,3 +1,12 @@
+v1.0.58
+- Persist all Continue Watching state in local SQLite instead of limiting completed-series checks.
+- Keep completed series ready for the next aired episode and re-check finished series for new episodes/seasons.
+- Refresh Stremio Continue Watching state in the background every 15 minutes.
+- Add MKGA server-side subtitle resolver using linked Stremio subtitle addons and cloud translation cache.
+- Prefer fast external subtitle sources before slow embedded extraction on remote 4K streams.
+- Add Noiro-style large-batch translation behavior and MKGA cloud fallback.
+- Use Kodi User-Agent for MKGA API requests to avoid Cloudflare bot filtering.
+
 v1.0.57
 - Remove the obsolete Premium category, pricing, checkout handoff and Premium purchase UI from Stremio for Kodi.
 - Keep MKGA.TV account/session transport only for secure Account Hub and subtitle-profile sync.
