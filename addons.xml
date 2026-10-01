@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.54" provider-name="0eroiQ">
+<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.55" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,9 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.51: Prevent legacy-profile migration failures from blocking startup/sign-in, and add an optional native Kodi Search keyboard for Yatse/Kore and physical/Bluetooth keyboard users.</news>
+    <news>1.0.55: Sync MKGA.TV subtitle preferences in the background, including language priority, AI behavior and Kodi subtitle style.
+
+1.0.51: Prevent legacy-profile migration failures from blocking startup/sign-in, and add an optional native Kodi Search keyboard for Yatse/Kore and physical/Bluetooth keyboard users.</news>
     <assets>
       <icon>icon.png</icon>
       <fanart>fanart.png</fanart>
