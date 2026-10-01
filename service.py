@@ -266,7 +266,12 @@ class ContinueIndexSync:
                 self._worker = None
     def _run(self):
         try:
-            state = Store(PROFILE).load()
+            # Periodic account/CW sync is maintenance work; never compete with
+            # active playback or overwrite progress while the watcher is writing it.
+            if xbmc.Player().isPlayingVideo():
+                return
+            store = Store(PROFILE)
+            state = store.load()
             token = state.get("token")
             if not token:
                 return
@@ -278,12 +283,16 @@ class ContinueIndexSync:
                 state["addons"] = merge_account(state, remote)
             except Exception:
                 pass
-            state["library"] = pull_library(token)
-            Store(PROFILE).save(state)
-            continue_index.seed(PROFILE, state["library"])
-            # Never compete with active video playback for metadata/provider bandwidth.
-            if xbmc.Player().isPlayingVideo():
-                return
+            remote_library = pull_library(token)
+            # Re-read after network I/O so unrelated concurrent state writes are
+            # preserved. Merge only fields owned by this maintenance worker.
+            latest = store.load()
+            latest["library"] = remote_library
+            if "addons" in state:
+                latest["addons"] = state["addons"]
+            store.save(latest)
+            state = latest
+            continue_index.seed(PROFILE, remote_library)
             # Resolve completed/sentinel series in this daemon worker, not Home.
             from continue_playback import continue_series_target
             from lib import backend as home_api
