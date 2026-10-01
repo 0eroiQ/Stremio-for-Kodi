@@ -218,21 +218,12 @@ def account_home(refresh=True):
         perf_log('home.cached.total', total_started, profile=STORE.directory)
         return result
 
-    from account import pull_addons, pull_library
-    from addons_core import merge_account
     from lib.home_catalogs import load_rows
 
-    # Account addon order may change on another Stremio device. Failure here is
-    # non-fatal: the last saved account collection remains usable.
+    # Account addon/order sync runs in the periodic service worker. Home uses the
+    # latest saved descriptors and spends its network budget only on catalog rows.
     addons_started = perf_now()
-    try:
-        remote, _ = pull_addons(state['token'])
-        state['addons'] = merge_account(state, remote)
-        STORE.save(state)
-    except Exception:
-        xbmc.log('Stremio for Kodi: using saved account catalog order; sync unavailable', xbmc.LOGWARNING)
-
-    perf_log('home.refresh.account', addons_started, profile=STORE.directory)
+    perf_log('home.refresh.account.local', addons_started, profile=STORE.directory)
     remote = [a for a in state.get('addons', []) if a.get('account') is True]
     catalogs_started = perf_now()
     catalog_rows = load_rows(remote, fetch, resource_url)

@@ -135,7 +135,7 @@ class PerformanceTraceWiringTests(unittest.TestCase):
         backend=(ROOT/'lib/backend.py').read_text()
         nimbus=(ROOT/'lib/nimbus.py').read_text()
         self.assertIn("perf_log('home.cached'",backend)
-        self.assertIn("perf_log('home.refresh.account'",backend)
+        self.assertIn("perf_log('home.refresh.account.local'",backend)
         self.assertIn("perf_log('home.refresh.catalogs'",backend)
         self.assertIn("home.refresh.library.local",backend)
         self.assertIn("perf_log('home.refresh.total'",backend)

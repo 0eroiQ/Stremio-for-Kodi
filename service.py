@@ -270,8 +270,14 @@ class ContinueIndexSync:
             token = state.get("token")
             if not token:
                 return
-            from account import pull_library
+            from account import pull_library, pull_addons
+            from addons_core import merge_account
             from lib import continue_index
+            try:
+                remote, _ = pull_addons(token)
+                state["addons"] = merge_account(state, remote)
+            except Exception:
+                pass
             state["library"] = pull_library(token)
             Store(PROFILE).save(state)
             continue_index.seed(PROFILE, state["library"])
