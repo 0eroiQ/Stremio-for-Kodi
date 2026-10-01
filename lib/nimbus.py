@@ -331,6 +331,31 @@ class HomeWindow(AddonsPage, NimbusWindow):
     def load_home(self):
         self.populate_rows('Home', self.account_rows)
 
+    @staticmethod
+    def _home_row_key(row):
+        if not isinstance(row, dict): return ''
+        if row.get('label') == 'Continue Watching': return '__continue__'
+        return str(row.get('_key') or '|'.join(str(row.get(k) or '') for k in ('provider','kind','catalog_id')))
+
+    def patch_home_rows(self, fresh):
+        current=list(self.account_rows or []);fresh=list(fresh or [])
+        if [self._home_row_key(r) for r in current] != [self._home_row_key(r) for r in fresh]: return False
+        changed=0
+        for index,(old,new) in enumerate(zip(current,fresh)):
+            if old == new: continue
+            cid=400+index
+            if cid not in self.rows: return False
+            control=self.getControl(cid);position=control.getSelectedPosition();rows=list(new.get('items') or [])
+            self.rows[cid]=rows;self.row_labels[cid]=new.get('label','')
+            self.home_row_specs[cid]={k:new.get(k) for k in ('url','kind','catalog_id','provider') if new.get(k) is not None}
+            self.home_row_cursor[cid]=len(rows);self.home_row_exhausted.discard(cid)
+            control.reset();control.addItems([item(row) for row in rows])
+            self.setProperty('row'+str(cid),self.row_labels[cid]);self.setProperty('has'+str(cid),'true' if rows else '')
+            if rows: control.selectItem(min(max(0,position),len(rows)-1))
+            changed+=1
+        self.account_rows=fresh
+        return changed
+
     def refresh_home_async(self):
         if self.home_refreshing or self.closed:
             return
@@ -343,24 +368,20 @@ class HomeWindow(AddonsPage, NimbusWindow):
                 fresh = api.account_home(True)
                 if self.closed:
                     return
-                self.account_rows = fresh
-                # Never steal focus from another page or an open details window.
                 if self.getProperty('page') != 'Home' or self.preview_suspended:
+                    self.account_rows = fresh
                     return
-                focus = self.getFocusId()
-                position = None
-                if focus in self.rows:
-                    position = self.getControl(focus).getSelectedPosition()
-                populate_started = perf_now()
-                self.populate_rows('Home', fresh)
-                perf_log('ui.home.repopulate', populate_started, profile=api.STORE.directory, rows=len(fresh),
-                         items=sum(len(row.get('items') or []) for row in fresh))
-                perf_log('ui.home.background.total', refresh_started, profile=api.STORE.directory)
-                if focus == 9000:
-                    self.setFocusId(9000)
+                focus=self.getFocusId();position=self.getControl(focus).getSelectedPosition() if focus in self.rows else None
+                patch_started=perf_now();patched=self.patch_home_rows(fresh)
+                if patched is False:
+                    self.account_rows=fresh;self.populate_rows('Home',fresh);mode='full';changed=len(fresh)
+                else:
+                    mode='incremental';changed=patched
+                perf_log('ui.home.'+mode,patch_started,profile=api.STORE.directory,rows=len(fresh),items=sum(len(row.get('items') or []) for row in fresh),changed=changed)
+                perf_log('ui.home.background.total',refresh_started,profile=api.STORE.directory)
+                if focus==9000:self.setFocusId(9000)
                 elif focus in self.rows and self.rows[focus]:
-                    self.getControl(focus).selectItem(
-                        min(max(0, position or 0), len(self.rows[focus]) - 1))
+                    if position is not None:self.getControl(focus).selectItem(min(max(0,position),len(self.rows[focus])-1))
                     self.setFocusId(focus)
             except Exception:
                 # Cached/snapshot Home stays usable and the next launch retries.

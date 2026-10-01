@@ -27,3 +27,11 @@ class HomePaginationCursorTests(unittest.TestCase):
   source=Path(__file__).resolve().parents[1].joinpath('lib/nimbus.py').read_text()
   self.assertIn('self.home_row_exhausted.clear()',source)
   self.assertIn('self.home_row_cursor.clear()',source)
+
+class IncrementalHomeRefreshTests(unittest.TestCase):
+ def test_incremental_refresh_skips_unchanged_rows_and_has_full_fallback(self):
+  source=Path(__file__).resolve().parents[1].joinpath('lib/nimbus.py').read_text()
+  self.assertIn('def patch_home_rows(self, fresh):',source)
+  self.assertIn('if old == new: continue',source)
+  self.assertIn('if patched is False:',source)
+  self.assertIn("self.populate_rows('Home',fresh)",source)

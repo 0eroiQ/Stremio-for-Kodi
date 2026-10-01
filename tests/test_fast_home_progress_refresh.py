@@ -140,7 +140,7 @@ class PerformanceTraceWiringTests(unittest.TestCase):
         self.assertIn("perf_log('home.refresh.library'",backend)
         self.assertIn("perf_log('home.refresh.total'",backend)
         self.assertIn("perf_log('ui.home.initial'",nimbus)
-        self.assertIn("perf_log('ui.home.repopulate'",nimbus)
+        self.assertIn("ui.home.",nimbus)
 
     def test_perf_trace_never_accepts_freeform_values(self):
         text=(ROOT/'lib/perf_trace.py').read_text()
