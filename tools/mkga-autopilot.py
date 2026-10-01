@@ -114,6 +114,8 @@ def run_coder(statement, analyses, ai_token, feedback=""):
     )
     env = os.environ.copy()
     env["OPENAI_API_KEY"] = ai_token
+    env["MSWEA_CONFIGURED"] = "true"
+    env["MSWEA_SILENT_STARTUP"] = "1"
     env["MSWEA_COST_TRACKING"] = "ignore_errors"
     env.pop("GH_TOKEN", None)
     env.pop("GITHUB_TOKEN", None)
