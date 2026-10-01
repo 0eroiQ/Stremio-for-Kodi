@@ -415,14 +415,21 @@ def refresh(store, opener=None):
     return dict(saved)
 
 
-def hub_state(store, opener=None, refresh_remote=False):
+def hub_state(store, opener=None, refresh_remote=False, max_age=300):
     state = store.load()
-    if refresh_remote:
+    checked_at = state.get("mkga_stremio_hub_checked_at", 0) if isinstance(state, dict) else 0
+    try:
+        checked_at = int(checked_at or 0)
+    except (TypeError, ValueError):
+        checked_at = 0
+    stale = not checked_at or int(time.time()) - checked_at >= max(0, int(max_age or 0))
+    if refresh_remote or stale:
         try:
             session = _premium_session(state, opener=opener)
             hub = fetch_stremio_hub(session["access_token"], opener=opener)
             state["vortexo_premium_session"] = session
             state["mkga_stremio_hub"] = hub
+            state["mkga_stremio_hub_checked_at"] = int(time.time())
             store.save(state)
             return hub
         except PremiumError:

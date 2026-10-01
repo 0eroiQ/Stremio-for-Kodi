@@ -73,6 +73,50 @@ class AISubtitleTests(unittest.TestCase):
         self.assertEqual(module.target_code("Bosnian"), "bs")
         self.assertEqual(module.target_code("hr"), "hr")
 
+
+    def test_mkga_stremio_hub_overrides_smart_subtitle_preference(self):
+        module = load_module()
+        class Addon:
+            def getSetting(self, key):
+                values = {
+                    "ai_subtitles_enabled": "false",
+                    "ai_subtitles_provider": "0",
+                    "ai_subtitles_source": "0",
+                    "ai_subtitles_gemini_api_key": "local-key",
+                    "ai_subtitles_target": "3",
+                }
+                return values.get(key, "")
+        addon_state = types.ModuleType("addon_state")
+        addon_state.get_addon = lambda: Addon()
+        signin = types.ModuleType("lib.signin")
+        signin.account_store = lambda: object()
+        premium = types.ModuleType("lib.vortexo_premium")
+        premium.hub_state = lambda store: {
+            "linked": True,
+            "plan": "supporter",
+            "settings": {
+                "preferredLanguages": ["bs", "de"],
+                "smartSubtitles": True,
+                "autoTranslate": True,
+                "generateFromAudio": True,
+                "finishFullTitle": True,
+                "communityCache": True,
+                "autoTiming": True,
+            },
+        }
+        with patch.dict(sys.modules, {
+            "addon_state": addon_state,
+            "lib.signin": signin,
+            "lib.vortexo_premium": premium,
+        }):
+            settings = module.local_settings()
+        self.assertTrue(settings["remote"])
+        self.assertTrue(settings["enabled"])
+        self.assertEqual(settings["target"], "bs")
+        self.assertEqual(settings["preferred_languages"], ["bs", "de"])
+        self.assertTrue(settings["generate_from_audio"])
+        self.assertTrue(settings["finish_full_title"])
+
     def test_whole_track_translation_preserves_timestamps_and_uses_header_key(self):
         module = load_module()
         opener = Opener([gemini_payload([

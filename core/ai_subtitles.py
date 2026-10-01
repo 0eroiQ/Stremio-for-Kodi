@@ -470,19 +470,49 @@ def translate_subtitle_file(path, cache_directory, api_key, target_language,
 def local_settings():
     from addon_state import get_addon
     addon = get_addon()
-    return {
+    settings = {
         "enabled": addon.getSetting("ai_subtitles_enabled").strip().lower() == "true",
         "provider": addon.getSetting("ai_subtitles_provider").strip() or "0",
         "source": addon.getSetting("ai_subtitles_source").strip() or "0",
         "api_key": addon.getSetting("ai_subtitles_gemini_api_key").strip(),
         "target": target_code(addon.getSetting("ai_subtitles_target")),
+        "remote": False,
+        "preferred_languages": [],
+        "auto_translate": True,
+        "generate_from_audio": False,
+        "finish_full_title": False,
+        "community_cache": False,
+        "auto_timing": False,
     }
+    try:
+        from lib.signin import account_store
+        from lib.vortexo_premium import hub_state
+        hub = hub_state(account_store())
+        remote = hub.get("settings") if isinstance(hub, dict) and hub.get("linked") else None
+        if isinstance(remote, dict):
+            languages = [str(x).strip().lower() for x in remote.get("preferredLanguages", [])
+                         if isinstance(x, str) and str(x).strip()]
+            settings.update({
+                "enabled": bool(remote.get("smartSubtitles")),
+                "target": target_code(languages[0]) if languages else settings["target"],
+                "remote": True,
+                "preferred_languages": languages,
+                "auto_translate": bool(remote.get("autoTranslate")),
+                "generate_from_audio": bool(remote.get("generateFromAudio")),
+                "finish_full_title": bool(remote.get("finishFullTitle")),
+                "community_cache": bool(remote.get("communityCache")),
+                "auto_timing": bool(remote.get("autoTiming")),
+            })
+    except Exception:
+        pass
+    return settings
 
 
 def prepare_embedded_auto(stream_url, profile, progress_callback=None):
     """Video-first AUTO source. Returns translated/exact-target subtitle + metadata."""
     settings = local_settings()
-    if not settings["enabled"] or settings["provider"] != "0" or not settings["api_key"]:
+    if (not settings["enabled"] or not settings.get("auto_translate", True)
+            or settings["provider"] != "0" or not settings["api_key"]):
         return None
     cache = Path(profile) / "ai-subtitles"
     _progress(progress_callback, 5, "Checking subtitles embedded in the video")
@@ -511,7 +541,8 @@ def prepare_embedded_auto(stream_url, profile, progress_callback=None):
 
 def translate_external_auto(path, profile, source_language=None, progress_callback=None):
     settings = local_settings()
-    if not settings["enabled"] or settings["provider"] != "0" or not settings["api_key"]:
+    if (not settings["enabled"] or not settings.get("auto_translate", True)
+            or settings["provider"] != "0" or not settings["api_key"]):
         return str(path)
     return translate_subtitle_file(
         path, Path(profile) / "ai-subtitles", settings["api_key"],
@@ -521,20 +552,16 @@ def translate_external_auto(path, profile, source_language=None, progress_callba
 
 def maybe_translate(path, profile, source_language=None, progress_callback=None):
     try:
-        from addon_state import get_addon
-        addon = get_addon()
-        if addon.getSetting("ai_subtitles_enabled").strip().lower() != "true":
+        settings = local_settings()
+        if not settings["enabled"] or not settings.get("auto_translate", True):
             return str(path)
-        provider = addon.getSetting("ai_subtitles_provider").strip() or "0"
-        if provider != "0":
-            return str(path)  # MKGA Premium hosted AI is still in construction.
-        api_key = addon.getSetting("ai_subtitles_gemini_api_key").strip()
-        if not api_key:
+        if settings["provider"] != "0":
+            return str(path)  # MKGA hosted generation is wired separately.
+        if not settings["api_key"]:
             return str(path)
-        target = target_code(addon.getSetting("ai_subtitles_target"))
         return translate_subtitle_file(
-            path, Path(profile) / "ai-subtitles", api_key, target, source_language,
-            progress_callback=progress_callback
+            path, Path(profile) / "ai-subtitles", settings["api_key"],
+            settings["target"], source_language, progress_callback=progress_callback
         )
     except Exception:
         # Translation is optional. Original subtitles must always keep playback usable.
