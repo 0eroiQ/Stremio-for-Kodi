@@ -473,7 +473,7 @@ def _apply_remote_style(settings):
     try:
         import xbmc
         size_map = {"small": 32, "medium": 40, "large": 48, "extra-large": 56}
-        color_map = {"white": "FFFFFFFF", "yellow": "FFFFFF00", "cyan": "FF00FFFF", "green": "FF00FF00"}
+        color_map = {"white": "FFFFFFFF", "yellow": "FFFFFF00", "orange": "FFFFA500", "cyan": "FF00FFFF", "green": "FF00FF00"}
         align_map = {"bottom": 0, "middle": 1, "top": 2}
         for key, value in (("subtitles.fontsize", size_map.get(settings.get("subtitle_size"), 40)), ("subtitles.colorpick", color_map.get(settings.get("subtitle_color"), "FFFFFFFF")), ("subtitles.align", align_map.get(settings.get("subtitle_position"), 0))):
             payload = json.dumps({"jsonrpc":"2.0","id":1,"method":"Settings.SetSettingValue","params":{"setting":key,"value":value}})
