@@ -1,3 +1,12 @@
+v1.0.62
+- Fix Home infinite-scroll cursor drift when providers return duplicate items.
+- Patch only changed Home rows instead of repopulating the full Home window.
+- Preserve focus, selection and unaffected pagination state during background refresh.
+- Move Stremio library, Continue Watching series resolution and addon-order sync out of the Home refresh path.
+- Keep periodic account/CW maintenance on a daemon worker.
+- Skip maintenance and stream prefetch while video playback is active.
+- Re-read account state after network I/O before saving to avoid overwriting concurrent playback progress.
+
 v1.0.61
 - Upgrade Streams SQLite cache with fresh/stale/expiry state.
 - Show last-known-good cached streams immediately while stale entries refresh in background.
