@@ -25,6 +25,7 @@
     <setting type="lsep" label="Theme changes apply when you return from settings." />
   </category>
   <category label="AI Subtitles">
+    <setting id="subtitle_settings_source" type="enum" label="Subtitle settings source" values="MKGA.TV Account - Recommended|This device - Local" default="0" />
     <setting id="ai_subtitles_enabled" type="bool" label="Enable AI subtitle translation" default="false" />
     <setting id="ai_subtitles_provider" type="enum" label="Translation provider" values="My Gemini API key - Free|MKGA Premium - In construction" default="0" />
     <setting id="ai_subtitles_source" type="enum" label="Subtitle source" values="Auto - Video first, then Stremio addons|Video subtitles only|Stremio addons only" default="0" />

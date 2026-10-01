@@ -74,7 +74,7 @@ class AISubtitleTests(unittest.TestCase):
         self.assertEqual(module.target_code("hr"), "hr")
 
 
-    def test_mkga_stremio_hub_overrides_smart_subtitle_preference(self):
+    def test_local_master_switch_can_disable_mkga_smart_subtitles(self):
         module = load_module()
         class Addon:
             def getSetting(self, key):
@@ -111,7 +111,7 @@ class AISubtitleTests(unittest.TestCase):
         }):
             settings = module.local_settings()
         self.assertTrue(settings["remote"])
-        self.assertTrue(settings["enabled"])
+        self.assertFalse(settings["enabled"])
         self.assertEqual(settings["target"], "bs")
         self.assertEqual(settings["preferred_languages"], ["bs", "de"])
         self.assertTrue(settings["generate_from_audio"])

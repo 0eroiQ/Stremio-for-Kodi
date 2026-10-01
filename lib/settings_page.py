@@ -20,6 +20,7 @@ START_DELAYS = ("Immediately", "1 second", "2 seconds", "3 seconds", "5 seconds"
 TRAILER_QUALITY = ("1080p", "720p", "480p")
 TRAILER_SCOPE = ("Home and Media info hero", "Home hero only", "Media info hero only")
 TRAILER_DELAY = ("3 seconds", "5 seconds", "10 seconds", "15 seconds", "30 seconds", "1 second")
+SUBTITLE_SETTINGS_SOURCES = ("MKGA.TV Account - Recommended", "This device - Local")
 AI_PROVIDERS = ("My Gemini API key - Free", "MKGA Premium - In construction")
 AI_SOURCES = ("Auto - Video first, then Stremio addons", "Video subtitles only", "Stremio addons only")
 AI_TARGETS = ("Bosnian", "Croatian", "Serbian", "English", "German", "French", "Spanish",
@@ -155,14 +156,30 @@ def rows_for(category):
         ]
 
     if category == "subtitles":
-        return [
-            _bool("ai_subtitles_enabled", "AI subtitle translation", "Enable automatic AI subtitle translation."),
+        try:
+            mode = int(ADDON.getSetting("subtitle_settings_source") or "0")
+        except (TypeError, ValueError):
+            mode = 0
+        common = [
+            _enum("subtitle_settings_source", "Subtitle settings source", SUBTITLE_SETTINGS_SOURCES,
+                  "Use your MKGA.TV Stremio Account Hub as the main control center, or keep all preferences local to this Kodi device."),
+            _bool("ai_subtitles_enabled", "AI subtitles on this device",
+                  "Local master switch. Turn this off to disable AI subtitles on this Kodi device even when MKGA.TV enables Smart Subtitles."),
             _enum("ai_subtitles_provider", "AI provider", AI_PROVIDERS,
-                  "Free mode uses your own Gemini API key. Hosted Premium is not active yet."),
+                  "Provider choice stays local. Free mode uses your own Gemini API key."),
+            _secret("ai_subtitles_gemini_api_key", "Gemini API key",
+                    "Always stored locally in Kodi and sent only to Google's Gemini API in Free BYOK mode."),
+        ]
+        if mode == 0:
+            return common + [
+                _info("MKGA.TV subtitle profile", "Synced automatically",
+                      "Language priority, Smart Subtitles, translation/generation behavior, source priority, timing, size, position and color are managed in Account > Stremio > Subtitles on MKGA.TV."),
+                _info("Sync interval", "About 30 seconds",
+                      "The Kodi background service checks for saved MKGA.TV subtitle profile changes without requiring an addon restart."),
+            ]
+        return common + [
             _enum("ai_subtitles_source", "Subtitle source", AI_SOURCES,
                   "Auto prefers the subtitle embedded in the exact video for best sync, then Stremio addons."),
-            _secret("ai_subtitles_gemini_api_key", "Gemini API key",
-                    "Stored locally in Kodi and sent only to Google's Gemini API in Free BYOK mode."),
             _enum("ai_subtitles_target", "Translate to", AI_TARGETS, "Target language for AI subtitles."),
         ] + _kodi_rows()
     if category == "appearance":

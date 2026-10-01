@@ -501,6 +501,9 @@ def local_settings():
         "subtitle_size": "medium", "subtitle_position": "bottom", "subtitle_color": "white",
     }
     try:
+        use_remote = addon.getSetting("subtitle_settings_source").strip() in ("", "0")
+        if not use_remote:
+            return settings
         from lib.signin import account_store
         from lib.vortexo_premium import hub_state
         hub = hub_state(account_store())
@@ -509,7 +512,7 @@ def local_settings():
             languages = [str(x).strip().lower() for x in remote.get("preferredLanguages", [])
                          if isinstance(x, str) and str(x).strip()]
             settings.update({
-                "enabled": bool(remote.get("smartSubtitles")),
+                "enabled": settings["enabled"] and bool(remote.get("smartSubtitles")),
                 "target": target_code(languages[0]) if languages else settings["target"],
                 "remote": True,
                 "preferred_languages": languages,
