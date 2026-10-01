@@ -17,11 +17,12 @@ SESSION_PATH = "/api/stremio-for-kodi/v1/session"
 ENTITLEMENTS_PATH = "/api/stremio-for-kodi/v1/entitlements"
 PURCHASE_PATH = "/api/stremio-for-kodi/v1/purchase-sessions"
 AI_TRANSLATION_PATH = "/api/stremio-for-kodi/v1/features/ai-translation"
+STREMIO_HUB_PATH = "/api/stremio-for-kodi/v1/stremio-hub"
 MAX_RESPONSE_BYTES = 64 * 1024
 TIMEOUT_SECONDS = 6
 TOKEN_REFRESH_SKEW_SECONDS = 30
 FEATURES = ("trailers", "ai_translation")
-_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH)
+_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH, STREMIO_HUB_PATH)
 
 
 from lib.theme import window as themed_window
@@ -189,6 +190,58 @@ def fetch_entitlements(access_token, opener=None):
         method="POST"
     )
     return _bounded_entitlement(_read_json(request, opener=opener))
+
+
+
+def _bounded_stremio_hub(payload):
+    if not isinstance(payload, dict) or not isinstance(payload.get("linked"), bool):
+        raise PremiumError("Invalid MKGA Stremio settings response.")
+    if not payload["linked"]:
+        return {"linked": False, "plan": "basic", "capabilities": {}, "settings": None}
+    plan = payload.get("plan")
+    capabilities = payload.get("capabilities")
+    settings = payload.get("settings")
+    if plan not in ("basic", "supporter", "lifetime"):
+        raise PremiumError("Invalid MKGA Stremio settings response.")
+    if not isinstance(capabilities, dict) or not isinstance(settings, dict):
+        raise PremiumError("Invalid MKGA Stremio settings response.")
+    languages = settings.get("preferredLanguages")
+    if not isinstance(languages, list) or not languages or len(languages) > 5:
+        raise PremiumError("Invalid MKGA Stremio settings response.")
+    clean_languages = []
+    for language in languages:
+        if not isinstance(language, str) or not language or len(language) > 20:
+            raise PremiumError("Invalid MKGA Stremio settings response.")
+        clean_languages.append(language)
+    safe = {
+        "preferredLanguages": clean_languages,
+        "smartSubtitles": bool(settings.get("smartSubtitles")),
+        "autoTranslate": bool(settings.get("autoTranslate")),
+        "generateFromAudio": bool(settings.get("generateFromAudio")),
+        "finishFullTitle": bool(settings.get("finishFullTitle")),
+        "communityCache": bool(settings.get("communityCache")),
+        "autoTiming": bool(settings.get("autoTiming")),
+        "subtitleSize": str(settings.get("subtitleSize") or "medium")[:20],
+        "subtitlePosition": str(settings.get("subtitlePosition") or "bottom")[:20],
+        "subtitleColor": str(settings.get("subtitleColor") or "white")[:20],
+    }
+    return {"linked": True, "plan": plan, "capabilities": capabilities, "settings": safe}
+
+
+def fetch_stremio_hub(access_token, opener=None):
+    access_token = access_token.strip() if isinstance(access_token, str) else ""
+    if not access_token or len(access_token) > 4096:
+        raise PremiumError("A valid MKGA session is required.")
+    request = Request(
+        _validated_url(STREMIO_HUB_PATH),
+        headers={
+            "Accept": "application/json",
+            "Authorization": "Bearer " + access_token,
+            "User-Agent": "Stremio-for-Kodi/1"
+        },
+        method="GET"
+    )
+    return _bounded_stremio_hub(_read_json(request, opener=opener))
 
 
 def _bounded_translation(payload, expected_ids):
@@ -360,6 +413,25 @@ def refresh(store, opener=None):
     state["vortexo_premium"] = saved
     store.save(state)
     return dict(saved)
+
+
+def hub_state(store, opener=None, refresh_remote=False):
+    state = store.load()
+    if refresh_remote:
+        try:
+            session = _premium_session(state, opener=opener)
+            hub = fetch_stremio_hub(session["access_token"], opener=opener)
+            state["vortexo_premium_session"] = session
+            state["mkga_stremio_hub"] = hub
+            store.save(state)
+            return hub
+        except PremiumError:
+            pass
+    cached = state.get("mkga_stremio_hub") if isinstance(state, dict) else None
+    try:
+        return _bounded_stremio_hub(cached)
+    except PremiumError:
+        return {"linked": False, "plan": "basic", "capabilities": {}, "settings": None}
 
 
 def refresh_quiet(store):
