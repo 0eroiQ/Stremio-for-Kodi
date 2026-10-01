@@ -114,7 +114,7 @@ def analyze(task_id, agent, statement, context, ai_token):
     return f"[{role}]\n{answer}"
 
 def _extract_command(answer):
-    fences = re.findall(r"```(?:bash|sh|shell|mswea_bash_command)?\\s*\\n(.*?)```", answer, re.S | re.I)
+    fences = re.findall(r"```(?:bash|sh|shell|mswea_bash_command)?\s*\n(.*?)```", answer, re.S | re.I)
     if fences:
         return fences[-1].strip()
     m = re.search(r"<command>(.*?)</command>", answer, re.S | re.I)
@@ -122,9 +122,9 @@ def _extract_command(answer):
 
 def _safe_coder_command(command):
     blocked = [
-        r"\\bgit\\s+push\\b", r"\\bgh\\s+pr\\b", r"\\bgh\\s+release\\b",
-        r"\\bsudo\\b", r"\\brm\\s+-rf\\s+/", r"\\bcurl\\b.*\\|\\s*(?:sh|bash)",
-        r"\\bwget\\b.*\\|\\s*(?:sh|bash)", r"MKGA_LAB_", r"GITHUB_TOKEN", r"GH_TOKEN",
+        r"\bgit\s+push\b", r"\bgh\s+pr\b", r"\bgh\s+release\b",
+        r"\bsudo\b", r"\brm\s+-rf\s+/", r"\bcurl\b.*\|\s*(?:sh|bash)",
+        r"\bwget\b.*\|\s*(?:sh|bash)", r"MKGA_LAB_", r"GITHUB_TOKEN", r"GH_TOKEN",
     ]
     return not any(re.search(p, command, re.I | re.S) for p in blocked)
 
@@ -157,7 +157,7 @@ def run_coder(statement, analyses, ai_token, feedback=""):
             continue
         if command.strip()=="echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT":
             return subprocess.CompletedProcess(["mkga-free-coder"],0,"\\n\\n".join(transcript),"")
-        normalized=re.sub(r"\\s+"," ",command.strip())
+        normalized=re.sub(r"\s+"," ",command.strip())
         if normalized in seen_commands:
             messages.append({"role":"assistant","content":answer})
             messages.append({"role":"user","content":"REPEATED COMMAND: you already ran that exact command. Do not repeat it. Use the previous output and take the next concrete step; edit the relevant file if the cause is understood."})

@@ -1,0 +1,41 @@
+import importlib.util
+import os
+import pathlib
+import unittest
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "tools" / "mkga-autopilot.py"
+os.environ.setdefault("MKGA_LAB_AUTOPILOT_TOKEN", "test-token")
+
+spec = importlib.util.spec_from_file_location("mkga_autopilot", SCRIPT)
+autopilot = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(autopilot)
+
+
+class MkgaAutopilotTests(unittest.TestCase):
+    def test_extracts_bash_fence(self):
+        answer = "Do this:\n\n```bash\nprintf 'ok' > /tmp/x\n```"
+        self.assertEqual(autopilot._extract_command(answer), "printf 'ok' > /tmp/x")
+
+    def test_extracts_command_tag(self):
+        self.assertEqual(
+            autopilot._extract_command("<command>python3 -m unittest</command>"),
+            "python3 -m unittest",
+        )
+
+    def test_blocks_git_push_and_secret_reads(self):
+        self.assertFalse(autopilot._safe_coder_command("git push origin main"))
+        self.assertFalse(autopilot._safe_coder_command("echo $GITHUB_TOKEN"))
+        self.assertFalse(autopilot._safe_coder_command("env | grep MKGA_LAB_"))
+
+    def test_allows_repository_edits_and_tests(self):
+        self.assertTrue(
+            autopilot._safe_coder_command(
+                "python3 - <<'PY'\nfrom pathlib import Path\nPath('x.txt').write_text('ok')\nPY"
+            )
+        )
+        self.assertTrue(autopilot._safe_coder_command("python3 -m unittest discover -s tests"))
+
+
+if __name__ == "__main__":
+    unittest.main()
