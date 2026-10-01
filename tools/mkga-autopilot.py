@@ -119,8 +119,10 @@ def run_coder(statement, analyses, ai_token, feedback=""):
     env["MSWEA_COST_TRACKING"] = "ignore_errors"
     env.pop("GH_TOKEN", None)
     env.pop("GITHUB_TOKEN", None)
+    env.pop("MKGA_LAB_AUTOPILOT_TOKEN", None)
+    env.pop("MKGA_LAB_SERVICE_TOKEN", None)
     result = run(
-        ["mini", "-y", "-c", str(CONFIG), "-t", prompt],
+        ["mini", "-y", "--exit-immediately", "-c", str(CONFIG), "-t", prompt],
         check=False,
         env=env,
         timeout=1500,
@@ -188,9 +190,14 @@ def main():
 
     lab_reply(task_id, job_id, f"Autopilot started · {plan.get('label','AUTO')} · FREE ONLY · $0 paid fallback.", "working")
     context = repo_context(statement)
-    analyses = [analyze(task_id, a, statement, context, ai_token) for a in analysis_agents]
+    analyses = []
+    for a in analysis_agents:
+        if a.get("status") == "completed" and a.get("summary"):
+            analyses.append(f"[{a['role']}]\n{a['summary']}")
+        else:
+            analyses.append(analyze(task_id, a, statement, context, ai_token))
 
-    branch = "ai/mkga-" + re.sub(r"[^a-zA-Z0-9]", "", task_id)[:10].lower()
+    branch = "ai/mkga-" + re.sub(r"[^a-zA-Z0-9]", "", task_id)[:8].lower() + "-" + re.sub(r"[^a-zA-Z0-9]", "", job_id)[:6].lower()
     git("switch", "-c", branch)
     if coder_agents:
         update_agent(task_id, coder_agents[0], "working", provider="cloudflare-glm")
