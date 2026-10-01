@@ -1,3 +1,10 @@
+v1.0.57
+- Remove the obsolete Premium category, pricing, checkout handoff and Premium purchase UI from Stremio for Kodi.
+- Keep MKGA.TV account/session transport only for secure Account Hub and subtitle-profile sync.
+- Add Last MKGA sync and Sync from MKGA.TV now to the MKGA subtitle settings mode.
+- Add Orange subtitle color support for MKGA.TV profiles using Kodi's AARRGGBB color format.
+- Keep Support development optional and keep core functionality free.
+
 v1.0.56
 - Make MKGA.TV Account the recommended subtitle settings source for linked Stremio users.
 - Keep a This device - Local mode that restores the existing Kodi subtitle and AI preference controls.
