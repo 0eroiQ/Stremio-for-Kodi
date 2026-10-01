@@ -1,0 +1,46 @@
+name: Sync release to MKGA.TV
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to sync (for manual recovery)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          TAG="${EVENT_TAG:-$INPUT_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG="$(gh api repos/${{ github.repository }}/releases/latest --jq .tag_name)"
+          fi
+          RELEASE_JSON="$(gh api repos/${{ github.repository }}/releases/tags/"$TAG")"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "url=$(jq -r .html_url <<<"$RELEASE_JSON")" >> "$GITHUB_OUTPUT"
+          echo "published=$(jq -r .published_at <<<"$RELEASE_JSON")" >> "$GITHUB_OUTPUT"
+          echo "download=$(jq -r '[.assets[] | select(.name | startswith("script.stremioelec-"))][0].browser_download_url // .html_url' <<<"$RELEASE_JSON")" >> "$GITHUB_OUTPUT"
+
+      - name: Sync MKGA project release
+        env:
+          MKGA_RELEASE_SYNC_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_URL: ${{ steps.release.outputs.url }}
+          DOWNLOAD_URL: ${{ steps.release.outputs.download }}
+          PUBLISHED_AT: ${{ steps.release.outputs.published }}
+        run: |
+          test -n "$MKGA_RELEASE_SYNC_TOKEN"
+          jq -n             --arg version "$TAG"             --arg releaseUrl "$RELEASE_URL"             --arg downloadUrl "$DOWNLOAD_URL"             --arg publishedAt "$PUBLISHED_AT"             '{version:$version,releaseUrl:$releaseUrl,downloadUrl:$downloadUrl,publishedAt:$publishedAt}'           | curl --fail-with-body --silent --show-error               -H "Authorization: Bearer $MKGA_RELEASE_SYNC_TOKEN"               -H "Content-Type: application/json"               --data-binary @-               https://mkga.tv/api/projects/stremio-for-kodi/release-sync
