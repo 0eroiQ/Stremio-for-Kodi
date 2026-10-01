@@ -1,3 +1,13 @@
+v1.0.61
+- Upgrade Streams SQLite cache with fresh/stale/expiry state.
+- Show last-known-good cached streams immediately while stale entries refresh in background.
+- Invalidate stream cache when Stremio provider/addon configuration changes.
+- Discard stream cache older than 24 hours.
+- Prefetch recent Continue Watching stream sources while Kodi is idle.
+- Limit background prefetch to two missing/stale titles per 15-minute cycle.
+- Never prefetch streams while video playback is active.
+- Move periodic Stremio/CW sync work off the Kodi UI thread.
+
 v1.0.60
 - Treat Stremio 1ms series pointers as unresolved next-episode state, not partial playback.
 - Verify the pointed episode has already aired before showing it in Continue Watching.
