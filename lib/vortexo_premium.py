@@ -225,6 +225,7 @@ def _bounded_stremio_hub(payload):
         "subtitlePosition": str(settings.get("subtitlePosition") or "bottom")[:20],
         "subtitleColor": str(settings.get("subtitleColor") or "white")[:20],
         "sourcePriority": [str(x)[:24] for x in settings.get("sourcePriority", []) if isinstance(x, str)][:5],
+        "updatedAt": int(settings.get("updatedAt") or 0),
     }
     return {"linked": True, "plan": plan, "capabilities": capabilities, "settings": safe}
 

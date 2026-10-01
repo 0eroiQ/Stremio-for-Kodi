@@ -348,5 +348,11 @@ class PremiumTests(unittest.TestCase):
         self.assertIsNone(module.cached_state(store))
 
 
+    def test_stremio_hub_preserves_updated_at_for_background_sync(self):
+        payload = {"linked": True, "plan": "basic", "capabilities": {}, "settings": {"preferredLanguages": ["bs"], "updatedAt": 12345}}
+        module = load_module()
+        result = module._bounded_stremio_hub(payload)
+        self.assertEqual(result["settings"]["updatedAt"], 12345)
+
 if __name__ == "__main__":
     unittest.main()

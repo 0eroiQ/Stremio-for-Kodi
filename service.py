@@ -2,6 +2,7 @@
 import hashlib
 import sys
 import threading
+import time
 from pathlib import Path
 
 _CORE = Path(__file__).resolve().parent / "core"
@@ -15,7 +16,7 @@ import xbmcvfs
 from account import Store
 from addon_state import get_addon
 from addons_core import active_addons
-from ai_subtitles import CODE_NAMES, local_settings, prepare_embedded_auto
+from ai_subtitles import CODE_NAMES, local_settings, prepare_embedded_auto, _apply_remote_style
 from subtitles import ai_source_candidates, download
 from lib.playback_observer import ProgressPlayer, flush_pending
 from lib.ui_dialogs import dialog as themed_dialog, progress_bg
@@ -212,6 +213,39 @@ class PlaybackWatcher(xbmc.Player):
             progress.close()
 
 
+class SubtitleSettingsSync:
+    INTERVAL_SECONDS = 30
+
+    def __init__(self):
+        self._next_check = 0
+        self._last_updated = None
+
+    def tick(self):
+        now = time.monotonic()
+        if now < self._next_check:
+            return
+        self._next_check = now + self.INTERVAL_SECONDS
+        try:
+            from lib.signin import account_store
+            from lib.vortexo_premium import hub_state
+            hub = hub_state(account_store(), refresh_remote=True, max_age=0)
+            remote = hub.get("settings") if isinstance(hub, dict) and hub.get("linked") else None
+            if not isinstance(remote, dict):
+                return
+            updated = int(remote.get("updatedAt") or 0)
+            if self._last_updated == updated:
+                return
+            self._last_updated = updated
+            _apply_remote_style({
+                "remote": True,
+                "subtitle_size": str(remote.get("subtitleSize") or "medium"),
+                "subtitle_position": str(remote.get("subtitlePosition") or "bottom"),
+                "subtitle_color": str(remote.get("subtitleColor") or "white"),
+            })
+        except Exception:
+            return
+
+
 def maybe_autostart(monitor):
     if ADDON.getSetting("startup_autostart") != "true":
         return
@@ -236,13 +270,16 @@ def main():
 
     player = ProgressPlayer()
     watcher = PlaybackWatcher(monitor)
+    subtitle_sync = SubtitleSettingsSync()
     session = xbmcgui.Window(SESSION_WINDOW_ID)
     session.setProperty(PROGRESS_READY, "true")
     try:
         maybe_autostart(monitor)
         # Service updates can restart while a video is already playing.
         watcher.schedule()
+        subtitle_sync.tick()
         while not monitor.waitForAbort(1):
+            subtitle_sync.tick()
             player.tick()
             while flush_pending(player):
                 pass
