@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.56" provider-name="0eroiQ">
+<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.57" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,9 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.56: Make MKGA.TV Account the recommended subtitle settings source while preserving a full This device - Local fallback and keeping Gemini keys local.
+    <news>1.0.57: Remove Premium UI, add MKGA subtitle sync status/Sync Now, and support Orange subtitle color from MKGA.TV.
+
+1.0.56: Make MKGA.TV Account the recommended subtitle settings source while preserving a full This device - Local fallback and keeping Gemini keys local.
 
 1.0.55: Sync MKGA.TV subtitle preferences in the background, including language priority, AI behavior and Kodi subtitle style.
 
