@@ -145,8 +145,42 @@ def play(meta, identity, stream, resume_ms=0):
 
 
 def _continue_rows(state, catalogs=(), allow_network=False):
+    library = state.get('library', [])
     continuing = [dict(row, id=row.get('_id') or row.get('id'))
-                  for row in library_rows(state.get('library', []), True)]
+                  for row in library_rows(library, True)]
+
+    # Stremio stores a just-completed series episode as timeOffset=0 +
+    # flaggedWatched/video_id. It is absent from library_rows(continuing=True),
+    # but may still belong in Continue Watching when the next episode has aired.
+    # Verify only a small recent set so Home does not fan out across the library.
+    if allow_network:
+        from continue_playback import continue_series_target
+        known = {row.get('_id') or row.get('id') for row in continuing}
+        completed = [row for row in library if isinstance(row, dict)
+                     and row.get('type') == 'series'
+                     and (row.get('_id') or row.get('id')) not in known
+                     and not row.get('removed')
+                     and isinstance(row.get('state'), dict)
+                     and not (row.get('state') or {}).get('timeOffset')
+                     and bool((row.get('state') or {}).get('flaggedWatched'))
+                     and bool((row.get('state') or {}).get('video_id'))]
+        completed.sort(key=lambda row: str((row.get('state') or {}).get('lastWatched') or row.get('_mtime') or ''), reverse=True)
+        for row in completed[:4]:
+            try:
+                full = metadata(row)
+                target, resume_ms = continue_series_target(full.get('videos') or [], row)
+            except Exception:
+                continue
+            if target is None:
+                continue
+            projected = dict(row, id=row.get('_id') or row.get('id'))
+            projected.update({key: value for key, value in full.items() if value not in ('', None, [], {})})
+            projected['id'] = row.get('_id') or row.get('id')
+            projected['state'] = dict(row.get('state') or {})
+            projected['state']['video_id'] = str(target.get('id') or '')
+            projected['state']['timeOffset'] = int(resume_ms) if resume_ms else 1
+            continuing.append(projected)
+
     if not continuing:
         return None
 
@@ -256,7 +290,7 @@ def account_home(refresh=True):
     # heavy on Pi-class hardware. Native playback sync already updates the local
     # Stremio state; details playback can verify episode metadata when needed.
     perf_log('home.refresh.library', library_started, profile=STORE.directory)
-    continuing = _continue_rows(state, catalog_rows, False)
+    continuing = _continue_rows(state, catalog_rows, True)
     result = ([continuing] if continuing else []) + catalog_rows
     perf_log('home.refresh.total', total_started, profile=STORE.directory, rows=len(result),
              items=sum(len(row.get('items') or []) for row in result))

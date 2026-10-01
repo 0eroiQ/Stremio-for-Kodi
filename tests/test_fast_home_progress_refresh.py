@@ -123,10 +123,10 @@ class HomePerformanceBudgetTests(unittest.TestCase):
         self.assertEqual(home_catalogs.HOME_ITEM_LIMIT,16)
         self.assertEqual(home_catalogs.MAX_WORKERS,2)
 
-    def test_home_refresh_does_not_verify_continue_with_network_metadata(self):
+    def test_home_refresh_bounds_completed_series_metadata_verification(self):
         text=(ROOT/'lib/backend.py').read_text()
-        self.assertIn('_continue_rows(state, catalog_rows, False)',text)
-        self.assertNotIn('_continue_rows(state, catalog_rows, True)',text)
+        self.assertIn('_continue_rows(state, catalog_rows, True)', text)
+        self.assertIn('for row in completed[:4]:', text)
 
 
 class PerformanceTraceWiringTests(unittest.TestCase):
