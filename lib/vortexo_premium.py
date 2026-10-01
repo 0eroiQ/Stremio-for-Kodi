@@ -169,7 +169,7 @@ def fetch_session(auth_key, opener=None):
         headers={
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "Stremio-for-Kodi/1"
+            "User-Agent": "Kodi/21 Stremio-for-Kodi/1"
         },
         method="POST"
     )
@@ -186,7 +186,7 @@ def fetch_entitlements(access_token, opener=None):
         headers={
             "Accept": "application/json",
             "Authorization": "Bearer " + access_token,
-            "User-Agent": "Stremio-for-Kodi/1"
+            "User-Agent": "Kodi/21 Stremio-for-Kodi/1"
         },
         method="POST"
     )
@@ -247,7 +247,7 @@ def translate_subtitle_cloud(store, source_hash, cues, target_language, source_l
     request = Request(_validated_url(SUBTITLE_TRANSLATE_PATH), data=payload, headers={
         "Authorization": "Bearer " + session["access_token"],
         "Content-Type": "application/json", "Accept": "application/json",
-        "User-Agent": "Stremio-for-Kodi/1"}, method="POST")
+        "User-Agent": "Kodi/21 Stremio-for-Kodi/1"}, method="POST")
     result = _read_json(request, opener=opener, max_bytes=2 * 1024 * 1024)
     rows = result.get("translations") if isinstance(result, dict) else None
     if not isinstance(rows, list) or len(rows) != len(cues):
@@ -273,7 +273,7 @@ def fetch_stremio_hub(access_token, opener=None):
         headers={
             "Accept": "application/json",
             "Authorization": "Bearer " + access_token,
-            "User-Agent": "Stremio-for-Kodi/1"
+            "User-Agent": "Kodi/21 Stremio-for-Kodi/1"
         },
         method="GET"
     )
@@ -348,7 +348,7 @@ def translate_segments(store, segments, target_language, source_language=None, o
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": "Bearer " + session["access_token"],
-            "User-Agent": "Stremio-for-Kodi/1"
+            "User-Agent": "Kodi/21 Stremio-for-Kodi/1"
         },
         method="POST"
     )
@@ -368,7 +368,7 @@ def create_purchase_session(access_token, opener=None):
         headers={
             "Accept": "application/json",
             "Authorization": "Bearer " + access_token,
-            "User-Agent": "Stremio-for-Kodi/1"
+            "User-Agent": "Kodi/21 Stremio-for-Kodi/1"
         },
         method="POST"
     )
