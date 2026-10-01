@@ -275,9 +275,24 @@ class ContinueIndexSync:
             state["library"] = pull_library(token)
             Store(PROFILE).save(state)
             continue_index.seed(PROFILE, state["library"])
-            # Never compete with active video playback for provider/network bandwidth.
+            # Never compete with active video playback for metadata/provider bandwidth.
             if xbmc.Player().isPlayingVideo():
                 return
+            # Resolve completed/sentinel series in this daemon worker, not Home.
+            from continue_playback import continue_series_target
+            from lib import backend as home_api
+            for media_id, row in continue_index.unresolved_series(PROFILE, 8):
+                try:
+                    full = home_api.metadata(row)
+                    target, resume_ms = continue_series_target(full.get("videos") or [], row)
+                    projected = dict(row)
+                    projected.update({k:v for k,v in full.items() if v not in ("",None,[],{})})
+                    projected["id"] = media_id
+                    status = str(full.get("status") or "").strip().lower()
+                    confirmed = target is None and status in ("ended","canceled","cancelled")
+                    continue_index.resolve_series(PROFILE, media_id, projected, target, resume_ms, confirmed)
+                except Exception:
+                    continue
             from lib.stream_index import get as stream_get, put as stream_put, provider_signature, prune
             active = list(active_addons(state))
             signature = provider_signature(active)

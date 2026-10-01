@@ -243,19 +243,12 @@ def account_home(refresh=True):
     # request skip=16/32/... without ever writing provider URLs to disk.
     save_snapshot(STORE.directory, catalog_rows)
 
+    # Library/CW network sync and series resolution run in the 15-minute service
+    # worker. Home only reads the latest local SQLite state, avoiding a 2-3s
+    # 4k+ library pull plus metadata fan-out on every window open.
     library_started = perf_now()
-    try:
-        state['library'] = pull_library(state['token'])
-        STORE.save(state)
-    except Exception:
-        pass
-
-    # Keep Home refresh bounded. Series metadata verification can fan out into
-    # many extra provider requests and made the background refresh CPU/network
-    # heavy on Pi-class hardware. Native playback sync already updates the local
-    # Stremio state; details playback can verify episode metadata when needed.
-    perf_log('home.refresh.library', library_started, profile=STORE.directory)
-    continuing = _continue_rows(state, catalog_rows, True)
+    continuing = _continue_rows(state, catalog_rows, False)
+    perf_log('home.refresh.library.local', library_started, profile=STORE.directory)
     result = ([continuing] if continuing else []) + catalog_rows
     perf_log('home.refresh.total', total_started, profile=STORE.directory, rows=len(result),
              items=sum(len(row.get('items') or []) for row in result))
