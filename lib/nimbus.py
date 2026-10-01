@@ -298,6 +298,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.home_row_specs = {}
         self.home_row_loading = set()
         self.home_row_exhausted = set()
+        self.home_row_cursor = {}
         super().__init__(*args, **kwargs)
 
     def onInit(self):
@@ -380,6 +381,10 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.set_hero({})
         self.hero_key = None
         self.row_labels = {}
+        if section == 'Home':
+            self.home_row_loading.clear()
+            self.home_row_exhausted.clear()
+            self.home_row_cursor.clear()
         for index, cid in enumerate(self.rows):
             catalog = catalogs[index] if index < len(catalogs) else {}
             rows = list(catalog.get('items', []))
@@ -387,6 +392,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
             self.row_labels[cid] = catalog.get('label', '')
             if section == 'Home':
                 self.home_row_specs[cid] = {k:catalog.get(k) for k in ('url','kind','catalog_id','provider') if catalog.get(k) is not None}
+                self.home_row_cursor[cid] = len(rows)
             listing = self.getControl(cid)
             listing.reset()
             listing.addItems([item(row) for row in rows])
@@ -413,19 +419,22 @@ class HomeWindow(AddonsPage, NimbusWindow):
         rows=self.rows[cid];spec=self.home_row_specs.get(cid) or {}
         if not rows or len(rows)<12 or len(rows)-self.getControl(cid).getSelectedPosition()>4:return
         if not all(spec.get(k) for k in ('url','kind','catalog_id')):return
-        self.home_row_loading.add(cid);skip=len(rows)
+        self.home_row_loading.add(cid);skip=self.home_row_cursor.get(cid,len(rows))
         def work():
             try:
                 from core.protocol import fetch,resource_url
                 from lib.home_catalogs import load_more
-                more=load_more(spec,fetch,resource_url,skip)
+                more,advanced=load_more(spec,fetch,resource_url,skip)
                 if self.closed:return
+                self.home_row_cursor[cid]=skip+advanced
                 known={(r.get('type'),r.get('id')) for r in self.rows.get(cid,[])}
                 fresh=[r for r in more if (r.get('type'),r.get('id')) not in known]
-                if not fresh:self.home_row_exhausted.add(cid);return
-                self.rows[cid].extend(fresh)
-                self.getControl(cid).addItems([item(r) for r in fresh])
-                if len(more)<16:self.home_row_exhausted.add(cid)
+                if fresh:
+                    self.rows[cid].extend(fresh)
+                    self.getControl(cid).addItems([item(r) for r in fresh])
+                # Exhaust only when the provider returned a short/empty page. A
+                # duplicate-only full page must advance cursor and remain pageable.
+                if advanced<16:self.home_row_exhausted.add(cid)
             except Exception:pass
             finally:self.home_row_loading.discard(cid)
         threading.Thread(target=work,daemon=True).start()

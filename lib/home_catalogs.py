@@ -52,8 +52,9 @@ def load_rows(addons, fetch, resource_url, item_limit=HOME_ITEM_LIMIT, max_worke
 
 
 def load_more(spec, fetch, resource_url, skip, item_limit=HOME_ITEM_LIMIT):
-    """Fetch one bounded continuation page for a Home row using Stremio skip."""
+    """Fetch one continuation page and preserve the provider cursor advance."""
     extras={'skip':str(max(0,int(skip or 0)))}
     payload=fetch(resource_url(spec['url'],'catalog',spec['kind'],spec['catalog_id'],extras))
-    items=[dict(item,type=item.get('type') or spec['kind']) for item in payload.get('metas',[]) if isinstance(item,dict) and item.get('id')]
-    return items[:max(1,int(item_limit))]
+    raw=[item for item in payload.get('metas',[]) if isinstance(item,dict) and item.get('id')]
+    limit=max(1,int(item_limit));items=[dict(item,type=item.get('type') or spec['kind']) for item in raw[:limit]]
+    return items,len(raw[:limit])
