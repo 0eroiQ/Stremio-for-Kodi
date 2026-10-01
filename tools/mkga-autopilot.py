@@ -215,10 +215,7 @@ def main():
         if coder.stderr:
             print("CODER STDERR (tail):\n" + coder.stderr[-6000:], file=sys.stderr)
         if coder.returncode != 0:
-            feedback = "Coding agent process failed. Correct the failure and retry.\n" + (coder.stdout + "\n" + coder.stderr)[-9000:]
-            if attempt < max_attempts:
-                continue
-            raise RuntimeError("coding agent process failed after retries")
+            raise RuntimeError("coding agent process failed: " + (coder.stdout + "\n" + coder.stderr)[-3000:])
         diff = git("diff", "--", ".", check=False).stdout
         if not diff.strip():
             feedback = "No code changes were produced. Inspect the repository again and implement the requested fix."
