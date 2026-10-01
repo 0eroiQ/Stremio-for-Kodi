@@ -1,3 +1,10 @@
+v1.0.59
+- Fix v1.0.58 Continue Watching over-import.
+- Exclude watched and 90%+ completed movies even when Stremio keeps a stale offset.
+- Treat 90%+/watched series episodes as unresolved until metadata confirms an already-aired next episode.
+- Keep future/unreleased next episodes out of Home.
+- Automatically rebuild the local Continue Watching SQLite index with corrected rules.
+
 v1.0.58
 - Persist all Continue Watching state in local SQLite instead of limiting completed-series checks.
 - Keep completed series ready for the next aired episode and re-check finished series for new episodes/seasons.
