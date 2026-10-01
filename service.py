@@ -126,7 +126,23 @@ class PlaybackWatcher(xbmc.Player):
         embedded_error = None
         last_fallback_error = None
         try:
-            # Noiro-style fast path: ask subtitle addons first. Remote 4K MKV
+            # Fastest path: MKGA resolves the user's own Stremio subtitle addons
+            # server-side, translates/caches there, and returns a ready SRT.
+            try:
+                from lib.signin import account_store
+                from lib.vortexo_premium import resolve_subtitle_cloud
+                cloud = resolve_subtitle_cloud(account_store(), context["kind"], context["id"], context.get("filename", ""), target)
+                if cloud and self._matches(digest):
+                    import hashlib as _hashlib
+                    path = PROFILE / "subtitles" / ("mkga-cloud-" + _hashlib.sha256(cloud["subtitle"].encode("utf-8")).hexdigest() + ".srt")
+                    from setup_profile import atomic_write
+                    atomic_write(path, cloud["subtitle"].encode("utf-8"))
+                    if self._apply(str(path), digest, "MKGA Cloud", cloud["source_language"], cloud["target_language"]):
+                        return
+            except Exception as error:
+                _remember_ai_error("MKGA subtitle cloud resolver", error)
+
+            # Noiro-style local fallback: ask subtitle addons first. Remote 4K MKV
             # embedded extraction can require reading/seeking the whole stream on
             # LibreELEC, so it must never block a ready text subtitle.
             if settings.get("source") != "1":

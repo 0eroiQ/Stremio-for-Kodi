@@ -19,11 +19,12 @@ PURCHASE_PATH = "/api/stremio-for-kodi/v1/purchase-sessions"
 AI_TRANSLATION_PATH = "/api/stremio-for-kodi/v1/features/ai-translation"
 STREMIO_HUB_PATH = "/api/stremio-for-kodi/v1/stremio-hub"
 SUBTITLE_TRANSLATE_PATH = "/api/stremio-for-kodi/v1/subtitle-translate"
+SUBTITLE_RESOLVE_PATH = "/api/stremio-for-kodi/v1/subtitle-resolve"
 MAX_RESPONSE_BYTES = 64 * 1024
 TIMEOUT_SECONDS = 6
 TOKEN_REFRESH_SKEW_SECONDS = 30
 FEATURES = ("trailers", "ai_translation")
-_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH, STREMIO_HUB_PATH, SUBTITLE_TRANSLATE_PATH)
+_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH, STREMIO_HUB_PATH, SUBTITLE_TRANSLATE_PATH, SUBTITLE_RESOLVE_PATH)
 
 
 from lib.theme import window as themed_window
@@ -229,6 +230,22 @@ def _bounded_stremio_hub(payload):
         "updatedAt": int(settings.get("updatedAt") or 0),
     }
     return {"linked": True, "plan": plan, "capabilities": capabilities, "settings": safe}
+
+
+def resolve_subtitle_cloud(store, kind, identity, filename, target_language, opener=None):
+    if kind not in ("movie", "series") or not str(identity or "").strip():
+        raise PremiumError("Invalid subtitle request.")
+    state = store.load(); session = _premium_session(state, opener=opener)
+    state["vortexo_premium_session"] = session; store.save(state)
+    payload = json.dumps({"kind": kind, "id": str(identity), "filename": str(filename or ""), "targetLanguage": str(target_language or "bs")}).encode("utf-8")
+    request = Request(_validated_url(SUBTITLE_RESOLVE_PATH), data=payload, headers={"Authorization":"Bearer "+session["access_token"],"Content-Type":"application/json","Accept":"application/json","User-Agent":"Kodi/21 Stremio-for-Kodi/1"}, method="POST")
+    result = _read_json(request, opener=opener, max_bytes=3 * 1024 * 1024)
+    if not isinstance(result, dict) or not result.get("found"):
+        return None
+    subtitle = result.get("subtitle")
+    if not isinstance(subtitle, str) or not subtitle.strip() or len(subtitle.encode("utf-8")) > 2 * 1024 * 1024:
+        raise PremiumError("Invalid subtitle response.")
+    return {"subtitle": subtitle, "source_language": str(result.get("sourceLanguage") or "und"), "target_language": str(result.get("targetLanguage") or target_language), "translated": bool(result.get("translated")), "cached": bool(result.get("cached"))}
 
 
 def translate_subtitle_cloud(store, source_hash, cues, target_language, source_language=None, opener=None):
