@@ -48,6 +48,21 @@ class MkgaAutopilotTests(unittest.TestCase):
         self.assertNotIn(".github/workflows/release-v1.0.34.yml:", context.split("FILE SNIPPETS:", 1)[0])
         self.assertLess(len(context), 18000)
 
+    def test_extracts_and_bounds_patch(self):
+        answer = """```diff
+diff --git a/tests/example.py b/tests/example.py
+--- a/tests/example.py
++++ b/tests/example.py
+@@ -1 +1 @@
+-old
++new
+```"""
+        patch = autopilot._extract_patch(answer)
+        self.assertIn("diff --git", patch)
+        self.assertTrue(autopilot._safe_patch_paths(patch))
+        blocked = patch.replace("tests/example.py", "tools/mkga-autopilot.py")
+        self.assertFalse(autopilot._safe_patch_paths(blocked))
+
 
 if __name__ == "__main__":
     unittest.main()

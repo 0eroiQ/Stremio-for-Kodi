@@ -175,6 +175,55 @@ def _safe_coder_command(command):
     ]
     return not any(re.search(p, command, re.I | re.S) for p in blocked)
 
+def _extract_patch(answer):
+    fenced = re.findall(r"```(?:diff|patch)?\s*\n(.*?)```", answer, re.S | re.I)
+    candidates = fenced + [answer]
+    for value in candidates:
+        start = value.find("diff --git ")
+        if start >= 0:
+            patch = value[start:].strip() + "\n"
+            if "--- a/" in patch and "+++ b/" in patch:
+                return patch
+    return ""
+
+def _safe_patch_paths(patch):
+    paths=[]
+    for line in patch.splitlines():
+        if line.startswith("+++ b/") or line.startswith("--- a/"):
+            name=line[6:].strip()
+            if name == "/dev/null":
+                continue
+            paths.append(name)
+    blocked=(".github/workflows/mkga-autopilot.yml","tools/mkga-autopilot.py")
+    return bool(paths) and all(not p.startswith("/") and ".." not in Path(p).parts and p not in blocked for p in paths)
+
+def try_patch_coder(statement, analyses, repo_hints, ai_token, feedback=""):
+    prompt = (
+        "You are MKGA Autopilot's coding worker. Produce the smallest safe code fix as a unified git diff. "
+        "Do not explain, do not use markdown except a single ```diff block, and do not modify MKGA autopilot infrastructure. "
+        "Use the repository hints below as authoritative current-file context. Do not inspect or target historical release workflows unless they are explicitly listed as a likely current file. "
+        "If the evidence is insufficient for a safe change, output exactly NO_CHANGE.\n\nTASK:\n" + statement
+        + "\n\nINDEPENDENT ANALYSIS:\n" + "\n\n".join(analyses)
+        + "\n\nCURRENT REPOSITORY HINTS:\n" + repo_hints
+        + ("\n\nPREVIOUS FAILURE TO CORRECT:\n" + feedback if feedback else "")
+    )
+    answer=ai_chat(ai_token,[{"role":"user","content":prompt}],"mkga-free-coder",1800)
+    patch=_extract_patch(answer)
+    if not patch or not _safe_patch_paths(patch):
+        return False, answer
+    patch_file=REPO / ".mkga-autopilot.patch"
+    patch_file.write_text(patch)
+    try:
+        check=run(["git","apply","--check",str(patch_file)],check=False,timeout=60)
+        if check.returncode:
+            return False, answer + "\nPATCH CHECK FAILED:\n" + check.stderr[-3000:]
+        applied=run(["git","apply",str(patch_file)],check=False,timeout=60)
+        if applied.returncode:
+            return False, answer + "\nPATCH APPLY FAILED:\n" + applied.stderr[-3000:]
+        return True, answer
+    finally:
+        patch_file.unlink(missing_ok=True)
+
 def run_coder(statement, analyses, repo_hints, ai_token, feedback=""):
     system = (
         "You are MKGA Autopilot's implementation worker inside an ephemeral GitHub Actions checkout. "
@@ -300,8 +349,9 @@ def main():
     final_test_log = ""
     review_failures = []
     for attempt in range(1, max_attempts + 1):
-        coder = run_coder(statement, analyses, context, ai_token, feedback)
-        print(f"Coder attempt {attempt} exit={coder.returncode}")
+        patch_ok, patch_log = try_patch_coder(statement, analyses, context, ai_token, feedback)
+        coder = subprocess.CompletedProcess(["mkga-patch-coder"], 0, patch_log, "") if patch_ok else run_coder(statement, analyses, context, ai_token, feedback + "\n\nPATCH-FIRST ATTEMPT DID NOT APPLY:\n" + patch_log[-4000:])
+        print(f"Coder attempt {attempt} exit={coder.returncode} patch_first={patch_ok}")
         if coder.stdout:
             print("CODER STDOUT (tail):\n" + coder.stdout[-6000:])
         if coder.stderr:
