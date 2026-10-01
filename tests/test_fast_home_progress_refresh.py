@@ -126,7 +126,8 @@ class HomePerformanceBudgetTests(unittest.TestCase):
     def test_home_refresh_bounds_completed_series_metadata_verification(self):
         text=(ROOT/'lib/backend.py').read_text()
         self.assertIn('_continue_rows(state, catalog_rows, True)', text)
-        self.assertIn('for row in completed[:4]:', text)
+        self.assertIn('continue_index.unresolved_series(STORE.directory, 8)', text)
+        self.assertIn('continue_index.rows(STORE.directory, 100)', text)
 
 
 class PerformanceTraceWiringTests(unittest.TestCase):

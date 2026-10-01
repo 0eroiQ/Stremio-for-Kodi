@@ -244,6 +244,30 @@ class SubtitleSettingsSync:
             return
 
 
+
+class ContinueIndexSync:
+    INTERVAL = 900
+    def __init__(self):
+        self._next = 0
+    def tick(self):
+        now = time.time()
+        if now < self._next:
+            return
+        self._next = now + self.INTERVAL
+        try:
+            state = Store(PROFILE).load()
+            token = state.get("token")
+            if not token:
+                return
+            from account import pull_library
+            from lib import continue_index
+            state["library"] = pull_library(token)
+            Store(PROFILE).save(state)
+            continue_index.seed(PROFILE, state["library"])
+        except Exception:
+            return
+
+
 def maybe_autostart(monitor):
     if ADDON.getSetting("startup_autostart") != "true":
         return
@@ -269,6 +293,7 @@ def main():
     player = ProgressPlayer()
     watcher = PlaybackWatcher(monitor)
     subtitle_sync = SubtitleSettingsSync()
+    continue_sync = ContinueIndexSync()
     session = xbmcgui.Window(SESSION_WINDOW_ID)
     session.setProperty(PROGRESS_READY, "true")
     try:
@@ -276,8 +301,10 @@ def main():
         # Service updates can restart while a video is already playing.
         watcher.schedule()
         subtitle_sync.tick()
+        continue_sync.tick()
         while not monitor.waitForAbort(1):
             subtitle_sync.tick()
+            continue_sync.tick()
             player.tick()
             while flush_pending(player):
                 pass

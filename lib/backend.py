@@ -145,78 +145,31 @@ def play(meta, identity, stream, resume_ms=0):
 
 
 def _continue_rows(state, catalogs=(), allow_network=False):
+    from lib import continue_index
     library = state.get('library', [])
-    continuing = [dict(row, id=row.get('_id') or row.get('id'))
-                  for row in library_rows(library, True)]
+    # Seed is local SQLite work only and keeps every Stremio CW pointer.
+    continue_index.seed(STORE.directory, library)
 
-    # Stremio stores a just-completed series episode as timeOffset=0 +
-    # flaggedWatched/video_id. It is absent from library_rows(continuing=True),
-    # but may still belong in Continue Watching when the next episode has aired.
-    # Verify only a small recent set so Home does not fan out across the library.
     if allow_network:
         from continue_playback import continue_series_target
-        known = {row.get('_id') or row.get('id') for row in continuing}
-        completed = [row for row in library if isinstance(row, dict)
-                     and row.get('type') == 'series'
-                     and (row.get('_id') or row.get('id')) not in known
-                     and not row.get('removed')
-                     and isinstance(row.get('state'), dict)
-                     and not (row.get('state') or {}).get('timeOffset')
-                     and bool((row.get('state') or {}).get('flaggedWatched'))
-                     and bool((row.get('state') or {}).get('video_id'))]
-        completed.sort(key=lambda row: str((row.get('state') or {}).get('lastWatched') or row.get('_mtime') or ''), reverse=True)
-        for row in completed[:4]:
+        # Resolve a bounded batch of changed/completed series each refresh. SQLite
+        # retains all prior resolutions, so subsequent refreshes continue the queue.
+        for media_id, row in continue_index.unresolved_series(STORE.directory, 8):
             try:
                 full = metadata(row)
                 target, resume_ms = continue_series_target(full.get('videos') or [], row)
             except Exception:
-                continue
-            if target is None:
-                continue
-            projected = dict(row, id=row.get('_id') or row.get('id'))
-            projected.update({key: value for key, value in full.items() if value not in ('', None, [], {})})
-            projected['id'] = row.get('_id') or row.get('id')
-            projected['state'] = dict(row.get('state') or {})
-            projected['state']['video_id'] = str(target.get('id') or '')
-            projected['state']['timeOffset'] = int(resume_ms) if resume_ms else 1
-            continuing.append(projected)
-
-    if not continuing:
-        return None
-
-    # Fast startup stays network-free and trusts Stremio's saved pointer. During
-    # the background refresh we can verify series episode state against current
-    # metadata so a watched/future/final episode never remains in Continue Watching.
-    if allow_network:
-        from continue_playback import continue_series_target
-        verified = []
-        for row in continuing:
-            if row.get('type') != 'series':
-                verified.append(row)
-                continue
-            try:
-                full = metadata(row)
-                target, resume_ms = continue_series_target(full.get('videos') or [], row)
-            except Exception:
-                # A metadata outage must not destructively remove a valid saved
-                # Continue Watching item. Keep it until a later refresh can verify.
-                verified.append(row)
-                continue
-            if target is None:
                 continue
             projected = dict(row)
             projected.update({key: value for key, value in full.items()
                               if value not in ('', None, [], {})})
-            projected['id'] = row.get('_id') or row.get('id')
-            projected['state'] = dict(row.get('state') or {})
-            projected['state']['video_id'] = str(target.get('id') or '')
-            projected['state']['timeOffset'] = int(resume_ms) if resume_ms else 1
-            verified.append(projected)
-        continuing = verified
+            projected['id'] = media_id
+            continue_index.resolve_series(STORE.directory, media_id, projected, target, resume_ms)
 
+    continuing = continue_index.rows(STORE.directory, 100)
     if continuing:
         from lib.hero_metadata import prepare
-        continuing = prepare(continuing, catalogs, metadata if allow_network else None)
+        continuing = prepare(continuing, catalogs, None)
         return {'label': 'Continue Watching', 'items': continuing, 'failed': False}
     return None
 
@@ -226,7 +179,9 @@ def account_home_capacity():
     from lib.home_catalogs import descriptors
     state = STORE.load()
     remote = [a for a in state.get('addons', []) if a.get('account') is True]
-    return len(descriptors(remote)) + (1 if library_rows(state.get('library', []), True) else 0)
+    from lib import continue_index
+    continue_index.seed(STORE.directory, state.get('library', []))
+    return len(descriptors(remote)) + (1 if continue_index.rows(STORE.directory, 1) else 0)
 
 
 def account_home(refresh=True):

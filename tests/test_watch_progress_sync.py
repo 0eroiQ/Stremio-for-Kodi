@@ -159,5 +159,16 @@ class WiringTests(unittest.TestCase):
         self.assertEqual(player._watched_ms,1000)
 
 
+    def test_continue_index_keeps_all_series_not_just_recent_four(self):
+        import tempfile
+        from pathlib import Path
+        from lib import continue_index
+        library=[]
+        for i in range(10):
+            library.append({'_id':'tt%03d'%i,'type':'series','removed':False,'temp':False,'_mtime':'2026-10-01T%02d:00:00Z'%i,'state':{'video_id':'tt%03d:1:3'%i,'timeOffset':0,'flaggedWatched':1,'lastWatched':'2026-10-01T%02d:00:00Z'%i}})
+        with tempfile.TemporaryDirectory() as tmp:
+            continue_index.seed(Path(tmp),library)
+            self.assertEqual(len(continue_index.unresolved_series(Path(tmp),32)),10)
+
 if __name__=='__main__':
     unittest.main()
