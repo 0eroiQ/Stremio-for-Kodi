@@ -36,6 +36,18 @@ class MkgaAutopilotTests(unittest.TestCase):
         )
         self.assertTrue(autopilot._safe_coder_command("python3 -m unittest discover -s tests"))
 
+    def test_repo_context_prioritizes_current_repository_tooling(self):
+        context = autopilot.repo_context(
+            "Kodi repository update notifications not appearing; investigate repository publishing."
+        )
+        likely = context.split("MATCHES:", 1)[0]
+        self.assertIn(".github/workflows/repository.yml", likely)
+        self.assertIn("tests/test_kodi_repository.py", likely)
+        self.assertIn("tools/build-kodi-repository.py", likely)
+        self.assertIn("--- .github/workflows/repository.yml ---", context)
+        self.assertNotIn(".github/workflows/release-v1.0.34.yml:", context.split("FILE SNIPPETS:", 1)[0])
+        self.assertLess(len(context), 18000)
+
 
 if __name__ == "__main__":
     unittest.main()

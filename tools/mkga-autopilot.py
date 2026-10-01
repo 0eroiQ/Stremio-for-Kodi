@@ -60,16 +60,63 @@ def task_text(data):
     )
 
 def repo_context(statement):
-    files = git("ls-files").stdout.splitlines()[:500]
     words = [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z0-9_-]{3,}", statement)]
-    stop = {"this","that","with","from","have","will","when","then","task","kodi","stremio","issue"}
+    stop = {"this","that","with","from","have","will","when","then","task","kodi","stremio","issue","investigate","fix","missing","appearing"}
     words = list(dict.fromkeys(w for w in words if w not in stop))[:10]
-    matches = ""
+    tracked = git("ls-files").stdout.splitlines()
+    text_exts = {".py",".yml",".yaml",".xml",".json",".md",".txt"}
+    def useful(name):
+        p=Path(name)
+        return p.suffix.lower() in text_exts and p.name.lower() not in {"license","notice","license.txt","notice.md"}
+    def path_score(name):
+        low=name.lower()
+        score=sum(4 if w in low else 0 for w in words)
+        if low.startswith((".github/workflows/","tools/","tests/")): score+=3
+        if low.endswith((".py",".yml",".yaml",".xml")): score+=2
+        return score
+    likely = [n for n in sorted((n for n in tracked if useful(n) and path_score(n)>0), key=lambda n:(-path_score(n),n))[:20]]
+    raw_matches=[]
     if words:
         pattern = "|".join(re.escape(w) for w in words)
         found = run(["git", "grep", "-n", "-i", "-E", pattern], check=False, timeout=60)
-        matches = "\n".join(found.stdout.splitlines()[:140])
-    return "REPOSITORY FILES:\n" + "\n".join(files) + "\n\nSEARCH MATCHES:\n" + matches
+        raw_matches=found.stdout.splitlines()
+    parsed=[]
+    for line in raw_matches:
+        name=line.split(":",1)[0]
+        # Old version-specific release workflows create a lot of low-value noise.
+        if re.match(r"^\.github/workflows/release-v\d+\.\d+\.\d+\.yml$", name) and not name.endswith("release-v1.0.54.yml"):
+            continue
+        if useful(name):
+            priority=(20 if name in likely[:8] else 0)+path_score(name)
+            parsed.append((priority,name,line))
+    parsed.sort(key=lambda x:(-x[0],x[1]))
+    matches=[];matched_files=[];per_file={}
+    for _,name,line in parsed:
+        if per_file.get(name,0)>=6: continue
+        per_file[name]=per_file.get(name,0)+1
+        matches.append(line)
+        if name not in matched_files: matched_files.append(name)
+        if len(matches)>=35: break
+    candidates=[]
+    for name in likely + matched_files:
+        if name not in candidates and useful(name) and (REPO/name).is_file(): candidates.append(name)
+    snippets=[]
+    for name in candidates[:4]:
+        try:
+            lines=(REPO/name).read_text(errors="replace").splitlines()
+        except Exception:
+            continue
+        hit=0
+        for i,line in enumerate(lines):
+            if any(w in line.lower() for w in words): hit=i;break
+        a=max(0,hit-20);b=min(len(lines),hit+70)
+        body="\n".join(f"{i+1}: {lines[i]}" for i in range(a,b))[:5000]
+        snippets.append(f"--- {name} ---\n{body}")
+    return (
+        "LIKELY FILES:\n" + "\n".join(likely[:20])
+        + "\n\nMATCHES:\n" + "\n".join(matches)
+        + "\n\nFILE SNIPPETS:\n" + "\n\n".join(snippets)
+    )
 
 def ai_chat(ai_token, messages, model="mkga-free", max_tokens=1400):
     payload = {
@@ -128,7 +175,7 @@ def _safe_coder_command(command):
     ]
     return not any(re.search(p, command, re.I | re.S) for p in blocked)
 
-def run_coder(statement, analyses, ai_token, feedback=""):
+def run_coder(statement, analyses, repo_hints, ai_token, feedback=""):
     system = (
         "You are MKGA Autopilot's implementation worker inside an ephemeral GitHub Actions checkout. "
         "Your job is to inspect, edit, and test the repository, not merely explain. "
@@ -140,6 +187,7 @@ def run_coder(statement, analyses, ai_token, feedback=""):
     )
     task = (
         statement + "\\n\\nINDEPENDENT ANALYSIS:\\n" + "\\n\\n".join(analyses)
+        + "\\n\\nREPOSITORY HINTS (use these before broad searches):\\n" + repo_hints
         + ("\\n\\nREVIEW/TEST FEEDBACK TO FIX:\\n" + feedback if feedback else "")
         + "\\n\\nImplement the smallest safe fix now."
     )
@@ -252,7 +300,7 @@ def main():
     final_test_log = ""
     review_failures = []
     for attempt in range(1, max_attempts + 1):
-        coder = run_coder(statement, analyses, ai_token, feedback)
+        coder = run_coder(statement, analyses, context, ai_token, feedback)
         print(f"Coder attempt {attempt} exit={coder.returncode}")
         if coder.stdout:
             print("CODER STDOUT (tail):\n" + coder.stdout[-6000:])
