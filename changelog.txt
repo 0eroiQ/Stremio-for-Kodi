@@ -1,3 +1,10 @@
+v1.0.55
+- Sync MKGA.TV Stremio Account Hub subtitle preferences into Stremio for Kodi.
+- Refresh linked subtitle settings in the background about every 30 seconds without requiring an addon restart.
+- Apply website subtitle size, position and color through Kodi settings APIs.
+- Read preferred-language priority, Smart Subtitles, Auto Translate, Generate from Audio, source priority, community cache and timing preferences from the verified Stremio identity.
+- Keep local/free BYOK subtitle behavior available when MKGA.TV is unavailable.
+
 v1.0.54
 - Move Stremio for Kodi Premium/session/entitlement control-plane URLs from the retired Vortexo site to MKGA.TV.
 - Move the anonymous report sync feed from Vortexo to MKGA Lab.
