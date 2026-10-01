@@ -1,0 +1,38 @@
+name: MKGA Free Autopilot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: mkga-free-autopilot
+  cancel-in-progress: false
+
+jobs:
+  autopilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install free coding agent
+        run: python -m pip install --disable-pip-version-check "mini-swe-agent>=2,<3"
+
+      - name: Run MKGA Lab autopilot
+        env:
+          MKGA_LAB_AUTOPILOT_TOKEN: ${{ secrets.MKGA_LAB_AUTOPILOT_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/mkga-autopilot.py

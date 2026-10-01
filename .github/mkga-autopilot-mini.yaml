@@ -1,0 +1,48 @@
+agent:
+  system_template: |
+    You are the implementation worker for MKGA Autopilot.
+    Work only inside the checked-out repository.
+    Never push, merge, create releases, change GitHub settings, expose secrets, or contact users.
+    Make the smallest safe code change that solves the assigned task.
+    Preserve existing behavior unless the task explicitly requires a change.
+  instance_template: |
+    Solve this MKGA Lab task:
+
+    {{task}}
+
+    Workflow:
+    1. Inspect the repository and identify the root cause.
+    2. Read existing tests and related implementation before editing.
+    3. Implement the smallest safe fix.
+    4. Add or update tests when useful.
+    5. Run relevant tests.
+    6. Finish by running exactly:
+       echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT
+
+    Each response must include exactly one bash command block:
+    ```mswea_bash_command
+    your_command_here
+    ```
+
+    Do not run git push, gh pr create, release commands, or destructive repository cleanup.
+  step_limit: 18
+  cost_limit: 1
+  mode: yolo
+environment:
+  env:
+    PAGER: cat
+    MANPAGER: cat
+    LESS: -R
+    PIP_PROGRESS_BAR: "off"
+    TQDM_DISABLE: "1"
+model:
+  model_class: litellm_textbased
+  model_name: mkga-free-coder
+  cost_tracking: ignore_errors
+  action_regex: '```mswea_bash_command\s*\n(.*?)\n```'
+  model_kwargs:
+    custom_llm_provider: openai
+    api_base: https://mkga.tv/api/lab/ai/v1
+    drop_params: true
+    temperature: 0.1
+run: {}
