@@ -164,7 +164,9 @@ def _continue_rows(state, catalogs=(), allow_network=False):
             projected.update({key: value for key, value in full.items()
                               if value not in ('', None, [], {})})
             projected['id'] = media_id
-            continue_index.resolve_series(STORE.directory, media_id, projected, target, resume_ms)
+            series_status=str(full.get('status') or '').strip().lower()
+            confirmed_finished = target is None and series_status in ('ended','canceled','cancelled')
+            continue_index.resolve_series(STORE.directory, media_id, projected, target, resume_ms, confirmed_finished)
 
     continuing = continue_index.rows(STORE.directory, 100)
     if continuing:

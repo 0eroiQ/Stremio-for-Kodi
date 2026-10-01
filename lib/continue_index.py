@@ -3,7 +3,7 @@ import json, sqlite3, threading, time
 from pathlib import Path
 
 _lock=threading.RLock()
-LOGIC_VERSION=2
+LOGIC_VERSION=3
 
 def _path(profile): return Path(profile)/'continue_index.sqlite'
 def _db(profile):
@@ -50,7 +50,7 @@ def seed(profile, library):
           # metadata must prove an already-aired next episode before Home shows them.
           series_pointer=typ=='series' and bool(state.get('video_id')) and (offset>0 or completed)
           if not (series_pointer or movie_pointer): continue
-          status=('waiting' if typ=='series' and completed else 'partial')
+          status=('waiting' if typ=='series' and (completed or offset==1) else 'partial')
           key=(typ,media_id);seen.add(key)
           item=dict(row,id=media_id);mtime=str(row.get('_mtime') or '');video_id=str(state.get('video_id') or '')
           existing=db.execute('SELECT status,last_video_id,source_mtime,next_video_id,next_release,item_json FROM continue_items WHERE media_type=? AND media_id=?',key).fetchone()
@@ -61,7 +61,7 @@ def seed(profile, library):
             db.execute('''INSERT INTO continue_items(media_type,media_id,status,last_video_id,next_video_id,next_release,progress_ms,last_watched,item_json,source_mtime,updated)
               VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(media_type,media_id) DO UPDATE SET
               status=excluded.status,last_video_id=excluded.last_video_id,next_video_id=NULL,next_release=NULL,progress_ms=excluded.progress_ms,
-              last_watched=excluded.last_watched,item_json=excluded.item_json,source_mtime=excluded.source_mtime,updated=excluded.updated''',
+              last_watched=excluded.last_watched,item_json=excluded.item_json,source_mtime=excluded.source_mtime,updated=excluded.updated,next_check=0''',
               (typ,media_id,status,video_id,None,None,offset,str(state.get('lastWatched') or mtime),json.dumps(item,separators=(',',':')),mtime,now))
         # Entries no longer represented by Stremio CW state are removed. Resolved waiting/finished
         # rows remain represented because completed series pointers are seeded above.
@@ -71,8 +71,8 @@ def seed(profile, library):
         db.commit()
       finally: db.close()
 
-def resolve_series(profile, media_id, item, target, resume_ms=0):
-    status='next_ready' if target else 'finished'
+def resolve_series(profile, media_id, item, target, resume_ms=0, confirmed_finished=False):
+    status='next_ready' if target else ('finished' if confirmed_finished else 'waiting')
     next_id=str((target or {}).get('id') or '')
     release=str((target or {}).get('released') or (target or {}).get('firstAired') or '')
     display=dict(item)
@@ -83,7 +83,7 @@ def resolve_series(profile, media_id, item, target, resume_ms=0):
       db=_db(profile)
       try:
        db.execute('UPDATE continue_items SET status=?,next_video_id=?,next_release=?,progress_ms=?,item_json=?,updated=?,next_check=? WHERE media_type=? AND media_id=?',
-                  (status,next_id,release,int(resume_ms or 0),json.dumps(display,separators=(',',':')),time.time(),time.time()+(86400 if status=='finished' else 0),'series',media_id));db.commit()
+                  (status,next_id,release,int(resume_ms or 0),json.dumps(display,separators=(',',':')),time.time(),time.time()+(86400 if status in ('finished','waiting') else 0),'series',media_id));db.commit()
       finally: db.close()
 
 def rows(profile, limit=100):
@@ -100,7 +100,7 @@ def rows(profile, limit=100):
 def unresolved_series(profile, limit=32):
     with _lock:
       db=_db(profile)
-      try:data=db.execute("SELECT media_id,item_json FROM continue_items WHERE media_type='series' AND (status='waiting' OR (status='finished' AND next_check<=?)) ORDER BY CASE WHEN status='waiting' THEN 0 ELSE 1 END,last_watched DESC LIMIT ?",(time.time(),int(limit))).fetchall()
+      try:data=db.execute("SELECT media_id,item_json FROM continue_items WHERE media_type='series' AND status IN ('waiting','finished') AND next_check<=? ORDER BY CASE WHEN status='waiting' THEN 0 ELSE 1 END,last_watched DESC LIMIT ?",(time.time(),int(limit))).fetchall()
       finally:db.close()
     out=[]
     for media_id,raw in data:

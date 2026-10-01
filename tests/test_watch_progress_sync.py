@@ -182,5 +182,25 @@ class WiringTests(unittest.TestCase):
             self.assertEqual(continue_index.rows(root,100),[])
             self.assertEqual([x[0] for x in continue_index.unresolved_series(root,100)],['ttshow'])
 
+    def test_continue_index_treats_one_ms_series_sentinel_as_waiting(self):
+        import tempfile
+        from pathlib import Path
+        from lib import continue_index
+        row={'_id':'ttsentinel','type':'series','removed':False,'_mtime':'z','state':{'video_id':'ttsentinel:2:2','timeOffset':1,'duration':3000000,'flaggedWatched':0,'lastWatched':'z'}}
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);continue_index.seed(root,[row])
+            self.assertEqual(continue_index.rows(root,10),[])
+            self.assertEqual([x[0] for x in continue_index.unresolved_series(root,10)],['ttsentinel'])
+
+    def test_continue_index_does_not_mark_ambiguous_series_finished(self):
+        import tempfile
+        from pathlib import Path
+        from lib import continue_index
+        row={'_id':'ttamb','id':'ttamb','type':'series','removed':False,'_mtime':'z','state':{'video_id':'ttamb:1:3','timeOffset':0,'duration':100000,'flaggedWatched':1,'lastWatched':'z'}}
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);continue_index.seed(root,[row]);continue_index.resolve_series(root,'ttamb',row,None,0,False)
+            self.assertEqual(continue_index.rows(root,10),[])
+            self.assertEqual([x[0] for x in continue_index.unresolved_series(root,10)],[])  # daily backoff, not falsely visible/finished
+
 if __name__=='__main__':
     unittest.main()
