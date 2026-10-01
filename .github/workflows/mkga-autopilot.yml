@@ -4,6 +4,12 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mkga-autopilot.yml"
+      - ".github/mkga-autopilot-mini.yaml"
+      - "tools/mkga-autopilot.py"
 
 permissions:
   contents: write
