@@ -1,3 +1,11 @@
+v1.0.60
+- Treat Stremio 1ms series pointers as unresolved next-episode state, not partial playback.
+- Verify the pointed episode has already aired before showing it in Continue Watching.
+- Do not mark a series finished merely because one metadata response has no next episode.
+- Mark finished only when series metadata positively reports an ended/canceled series.
+- Back off ambiguous metadata checks for 24 hours and retry immediately when Stremio state changes.
+- Rebuild Continue Watching SQLite with logic version 3.
+
 v1.0.59
 - Fix v1.0.58 Continue Watching over-import.
 - Exclude watched and 90%+ completed movies even when Stremio keeps a stale offset.

@@ -1,0 +1,90 @@
+name: Release v1.0.60
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-v1.0.60.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate source
+        run: |
+          python3 -m unittest discover -s tests
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          python3 tools/audit-public-source.py --history
+
+      - name: Verify release version
+        run: grep -q 'version="1.0.60"' addon.xml
+
+      - name: Build addon package
+        run: python3 tools/build-stremio-addon.py --output dist
+
+      - name: Create or refresh GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v1.0.60
+        run: |
+          set -euo pipefail
+          PACKAGE="dist/script.stremioelec-1.0.60.zip"
+          test -f "$PACKAGE"
+          cat > /tmp/release-notes.md <<'EOF'
+          ## Stremio for Kodi 1.0.60
+
+          - Fix Stremio 1ms next-episode Continue Watching pointers.
+          - Keep future episodes hidden until aired.
+          - Avoid false finished-series state when metadata is incomplete.
+          - Rebuild the corrected Continue Watching SQLite index.
+          EOF
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$PACKAGE" --clobber
+            gh release edit "$TAG" --title "Stremio for Kodi 1.0.60" --notes-file /tmp/release-notes.md
+          else
+            gh release create "$TAG" "$PACKAGE" \
+              --target "${GITHUB_SHA}" \
+              --title "Stremio for Kodi 1.0.60" \
+              --notes-file /tmp/release-notes.md
+          fi
+
+      - name: Check out Kodi repository feed
+        uses: actions/checkout@v4
+        with:
+          ref: kodi-repository
+          path: dist/feed
+
+      - name: Publish Kodi repository feed and installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v1.0.60
+        run: |
+          set -euo pipefail
+          python3 tools/build-kodi-repository.py \
+            --package dist/script.stremioelec-1.0.60.zip \
+            --output dist/feed
+          git -C dist/feed config user.name 'github-actions[bot]'
+          git -C dist/feed config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C dist/feed add addons.xml addons.xml.sha256 README.md script.stremioelec repository.stremioforkodi
+          if ! git -C dist/feed diff --cached --quiet; then
+            git -C dist/feed commit -m "Publish ${TAG} to Kodi repository"
+            git -C dist/feed push origin kodi-repository
+          fi
+          gh release upload "$TAG" \
+            dist/feed/repository.stremioforkodi/repository.stremioforkodi-*.zip \
+            --clobber
