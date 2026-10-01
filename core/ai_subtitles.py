@@ -467,6 +467,20 @@ def translate_subtitle_file(path, cache_directory, api_key, target_language,
     return str(destination)
 
 
+def _apply_remote_style(settings):
+    if not settings.get("remote"):
+        return
+    try:
+        import xbmc
+        size_map = {"small": 32, "medium": 40, "large": 48, "extra-large": 56}
+        color_map = {"white": "FFFFFFFF", "yellow": "FFFFFF00", "cyan": "FF00FFFF", "green": "FF00FF00"}
+        align_map = {"bottom": 0, "middle": 1, "top": 2}
+        for key, value in (("subtitles.fontsize", size_map.get(settings.get("subtitle_size"), 40)), ("subtitles.colorpick", color_map.get(settings.get("subtitle_color"), "FFFFFFFF")), ("subtitles.align", align_map.get(settings.get("subtitle_position"), 0))):
+            payload = json.dumps({"jsonrpc":"2.0","id":1,"method":"Settings.SetSettingValue","params":{"setting":key,"value":value}})
+            xbmc.executeJSONRPC(payload)
+    except Exception:
+        pass
+
 def local_settings():
     from addon_state import get_addon
     addon = get_addon()
@@ -483,6 +497,8 @@ def local_settings():
         "finish_full_title": False,
         "community_cache": False,
         "auto_timing": False,
+        "source_priority": ["mkga_cache", "embedded", "stremio", "translate", "audio"],
+        "subtitle_size": "medium", "subtitle_position": "bottom", "subtitle_color": "white",
     }
     try:
         from lib.signin import account_store
@@ -502,9 +518,14 @@ def local_settings():
                 "finish_full_title": bool(remote.get("finishFullTitle")),
                 "community_cache": bool(remote.get("communityCache")),
                 "auto_timing": bool(remote.get("autoTiming")),
+                "source_priority": list(remote.get("sourcePriority") or settings["source_priority"]),
+                "subtitle_size": str(remote.get("subtitleSize") or "medium"),
+                "subtitle_position": str(remote.get("subtitlePosition") or "bottom"),
+                "subtitle_color": str(remote.get("subtitleColor") or "white"),
             })
     except Exception:
         pass
+    _apply_remote_style(settings)
     return settings
 
 
