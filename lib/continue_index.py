@@ -3,6 +3,7 @@ import json, sqlite3, threading, time
 from pathlib import Path
 
 _lock=threading.RLock()
+LOGIC_VERSION=2
 
 def _path(profile): return Path(profile)/'continue_index.sqlite'
 def _db(profile):
@@ -18,6 +19,12 @@ def _db(profile):
     try: db.execute('ALTER TABLE continue_items ADD COLUMN next_check REAL NOT NULL DEFAULT 0')
     except sqlite3.OperationalError: pass
     db.execute('CREATE INDEX IF NOT EXISTS cw_status_recent ON continue_items(status,last_watched DESC)')
+    db.execute('CREATE TABLE IF NOT EXISTS continue_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)')
+    row=db.execute("SELECT value FROM continue_meta WHERE key='logic_version'").fetchone()
+    if not row or str(row[0])!=str(LOGIC_VERSION):
+        db.execute('DELETE FROM continue_items')
+        db.execute("INSERT OR REPLACE INTO continue_meta(key,value) VALUES('logic_version',?)",(str(LOGIC_VERSION),))
+        db.commit()
     return db
 
 def seed(profile, library):
@@ -33,10 +40,17 @@ def seed(profile, library):
           if not media_id: continue
           try: offset=max(0,int(float(state.get('timeOffset') or 0)))
           except (TypeError,ValueError): offset=0
-          series_pointer=typ=='series' and bool(state.get('video_id')) and (offset>0 or bool(state.get('flaggedWatched')))
-          movie_pointer=typ=='movie' and offset>0
+          try: duration=max(0,int(float(state.get('duration') or 0)))
+          except (TypeError,ValueError): duration=0
+          completed = bool(state.get('flaggedWatched')) or (duration>0 and offset>=duration*0.90)
+          # Movies belong in CW only for genuine incomplete progress. A stale
+          # offset on a watched/90%+ movie must never resurrect it.
+          movie_pointer=typ=='movie' and offset>0 and not completed
+          # Series keep completed episode pointers only as unresolved candidates;
+          # metadata must prove an already-aired next episode before Home shows them.
+          series_pointer=typ=='series' and bool(state.get('video_id')) and (offset>0 or completed)
           if not (series_pointer or movie_pointer): continue
-          status='partial' if offset>1 else ('waiting' if typ=='series' else 'partial')
+          status=('waiting' if typ=='series' and completed else 'partial')
           key=(typ,media_id);seen.add(key)
           item=dict(row,id=media_id);mtime=str(row.get('_mtime') or '');video_id=str(state.get('video_id') or '')
           existing=db.execute('SELECT status,last_video_id,source_mtime,next_video_id,next_release,item_json FROM continue_items WHERE media_type=? AND media_id=?',key).fetchone()

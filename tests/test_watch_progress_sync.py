@@ -170,5 +170,17 @@ class WiringTests(unittest.TestCase):
             continue_index.seed(Path(tmp),library)
             self.assertEqual(len(continue_index.unresolved_series(Path(tmp),32)),10)
 
+    def test_continue_index_excludes_completed_movie_and_hides_completed_series_until_resolved(self):
+        import tempfile
+        from pathlib import Path
+        from lib import continue_index
+        library=[
+          {'_id':'ttmovie','type':'movie','removed':False,'_mtime':'x','state':{'timeOffset':96000,'duration':100000,'flaggedWatched':1,'lastWatched':'x'}},
+          {'_id':'ttshow','type':'series','removed':False,'_mtime':'y','state':{'video_id':'ttshow:1:3','timeOffset':96000,'duration':100000,'flaggedWatched':1,'lastWatched':'y'}}]
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);continue_index.seed(root,library)
+            self.assertEqual(continue_index.rows(root,100),[])
+            self.assertEqual([x[0] for x in continue_index.unresolved_series(root,100)],['ttshow'])
+
 if __name__=='__main__':
     unittest.main()
