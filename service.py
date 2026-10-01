@@ -249,11 +249,22 @@ class ContinueIndexSync:
     INTERVAL = 900
     def __init__(self):
         self._next = 0
+        self._worker = None
+        self._lock = threading.Lock()
     def tick(self):
         now = time.time()
         if now < self._next:
             return
-        self._next = now + self.INTERVAL
+        with self._lock:
+            if self._worker is not None and self._worker.is_alive():
+                return
+            self._next = now + self.INTERVAL
+            try:
+                self._worker = threading.Thread(target=self._run, daemon=True)
+                self._worker.start()
+            except RuntimeError:
+                self._worker = None
+    def _run(self):
         try:
             state = Store(PROFILE).load()
             token = state.get("token")
@@ -264,6 +275,28 @@ class ContinueIndexSync:
             state["library"] = pull_library(token)
             Store(PROFILE).save(state)
             continue_index.seed(PROFILE, state["library"])
+            # Never compete with active video playback for provider/network bandwidth.
+            if xbmc.Player().isPlayingVideo():
+                return
+            from lib.stream_index import get as stream_get, put as stream_put, provider_signature, prune
+            active = list(active_addons(state))
+            signature = provider_signature(active)
+            prune(PROFILE)
+            refreshed = 0
+            for kind, identity, item in continue_index.prefetch_rows(PROFILE, 6):
+                cached = stream_get(PROFILE, kind, identity, signature)
+                if cached and not cached[4]:
+                    continue
+                try:
+                    from sources import collect
+                    result = collect(active, kind, identity)
+                    if result and result[0]:
+                        stream_put(PROFILE, kind, identity, result, signature)
+                except Exception:
+                    pass
+                refreshed += 1
+                if refreshed >= 2:
+                    break
         except Exception:
             return
 

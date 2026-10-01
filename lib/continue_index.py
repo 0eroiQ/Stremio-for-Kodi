@@ -107,3 +107,13 @@ def unresolved_series(profile, limit=32):
       try:out.append((media_id,json.loads(raw)))
       except Exception:pass
     return out
+
+def prefetch_rows(profile, limit=6):
+    """Recent visible CW items with their exact stream identity."""
+    out=[]
+    for item in rows(profile,limit):
+      typ=item.get('type');media_id=str(item.get('id') or item.get('_id') or '')
+      state=item.get('state') if isinstance(item.get('state'),dict) else {}
+      identity=str(state.get('video_id') or media_id) if typ=='series' else media_id
+      if typ in ('movie','series') and media_id and identity:out.append((typ,identity,item))
+    return out
