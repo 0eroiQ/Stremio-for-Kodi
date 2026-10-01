@@ -18,11 +18,12 @@ ENTITLEMENTS_PATH = "/api/stremio-for-kodi/v1/entitlements"
 PURCHASE_PATH = "/api/stremio-for-kodi/v1/purchase-sessions"
 AI_TRANSLATION_PATH = "/api/stremio-for-kodi/v1/features/ai-translation"
 STREMIO_HUB_PATH = "/api/stremio-for-kodi/v1/stremio-hub"
+SUBTITLE_TRANSLATE_PATH = "/api/stremio-for-kodi/v1/subtitle-translate"
 MAX_RESPONSE_BYTES = 64 * 1024
 TIMEOUT_SECONDS = 6
 TOKEN_REFRESH_SKEW_SECONDS = 30
 FEATURES = ("trailers", "ai_translation")
-_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH, STREMIO_HUB_PATH)
+_ALLOWED_PATHS = (SESSION_PATH, ENTITLEMENTS_PATH, PURCHASE_PATH, AI_TRANSLATION_PATH, STREMIO_HUB_PATH, SUBTITLE_TRANSLATE_PATH)
 
 
 from lib.theme import window as themed_window
@@ -51,16 +52,16 @@ def _validated_url(path):
     return url
 
 
-def _read_json(request, opener=None):
+def _read_json(request, opener=None, max_bytes=MAX_RESPONSE_BYTES):
     client = opener or _opener()
     try:
         with client.open(request, timeout=TIMEOUT_SECONDS) as response:
-            body = response.read(MAX_RESPONSE_BYTES + 1)
+            body = response.read(max_bytes + 1)
     except PremiumError:
         raise
     except Exception:
         raise PremiumError("Premium status is temporarily unavailable.") from None
-    if len(body) > MAX_RESPONSE_BYTES:
+    if len(body) > max_bytes:
         raise PremiumError("Premium response was too large.")
     try:
         return json.loads(body)
@@ -228,6 +229,39 @@ def _bounded_stremio_hub(payload):
         "updatedAt": int(settings.get("updatedAt") or 0),
     }
     return {"linked": True, "plan": plan, "capabilities": capabilities, "settings": safe}
+
+
+def translate_subtitle_cloud(store, source_hash, cues, target_language, source_language=None, opener=None):
+    if not isinstance(source_hash, str) or len(source_hash) != 64:
+        raise PremiumError("Invalid subtitle hash.")
+    if not isinstance(cues, list) or not cues or len(cues) > 2400:
+        raise PremiumError("Invalid subtitle cues.")
+    state = store.load()
+    session = _premium_session(state, opener=opener)
+    state["vortexo_premium_session"] = session
+    store.save(state)
+    payload = json.dumps({
+        "sourceHash": source_hash, "sourceLanguage": str(source_language or ""),
+        "targetLanguage": str(target_language or ""), "cues": cues
+    }, ensure_ascii=False).encode("utf-8")
+    request = Request(_validated_url(SUBTITLE_TRANSLATE_PATH), data=payload, headers={
+        "Authorization": "Bearer " + session["access_token"],
+        "Content-Type": "application/json", "Accept": "application/json",
+        "User-Agent": "Stremio-for-Kodi/1"}, method="POST")
+    result = _read_json(request, opener=opener, max_bytes=2 * 1024 * 1024)
+    rows = result.get("translations") if isinstance(result, dict) else None
+    if not isinstance(rows, list) or len(rows) != len(cues):
+        raise PremiumError("Invalid subtitle translation response.")
+    expected = [str(x.get("id")) for x in cues]
+    out = {}
+    for index, row in enumerate(rows):
+        if not isinstance(row, dict) or str(row.get("id")) != expected[index]:
+            raise PremiumError("Invalid subtitle translation response.")
+        text = row.get("text")
+        if not isinstance(text, str) or not text.strip():
+            raise PremiumError("Invalid subtitle translation response.")
+        out[expected[index]] = text.strip()
+    return {"translations": out, "cached": bool(result.get("cached")), "model": str(result.get("model") or "")}
 
 
 def fetch_stremio_hub(access_token, opener=None):

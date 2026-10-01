@@ -413,6 +413,21 @@ def _progress(callback, percent, message):
         pass
 
 
+def _cloud_translation(cues, source_data, target_language, source_language=None):
+    try:
+        from lib.signin import account_store
+        from lib.vortexo_premium import translate_subtitle_cloud
+        source_hash = hashlib.sha256(source_data).hexdigest()
+        result = translate_subtitle_cloud(
+            account_store(), source_hash,
+            [{"id": cue["id"], "text": cue["text"]} for cue in cues],
+            target_language, source_language
+        )
+        return result.get("translations") or {}
+    except Exception:
+        return {}
+
+
 def translate_subtitle_file(path, cache_directory, api_key, target_language,
                             source_language=None, opener=None, progress_callback=None):
     source = Path(path)
@@ -437,6 +452,11 @@ def translate_subtitle_file(path, cache_directory, api_key, target_language,
 
     content = data.decode("utf-8-sig", errors="replace")
     blocks, cues = _parse_timed_text(content)
+    translations = _cloud_translation(cues, data, target_language, source_language)
+    if len(translations) == len(cues):
+        _progress(progress_callback, 100, "MKGA Cloud translation ready")
+        atomic_write(destination, _rebuild(blocks, cues, translations).encode("utf-8"))
+        return str(destination)
     translations = {}
     batches = _translation_batches(cues)
     target_name = CODE_NAMES.get(target_language, target_language)
