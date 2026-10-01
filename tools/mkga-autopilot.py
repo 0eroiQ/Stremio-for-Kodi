@@ -12,7 +12,6 @@ from pathlib import Path
 BASE = os.getenv("MKGA_URL", "https://mkga.tv").rstrip("/")
 SERVICE_TOKEN = os.environ["MKGA_LAB_AUTOPILOT_TOKEN"]
 REPO = Path(__file__).resolve().parents[1]
-CONFIG = REPO / ".github" / "mkga-autopilot-mini.yaml"
 ACTIVE_JOB = None
 
 def api(path, method="GET", payload=None, token=None):
@@ -104,31 +103,59 @@ def analyze(task_id, agent, statement, context, ai_token):
     update_agent(task_id, agent, "completed", "ANALYZED", answer[:8000], "cloudflare-glm")
     return f"[{role}]\n{answer}"
 
+def _extract_command(answer):
+    fences = re.findall(r"```(?:bash|sh|shell|mswea_bash_command)?\\s*\\n(.*?)```", answer, re.S | re.I)
+    if fences:
+        return fences[-1].strip()
+    m = re.search(r"<command>(.*?)</command>", answer, re.S | re.I)
+    return m.group(1).strip() if m else ""
+
+def _safe_coder_command(command):
+    blocked = [
+        r"\\bgit\\s+push\\b", r"\\bgh\\s+pr\\b", r"\\bgh\\s+release\\b",
+        r"\\bsudo\\b", r"\\brm\\s+-rf\\s+/", r"\\bcurl\\b.*\\|\\s*(?:sh|bash)",
+        r"\\bwget\\b.*\\|\\s*(?:sh|bash)", r"MKGA_LAB_", r"GITHUB_TOKEN", r"GH_TOKEN",
+    ]
+    return not any(re.search(p, command, re.I | re.S) for p in blocked)
+
 def run_coder(statement, analyses, ai_token, feedback=""):
-    prompt = (
-        statement
-        + "\n\nINDEPENDENT ANALYSIS:\n"
-        + "\n\n".join(analyses)
-        + ("\n\nREVIEW/TEST FEEDBACK TO FIX:\n" + feedback if feedback else "")
-        + "\n\nImplement the fix now. Do not push or create a PR."
+    system = (
+        "You are MKGA Autopilot's implementation worker inside an ephemeral GitHub Actions checkout. "
+        "Your job is to inspect, edit, and test the repository, not merely explain. "
+        "On EVERY turn return exactly one executable shell command inside a ```bash fenced block. "
+        "Use focused commands: read relevant files, then edit with python/sed/cat, then test. "
+        "Do not run git push, gh, releases, sudo, curl|sh, wget|sh, or read environment secrets. "
+        "You have at most 8 turns. By turn 4 you should make a justified edit unless evidence proves no code change is appropriate. "
+        "When finished, the only command must be: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"
     )
-    env = os.environ.copy()
-    env["OPENAI_API_KEY"] = ai_token
-    env["MSWEA_CONFIGURED"] = "true"
-    env["MSWEA_SILENT_STARTUP"] = "1"
-    env["MSWEA_COST_TRACKING"] = "ignore_errors"
-    env["MSWEA_MODEL_RETRY_STOP_AFTER_ATTEMPT"] = "2"
-    env.pop("GH_TOKEN", None)
-    env.pop("GITHUB_TOKEN", None)
-    env.pop("MKGA_LAB_AUTOPILOT_TOKEN", None)
-    env.pop("MKGA_LAB_SERVICE_TOKEN", None)
-    result = run(
-        ["mini", "-y", "--exit-immediately", "-c", str(CONFIG), "-t", prompt],
-        check=False,
-        env=env,
-        timeout=1500,
+    task = (
+        statement + "\\n\\nINDEPENDENT ANALYSIS:\\n" + "\\n\\n".join(analyses)
+        + ("\\n\\nREVIEW/TEST FEEDBACK TO FIX:\\n" + feedback if feedback else "")
+        + "\\n\\nImplement the smallest safe fix now."
     )
-    return result
+    messages = [{"role":"system","content":system},{"role":"user","content":task}]
+    transcript=[]
+    clean_env={k:v for k,v in os.environ.items() if not (k.startswith('MKGA_') or k in {'GH_TOKEN','GITHUB_TOKEN','OPENAI_API_KEY'})}
+    for step in range(1,9):
+        answer=ai_chat(ai_token,messages,"mkga-free-coder",1000)
+        command=_extract_command(answer)
+        transcript.append(f"STEP {step} AI:\\n{answer}")
+        if not command:
+            messages.append({"role":"assistant","content":answer})
+            messages.append({"role":"user","content":"FORMAT ERROR: return exactly one executable command in a ```bash fenced block. Do not explain outside the block."})
+            continue
+        if command.strip()=="echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT":
+            return subprocess.CompletedProcess(["mkga-free-coder"],0,"\\n\\n".join(transcript),"")
+        if not _safe_coder_command(command):
+            messages.append({"role":"assistant","content":answer})
+            messages.append({"role":"user","content":"That command is blocked by MKGA safety policy. Choose a safe local repository command instead."})
+            continue
+        result=run(["bash","-lc",command],check=False,env=clean_env,timeout=120)
+        observation=(result.stdout+result.stderr)[-7000:]
+        transcript.append(f"STEP {step} COMMAND:\\n{command}\\nRESULT {result.returncode}:\\n{observation}")
+        messages.append({"role":"assistant","content":answer})
+        messages.append({"role":"user","content":f"Command exit code: {result.returncode}\\nOutput:\\n{observation}\\nContinue. Remember: exactly one ```bash command, and finish only after the fix is implemented and checked."})
+    return subprocess.CompletedProcess(["mkga-free-coder"],1,"\\n\\n".join(transcript),"free coder reached the 8-step limit")
 
 def validate():
     tests = run(["python3", "-m", "unittest", "discover", "-s", "tests"], check=False, timeout=900)
