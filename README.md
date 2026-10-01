@@ -103,7 +103,7 @@ You can also use **Settings → Support → Report a bug / request a feature** a
 
 - `addon.xml` plus the small `default.py`, `plugin.py`, `service.py` and `subtitle_service.py` bootstraps: Kodi entry points kept at the add-on root.
 - `core/`: Stremio account, protocol, metadata, stream, subtitle and supporting runtime modules.
-- `lib/`: Nimbus UI, browsing, settings, caching, Premium client and other application modules.
+- `lib/`: Nimbus UI, browsing, settings, caching, MKGA account sync and other application modules.
 - `resources/`: embedded Nimbus skin assets, settings and runtime data.
 - `tools/build-stremio-addon.py`: builds the installation ZIP from source.
 - `tests/test_stremio_addon.py`: packaging, syntax, migration and launch-route regressions.

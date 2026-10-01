@@ -19,10 +19,11 @@ class SettingsPageTests(unittest.TestCase):
     def test_settings_categories_are_reorganized(self):
         source = (ROOT / "lib/settings_page.py").read_text(encoding="utf-8")
         for label in ("General", "Account & Stremio", "Playback", "Subtitles & AI",
-                      "Appearance", "Weather", "Ratings", "Cache", "Support", "Premium"):
+                      "Appearance", "Weather", "Ratings", "Cache", "Support"):
             self.assertIn('"' + label + '"', source)
         self.assertIn("Auto - Video first, then Stremio addons", source)
-        self.assertIn("$4.99 USD / month", source)
+        self.assertNotIn("Premium", source)
+        self.assertNotIn("$4.99", source)
         self.assertIn("Subtitle text size", source)
         self.assertIn("Subtitle font", source)
         self.assertIn("Subtitle color", source)

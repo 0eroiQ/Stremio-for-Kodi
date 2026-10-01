@@ -200,14 +200,14 @@ class AISubtitleTests(unittest.TestCase):
         best = sorted(tracks, key=lambda item: module._embedded_rank(item, "hr"))[0]
         self.assertEqual(best["lang"], "hrv")
 
-    def test_settings_expose_free_byok_and_truthful_premium_placeholder(self):
+    def test_settings_expose_free_byok_without_premium_ui(self):
         settings = (ROOT / "resources" / "settings.xml").read_text(encoding="utf-8")
         root = ET.fromstring(settings)
         self.assertIn('id="ai_subtitles_gemini_api_key"', settings)
         self.assertIn("My Gemini API key - Free", settings)
         self.assertIn("Auto - Video first, then Stremio addons", settings)
-        self.assertIn("MKGA Premium - In construction", settings)
-        self.assertIn("$4.99 USD/month", settings)
+        self.assertNotIn("MKGA Premium", settings)
+        self.assertNotIn("$4.99", settings)
         self.assertNotIn('label="Get Premium"', settings)
         self.assertIsNotNone(root)
 

@@ -21,7 +21,7 @@ TRAILER_QUALITY = ("1080p", "720p", "480p")
 TRAILER_SCOPE = ("Home and Media info hero", "Home hero only", "Media info hero only")
 TRAILER_DELAY = ("3 seconds", "5 seconds", "10 seconds", "15 seconds", "30 seconds", "1 second")
 SUBTITLE_SETTINGS_SOURCES = ("MKGA.TV Account - Recommended", "This device - Local")
-AI_PROVIDERS = ("My Gemini API key - Free", "MKGA Premium - In construction")
+AI_PROVIDERS = ("My Gemini API key - Free",)
 AI_SOURCES = ("Auto - Video first, then Stremio addons", "Video subtitles only", "Stremio addons only")
 AI_TARGETS = ("Bosnian", "Croatian", "Serbian", "English", "German", "French", "Spanish",
               "Italian", "Portuguese", "Dutch", "Polish", "Czech", "Slovak", "Slovenian",
@@ -33,7 +33,6 @@ CATEGORIES = (
     ("General", "general"), ("Account & Stremio", "account"), ("Playback", "playback"),
     ("Subtitles & AI", "subtitles"), ("Appearance", "appearance"), ("Weather", "weather"),
     ("Ratings", "ratings"), ("Cache", "cache"), ("Support", "support"),
-    ("Premium", "premium"),
 )
 
 
@@ -130,7 +129,7 @@ def rows_for(category):
         manifest = ADDON.getSetting("manifest").strip() or "https://v3-cinemeta.strem.io/manifest.json"
         rows = [
             _info("Stremio account", "Connected" if connected else "Not connected",
-                  "This device uses your Stremio account for library, addons and Premium identity."),
+                  "This device uses your Stremio account for library, addons and MKGA.TV account sync."),
         ]
         rows += ([
             _action("account_refresh", "Refresh Stremio library", "Refresh library data from the connected Stremio account.", "Refresh"),
@@ -256,18 +255,11 @@ def rows_for(category):
         return rows
     if category == "support":
         return [
-            _action("support", "Support development", "Optional developer support; not a Premium purchase.", "Open"),
+            _action("support", "Support development", "Optional support for ongoing MKGA development.", "Open"),
             _bool("error_reporting_auto", "Anonymous error reports", "Automatically send sanitized anonymous crash reports."),
             _action("report_issue", "Report a bug / request a feature", "Send a reviewed bug report or feature request.", "Open"),
             _action("report_last_error", "Report last error", "Review and retry the most recent sanitized error report.", "Open"),
             _action("send_performance_report", "Send performance report", "Review and send Home timing data only; no Kodi log, account data, URLs or keys.", "Send"),
-        ]
-    if category == "premium":
-        return [
-            _info("MKGA Premium", "In construction", "Hosted AI translation is not enabled yet."),
-            _info("Planned price", "$4.99 USD / month", "Planned hosted AI option with no Gemini API key required."),
-            _info("Identity", "Verified Stremio account", "Premium will use the existing verified Stremio identity; no second Kodi login."),
-            _info("Free AI subtitles", "Available now", "Use your own Gemini API key without Premium."),
         ]
     return []
 
