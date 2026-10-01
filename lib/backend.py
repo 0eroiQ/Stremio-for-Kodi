@@ -111,21 +111,29 @@ def languages(meta):
     return rows
 
 
-def cached_source_rows(meta, identity):
+def _stream_provider_signature():
+    from lib.stream_index import provider_signature
+    return provider_signature(providers())
+
+def stream_cache_state(meta, identity):
     from lib.stream_index import get
-    cached=get(STORE.directory,meta['type'],identity)
+    return get(STORE.directory, meta['type'], identity, _stream_provider_signature())
+
+def cached_source_rows(meta, identity):
+    cached=stream_cache_state(meta, identity)
     if not cached:return None
-    rows,skipped,failed,_=cached
+    rows,skipped,failed,_,_,_=cached
     for row in rows:row['card']=stream_card(row)
     return rows,skipped,failed
 
 def source_rows(meta, identity):
     from lib.stream_index import put
-    rows, skipped, failed = collect(providers(), meta['type'], identity)
+    active = providers()
+    rows, skipped, failed = collect(active, meta['type'], identity)
     for row in rows:
         row['card'] = stream_card(row)
     result=(rows,skipped,failed)
-    if rows:put(STORE.directory,meta['type'],identity,result)
+    if rows:put(STORE.directory,meta['type'],identity,result,_stream_provider_signature())
     return result
 
 

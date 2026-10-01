@@ -26,8 +26,12 @@ class InlineStreams:
         """Media Info trigger: show cached data later, refresh this title once in background."""
         if not identity or self._streams_dead or self._streams_prefetch_identity == identity:return
         self._streams_prefetch_identity=identity
-        cached=api.cached_source_rows(self.meta,identity)
+        cached_state=api.stream_cache_state(self.meta,identity)
+        cached=api.cached_source_rows(self.meta,identity) if cached_state else None
         if cached and cached[0]:self.section_cache['streams:'+identity]=cached
+        # Fresh cache needs no provider fan-out. Stale/missing cache refreshes once
+        # in the background while the user can already open the cached rows.
+        if cached_state and not cached_state[4]:return
         def refresh():
             try:
                 result=api.source_rows(self.meta,identity)
