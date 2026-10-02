@@ -27,7 +27,7 @@ class KodiRepositoryTests(unittest.TestCase):
             data = (target / 'addons.xml').read_bytes()
             self.assertEqual(hashlib.sha256(data).hexdigest(), (target / 'addons.xml.sha256').read_text().strip())
             self.assertEqual([a.get('id') for a in ET.fromstring(data)],
-                             ['script.stremioelec', 'repository.stremioforkodi'])
+                             ['script.stremioelec', 'service.mkga.connector', 'repository.stremioforkodi'])
             with zipfile.ZipFile(installer) as archive:
                 repo = ET.fromstring(archive.read('repository.stremioforkodi/addon.xml'))
                 directory = repo.find("extension[@point='xbmc.addon.repository']/dir")
@@ -36,7 +36,13 @@ class KodiRepositoryTests(unittest.TestCase):
                     self.assertTrue(directory.findtext(field).startswith('https://'))
                 self.assertEqual(directory.find('info').get('compressed'), 'false')
                 self.assertEqual(directory.find('datadir').get('zip'), 'true')
-                self.assertEqual(repo.get('version'), '1.0.2')
+                self.assertEqual(repo.get('version'), '1.1.0')
+                self.assertEqual(repo.get('name'), 'MKGA Repository')
+            connector = target / 'service.mkga.connector' / 'service.mkga.connector-0.1.0.zip'
+            self.assertTrue(connector.is_file())
+            with zipfile.ZipFile(connector) as archive:
+                manifest = ET.fromstring(archive.read('service.mkga.connector/addon.xml'))
+                self.assertEqual(manifest.get('id'), 'service.mkga.connector')
             wrong = root / 'script.stremioelec-9.9.9.zip'
             wrong.write_bytes(before)
             with self.assertRaises(ValueError):
