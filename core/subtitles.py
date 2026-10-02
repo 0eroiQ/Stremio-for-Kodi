@@ -81,12 +81,11 @@ def ai_source_candidates(providers, kind, identity, inline=None, filename='', fe
         return entries
 
 
-def download(entry, directory, progress_callback=None):
+def download_original(entry, directory):
     with urlopen(Request(entry['url'], headers={'User-Agent': 'StremioELEC/0.5'}), timeout=10) as response:
         data = response.read(2 * 1024 * 1024 + 1)
     if len(data) > 2 * 1024 * 1024:
         raise ValueError('Subtitle too large')
-    # Reject archives, HTML/error documents and unsupported binary formats.
     probe = data.decode('utf-8-sig', errors='replace').lstrip()
     if probe.startswith('WEBVTT'):
         extension = 'vtt'
@@ -100,14 +99,16 @@ def download(entry, directory, progress_callback=None):
     lang = entry['lang'] if entry['lang'].isalpha() else 'und'
     target = Path(directory) / '{}.{}.{}'.format(digest, lang, extension)
     atomic_write(target, data)
+    return str(target)
+
+
+def download(entry, directory, progress_callback=None):
+    target = download_original(entry, directory)
     try:
         from ai_subtitles import maybe_translate
-        return maybe_translate(
-            target, Path(directory).parent, lang,
-            progress_callback=progress_callback
-        )
+        return maybe_translate(target, Path(directory).parent, entry.get('lang'), progress_callback=progress_callback)
     except Exception:
-        return str(target)
+        return target
 
 
 def remember_selection(profile, kind, identity, stream):

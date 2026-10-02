@@ -317,6 +317,8 @@ class AISubtitleTests(unittest.TestCase):
         self.assertIn("progress_bg", source)
         self.assertIn("progress_callback=update", source)
         self.assertIn("Report last error is available", source)
+        self.assertIn("download_original", source)
+        self.assertIn("Never leave playback subtitle-less while AI is working", source)
 
 
 if __name__ == "__main__":
@@ -348,4 +350,4 @@ class GeminiFallbackTests(unittest.TestCase):
                 inner=json.dumps([{'id':'1','text':'Zdravo'}])
                 return Response({'candidates':[{'content':{'parts':[{'text':inner}]}}]})
         self.assertEqual(module._request_translation(cues,'key','bs','en',Opener())['1'],'Zdravo')
-        self.assertEqual(len(calls),2);self.assertEqual(calls[0][1],35)
+        self.assertEqual(len(calls),2);self.assertEqual(calls[0][1],15)
