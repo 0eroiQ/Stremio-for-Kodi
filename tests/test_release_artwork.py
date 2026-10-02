@@ -36,7 +36,7 @@ class ReleaseArtworkTests(unittest.TestCase):
         for addon in self.feed.getroot():
             identity = addon.get('id')
             if identity == 'service.mkga.connector':
-                connector = self.root / 'feed' / identity / 'service.mkga.connector-0.1.0.zip'
+                connector = self.root / 'feed' / identity / 'service.mkga.connector-0.1.1.zip'
                 with zipfile.ZipFile(connector) as archive:
                     self.assertEqual(ET.fromstring(archive.read(identity + '/addon.xml')).get('id'), identity)
                 continue

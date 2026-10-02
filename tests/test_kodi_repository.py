@@ -38,7 +38,7 @@ class KodiRepositoryTests(unittest.TestCase):
                 self.assertEqual(directory.find('datadir').get('zip'), 'true')
                 self.assertEqual(repo.get('version'), '1.1.0')
                 self.assertEqual(repo.get('name'), 'MKGA Repository')
-            connector = target / 'service.mkga.connector' / 'service.mkga.connector-0.1.0.zip'
+            connector = target / 'service.mkga.connector' / 'service.mkga.connector-0.1.1.zip'
             self.assertTrue(connector.is_file())
             with zipfile.ZipFile(connector) as archive:
                 manifest = ET.fromstring(archive.read('service.mkga.connector/addon.xml'))
