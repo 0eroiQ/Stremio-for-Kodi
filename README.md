@@ -1,3 +1,3 @@
-# Stremio for Kodi repository
+# MKGA Repository
 
-Install repository.stremioforkodi/repository.stremioforkodi-1.0.2.zip in Kodi, then choose Install from repository > Stremio for Kodi Repository > Program add-ons.
+Install repository.stremioforkodi/repository.stremioforkodi-1.1.0.zip in Kodi, then choose Install from repository > MKGA Repository > Program add-ons. It contains Stremio for Kodi and MKGA Connector.
