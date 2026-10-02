@@ -319,6 +319,8 @@ class AISubtitleTests(unittest.TestCase):
         self.assertIn("Report last error is available", source)
         self.assertIn("download_original", source)
         self.assertIn("Never leave playback subtitle-less while AI is working", source)
+        self.assertIn("for _ in range(20):", source)
+        self.assertIn("self.monitor.waitForAbort(0.25)", source)
 
 
 if __name__ == "__main__":

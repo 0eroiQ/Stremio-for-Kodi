@@ -57,6 +57,7 @@ class StartupShellTests(unittest.TestCase):
         xbmcgui.Dialog.return_value = dialog
         window = Mock()
         window.getProperty.return_value = 'Home'
+        window.getFocusId.return_value = 9000
         action = Mock()
         action.getId.return_value = 92
         scope = {"BACK": (10, 92, 216, 247), "xbmcgui": xbmcgui, "home_index": lambda: 1}
@@ -75,6 +76,7 @@ class StartupShellTests(unittest.TestCase):
         xbmcgui.Dialog.return_value = dialog
         window = Mock()
         window.getProperty.return_value = 'Home'
+        window.getFocusId.return_value = 9000
         action = Mock()
         action.getId.return_value = 92
         scope = {"BACK": (10, 92, 216, 247), "xbmcgui": xbmcgui, "home_index": lambda: 1}

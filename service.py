@@ -108,8 +108,22 @@ class PlaybackWatcher(xbmc.Player):
         return True
 
     def _prepare(self, current, digest):
-        context = self._context(digest)
+        # onAVStarted can fire before the playback context has been persisted by
+        # the play action. Skip watcher runs later in the service loop, which is
+        # why Skip could work while AI subtitles silently returned here.
+        context = None
+        for _ in range(20):
+            if not self._matches(digest):
+                return
+            context = self._context(digest)
+            if context:
+                break
+            if self.monitor.waitForAbort(0.25):
+                return
         if not context:
+            with self._lock:
+                if self._last_hash == digest:
+                    self._last_hash = None
             return
         settings = local_settings()
         target = settings["target"]
