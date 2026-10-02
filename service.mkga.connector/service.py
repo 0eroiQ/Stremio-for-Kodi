@@ -2,8 +2,8 @@ import json, os, shutil, time, urllib.request, zipfile
 import xbmc, xbmcaddon, xbmcvfs
 
 BASE='https://mkga.tv/api/kodi/agent'
-REPO_ZIP='https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/repository.stremioforkodi/repository.stremioforkodi-1.0.2.zip'
-ADDON_ID='script.stremioelec';REPO_ID='repository.stremioforkodi'
+REPO_ZIP='https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/repository.stremioforkodi/repository.stremioforkodi-1.1.0.zip'
+ADDON_ID='script.stremioelec';REPO_ID='repository.stremioforkodi';CONNECTOR_ID='service.mkga.connector'
 addon=xbmcaddon.Addon(); monitor=xbmc.Monitor()
 def request(path,method='GET',data=None):
     token=addon.getSetting('device_token')
@@ -45,12 +45,20 @@ def execute(action):
         ok=install_stremio();return ok,('Stremio for Kodi installed' if action=='install_stremio' else 'Stremio for Kodi update requested') if ok else 'Stremio for Kodi installation failed'
     if action=='repair_stremio':ok=install_repo() and install_stremio();return ok,'Repository and Stremio for Kodi repaired' if ok else 'Repair failed'
     return False,'Unknown command'
+def state_payload(message=''):
+    return {'message':message,'repoInstalled':installed(REPO_ID),'addonInstalled':installed(ADDON_ID),'addonVersion':version(),'connectorInstalled':installed(CONNECTOR_ID),'connectorVersion':addon.getAddonInfo('version')}
 def report(cid,ok,message):
-    try:request('/commands/'+cid+'/result','POST',{'ok':ok,'message':message,'repoInstalled':installed(REPO_ID),'addonInstalled':installed(ADDON_ID),'addonVersion':version()})
+    try:request('/commands/'+cid+'/result','POST',dict(state_payload(message),ok=ok))
     except Exception:pass
+def heartbeat():
+    try:request('/heartbeat','POST',state_payload())
+    except Exception:pass
+next_heartbeat=0
 while not monitor.abortRequested():
     if addon.getSetting('device_token'):
         try:
+            if time.time()>=next_heartbeat:
+                heartbeat();next_heartbeat=time.time()+30
             data=request('/commands') or {}
             for cmd in data.get('commands',[]):
                 try:ok,msg=execute(str(cmd.get('action','')))
