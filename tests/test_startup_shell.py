@@ -56,9 +56,10 @@ class StartupShellTests(unittest.TestCase):
         xbmcgui = Mock()
         xbmcgui.Dialog.return_value = dialog
         window = Mock()
+        window.getProperty.return_value = 'Home'
         action = Mock()
         action.getId.return_value = 92
-        scope = {"BACK": (10, 92, 216, 247), "xbmcgui": xbmcgui}
+        scope = {"BACK": (10, 92, 216, 247), "xbmcgui": xbmcgui, "home_index": lambda: 1}
         exec(compile(ast.Module(body=[on_action], type_ignores=[]), "<home>", "exec"), scope)
         scope["onAction"](window, action)
         dialog.yesno.assert_called_once()
@@ -73,9 +74,10 @@ class StartupShellTests(unittest.TestCase):
         xbmcgui = Mock()
         xbmcgui.Dialog.return_value = dialog
         window = Mock()
+        window.getProperty.return_value = 'Home'
         action = Mock()
         action.getId.return_value = 92
-        scope = {"BACK": (10, 92, 216, 247), "xbmcgui": xbmcgui}
+        scope = {"BACK": (10, 92, 216, 247), "xbmcgui": xbmcgui, "home_index": lambda: 1}
         exec(compile(ast.Module(body=[on_action], type_ignores=[]), "<home>", "exec"), scope)
         scope["onAction"](window, action)
         window.close.assert_called_once_with()

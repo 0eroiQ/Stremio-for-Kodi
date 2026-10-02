@@ -704,10 +704,18 @@ class HomeWindow(AddonsPage, NimbusWindow):
             themed_dialog = xbmcgui.Dialog
         aid = action.getId()
         if aid in BACK:
-            # Back from the main program window must always offer a real exit.
-            # The previous two-press arm state made TV remotes appear trapped
-            # because the first Back silently moved focus to the sidebar.
+            # Back exits only from Home. From Search/Discover/Library/Addons/etc.
+            # it first returns to Home, matching normal TV navigation.
             self.exit_armed = False
+            if self.getProperty('page') != 'Home':
+                self.load_home()
+                try:
+                    sidebar = self.getControl(9000)
+                    sidebar.selectItem(home_index())
+                    self.setFocusId(9000)
+                except Exception:
+                    pass
+                return
             if themed_dialog().yesno(
                     'Exit Stremio for Kodi',
                     'Do you want to exit Stremio for Kodi?',
