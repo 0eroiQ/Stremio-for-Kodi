@@ -1,3 +1,10 @@
+v1.0.63
+- Keep the original subtitle visible immediately while AI translation runs in the background.
+- Replace the source subtitle only after a complete translated subtitle file is ready.
+- Allow MKGA-hosted AI translation for eligible Supporters without requiring a local Gemini BYOK key.
+- Stop long Gemini fallback chains: retry at most two models with a 15-second timeout each.
+- Fall back quickly to the original subtitle when MKGA Cloud and BYOK translation are unavailable.
+
 v1.0.62
 - Fix Home infinite-scroll cursor drift when providers return duplicate items.
 - Patch only changed Home rows instead of repopulating the full Home window.

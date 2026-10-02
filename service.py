@@ -17,7 +17,7 @@ from account import Store
 from addon_state import get_addon
 from addons_core import active_addons
 from ai_subtitles import CODE_NAMES, local_settings, prepare_embedded_auto, _apply_remote_style
-from subtitles import ai_source_candidates, download
+from subtitles import ai_source_candidates, download_original
 from lib.playback_observer import ProgressPlayer, flush_pending
 from lib.ui_dialogs import dialog as themed_dialog, progress_bg
 
@@ -67,8 +67,6 @@ class PlaybackWatcher(xbmc.Player):
         try:
             settings = local_settings()
             if not self.isPlayingVideo() or not settings["enabled"] or settings["provider"] != "0":
-                return
-            if not settings["api_key"]:
                 return
             current = self.getPlayingFile()
             digest = hashlib.sha256(current.encode()).hexdigest()
@@ -164,11 +162,21 @@ class PlaybackWatcher(xbmc.Player):
                         source_language = entry.get("lang")
                         source_name = CODE_NAMES.get(source_language, source_language or "Auto")
                         progress.update(15, "Using {} subtitle from Stremio addon…".format(source_name))
+                        original = download_original(entry, PROFILE / "subtitles")
+                        # Never leave playback subtitle-less while AI is working.
+                        # Show the source subtitle immediately, then replace it only
+                        # after a complete translated file is ready.
+                        self._apply(original, digest, "Stremio addon", source_language, source_language or target)
+                        if source_language == target:
+                            return
                         def fallback_progress(percent, message):
                             update(18 + int(percent * 0.78), message)
-                        path = download(entry, PROFILE / "subtitles", progress_callback=fallback_progress)
-                        if self._apply(path, digest, "Stremio addon", source_language, target):
+                        from ai_subtitles import translate_external_auto
+                        path = translate_external_auto(original, PROFILE, source_language, progress_callback=fallback_progress)
+                        if path != original and self._apply(path, digest, "AI translated", source_language, target):
                             return
+                        # Translation failed or was unavailable; original remains active.
+                        return
                     except Exception as error:
                         last_fallback_error = error
                         _remember_ai_error("AI subtitles Stremio translation", error)

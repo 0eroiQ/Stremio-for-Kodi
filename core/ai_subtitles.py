@@ -26,12 +26,14 @@ MODEL_CHAIN = (
 MAX_FILE_BYTES = 512 * 1024
 MAX_CUES = 2400
 MAX_CUE_TEXT = 8000
-TIMEOUT_SECONDS = 35
+TIMEOUT_SECONDS = 15
+MAX_MODEL_ATTEMPTS = 2
 MAX_BATCH_CUES = 2400
 MAX_BATCH_CHARACTERS = 120000
 TRANSLATION_REVISION = "byok-v2"
 TEXT_SUBTITLE_CODECS = {"subrip", "srt", "ass", "ssa", "webvtt", "mov_text", "text", "subviewer", "microdvd"}
-FFMPEG_TIMEOUT_SECONDS = 35
+FFMPEG_TIMEOUT_SECONDS = 15
+MAX_MODEL_ATTEMPTS = 2
 FFPROBE_TIMEOUT_SECONDS = 25
 TARGETS = (
     ("Bosnian", "bs"), ("Croatian", "hr"), ("Serbian", "sr"),
@@ -324,7 +326,7 @@ def _request_translation(cues, api_key, target_language, source_language=None, o
     }, ensure_ascii=False).encode("utf-8")
     client = opener or build_opener()
     last_error = None
-    for model in _ordered_models():
+    for model in _ordered_models()[:MAX_MODEL_ATTEMPTS]:
         request = Request(
             BASE_URL + "/" + model + ":generateContent",
             data=body,
@@ -457,6 +459,8 @@ def translate_subtitle_file(path, cache_directory, api_key, target_language,
         _progress(progress_callback, 100, "MKGA Cloud translation ready")
         atomic_write(destination, _rebuild(blocks, cues, translations).encode("utf-8"))
         return str(destination)
+    if not str(api_key or "").strip():
+        raise AITranslationError("MKGA Cloud translation was unavailable and no BYOK Gemini key is configured.")
     translations = {}
     batches = _translation_batches(cues)
     target_name = CODE_NAMES.get(target_language, target_language)
@@ -499,6 +503,19 @@ def _apply_remote_style(settings):
             xbmc.executeJSONRPC(payload)
     except Exception:
         pass
+
+def cloud_ai_available():
+    try:
+        from lib.signin import account_store
+        from lib.vortexo_premium import cached_state, refresh_quiet
+        store = account_store()
+        state = cached_state(store)
+        if not state or int(time.time()) - int(state.get("checked_at") or 0) > 300:
+            state = refresh_quiet(store)
+        return bool(state and state.get("entitlements", {}).get("ai_translation"))
+    except Exception:
+        return False
+
 
 def local_settings():
     from addon_state import get_addon
@@ -555,7 +572,7 @@ def prepare_embedded_auto(stream_url, profile, progress_callback=None):
     """Video-first AUTO source. Returns translated/exact-target subtitle + metadata."""
     settings = local_settings()
     if (not settings["enabled"] or not settings.get("auto_translate", True)
-            or settings["provider"] != "0" or not settings["api_key"]):
+            or settings["provider"] != "0" or (not settings["api_key"] and not cloud_ai_available())):
         return None
     cache = Path(profile) / "ai-subtitles"
     _progress(progress_callback, 5, "Checking subtitles embedded in the video")
@@ -585,7 +602,7 @@ def prepare_embedded_auto(stream_url, profile, progress_callback=None):
 def translate_external_auto(path, profile, source_language=None, progress_callback=None):
     settings = local_settings()
     if (not settings["enabled"] or not settings.get("auto_translate", True)
-            or settings["provider"] != "0" or not settings["api_key"]):
+            or settings["provider"] != "0" or (not settings["api_key"] and not cloud_ai_available())):
         return str(path)
     return translate_subtitle_file(
         path, Path(profile) / "ai-subtitles", settings["api_key"],
