@@ -43,12 +43,18 @@ def build(package, output):
         art = {name: archive.read('script.stremioelec/' + name)
                for name in asset_paths(addon)}
     repo_source = ROOT / 'repository/repository.stremioforkodi'
+    connector_source = ROOT / 'service.mkga.connector'
+    connector = ET.parse(connector_source / 'addon.xml').getroot()
+    if connector.attrib.get('id') != 'service.mkga.connector':
+        raise ValueError('Invalid MKGA Connector identity')
     repo = ET.parse(repo_source / 'addon.xml').getroot()
     repo_art = {name: (repo_source / name).read_bytes() for name in asset_paths(repo)}
     repo_dir = output / repo.attrib['id']
     addon_dir = output / addon.attrib['id']
+    connector_dir = output / connector.attrib['id']
     repo_dir.mkdir(parents=True, exist_ok=True)
     addon_dir.mkdir(parents=True, exist_ok=True)
+    connector_dir.mkdir(parents=True, exist_ok=True)
     repo_zip = repo_dir / '{}-{}.zip'.format(repo.attrib['id'], repo.attrib['version'])
     with zipfile.ZipFile(repo_zip, 'w', zipfile.ZIP_DEFLATED) as archive:
         for source in sorted(repo_source.rglob('*')):
@@ -58,6 +64,15 @@ def build(package, output):
                 continue
             archive.write(source, str(PurePosixPath(repo.attrib['id']) / rel.as_posix()))
     shutil.copyfile(package, addon_dir / package.name)
+    connector_zip = connector_dir / '{}-{}.zip'.format(connector.attrib['id'], connector.attrib['version'])
+    with zipfile.ZipFile(connector_zip, 'w', zipfile.ZIP_DEFLATED) as archive:
+        for source in sorted(connector_source.rglob('*')):
+            rel = source.relative_to(connector_source)
+            if (not source.is_file() or source.is_symlink()
+                    or any(p.startswith('.') or p == '__pycache__' for p in rel.parts)):
+                continue
+            archive.write(source, str(PurePosixPath(connector.attrib['id']) / rel.as_posix()))
+    (connector_dir / 'addon.xml').write_bytes(ET.tostring(connector, encoding='utf-8', xml_declaration=True))
     for directory, images in ((addon_dir, art), (repo_dir, repo_art)):
         for name, data in images.items():
             target = directory / name
@@ -67,14 +82,14 @@ def build(package, output):
     (addon_dir / 'addon.xml').write_bytes(ET.tostring(addon, encoding='utf-8', xml_declaration=True))
     (repo_dir / 'addon.xml').write_bytes((repo_source / 'addon.xml').read_bytes())
     index = ET.Element('addons')
-    index.extend([addon, repo])
+    index.extend([addon, connector, repo])
     data = ET.tostring(index, encoding='utf-8', xml_declaration=True)
     (output / 'addons.xml').write_bytes(data)
     (output / 'addons.xml.sha256').write_text(hashlib.sha256(data).hexdigest() + '\n')
     (output / 'README.md').write_text(
-        '# Stremio for Kodi repository\n\n'
+        '# MKGA Repository\n\n'
         'Install {}/{} in Kodi, then choose Install from repository > '
-        'Stremio for Kodi Repository > Program add-ons.\n'.format(repo.attrib['id'], repo_zip.name))
+        'MKGA Repository > Program add-ons. It contains Stremio for Kodi and MKGA Connector.\n'.format(repo.attrib['id'], repo_zip.name))
     return repo_zip
 
 
