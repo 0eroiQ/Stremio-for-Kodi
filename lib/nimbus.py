@@ -716,6 +716,17 @@ class HomeWindow(AddonsPage, NimbusWindow):
                 except Exception:
                     pass
                 return
+            # On Home, the first Back visibly moves focus to Home in the
+            # sidebar. Only Back again from that explicit Home-sidebar state
+            # asks to exit, preventing accidental one-press exit dialogs.
+            if self.getFocusId() != 9000:
+                try:
+                    sidebar = self.getControl(9000)
+                    sidebar.selectItem(home_index())
+                    self.setFocusId(9000)
+                except Exception:
+                    pass
+                return
             if themed_dialog().yesno(
                     'Exit Stremio for Kodi',
                     'Do you want to exit Stremio for Kodi?',

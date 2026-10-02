@@ -1,3 +1,8 @@
+v1.0.68
+- Fix AI subtitle startup race: wait briefly for playback context after Kodi onAVStarted instead of silently abandoning translation.
+- First Back on Home now visibly focuses Home in the sidebar; only the next Back opens Exit confirmation.
+- Back from other main pages still returns directly to Home first.
+
 v1.0.67
 - Back from Search, Discover, Library, Addons or Settings now returns to Home first.
 - Exit confirmation is shown only when Back is pressed from Home.
