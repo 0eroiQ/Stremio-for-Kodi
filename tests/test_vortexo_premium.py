@@ -343,10 +343,14 @@ class PremiumTests(unittest.TestCase):
 
 
     def test_stremio_hub_preserves_updated_at_for_background_sync(self):
-        payload = {"linked": True, "plan": "basic", "capabilities": {}, "settings": {"preferredLanguages": ["bs"], "updatedAt": 12345}}
+        payload = {"linked": True, "plan": "basic", "capabilities": {}, "settings": {"preferredLanguages": ["bs"], "updatedAt": 12345}, "mkgaSettings": {"skipIntro": False, "skipRecap": True, "skipOutro": False, "skipPostCredits": True, "updatedAt": 54321}}
         module = load_module()
         result = module._bounded_stremio_hub(payload)
         self.assertEqual(result["settings"]["updatedAt"], 12345)
+        self.assertFalse(result["mkgaSettings"]["skipIntro"])
+        self.assertTrue(result["mkgaSettings"]["skipRecap"])
+        self.assertFalse(result["mkgaSettings"]["skipOutro"])
+        self.assertEqual(result["mkgaSettings"]["updatedAt"], 54321)
 
 if __name__ == "__main__":
     unittest.main()

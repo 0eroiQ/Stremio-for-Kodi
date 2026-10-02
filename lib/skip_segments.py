@@ -34,6 +34,25 @@ class _NoRedirect(HTTPRedirectHandler):
         return None
 
 
+def _preferences():
+    defaults = {"intro": True, "recap": True, "outro": True, "post_credits": True}
+    try:
+        from lib.signin import account_store
+        from lib.vortexo_premium import hub_state
+        hub = hub_state(account_store(), refresh_remote=False, max_age=300)
+        settings = hub.get("mkgaSettings") if isinstance(hub, dict) else None
+        if not isinstance(settings, dict):
+            return defaults
+        return {
+            "intro": bool(settings.get("skipIntro", True)),
+            "recap": bool(settings.get("skipRecap", True)),
+            "outro": bool(settings.get("skipOutro", True)),
+            "post_credits": bool(settings.get("skipPostCredits", True)),
+        }
+    except Exception:
+        return defaults
+
+
 def _supporter_enabled():
     try:
         from lib.signin import account_store
@@ -203,7 +222,8 @@ class SkipSegmentWatcher:
             context = self._context(digest)
             segments = []
             if context and _supporter_enabled():
-                segments = fetch_segments(self.profile, context.get("kind"), context.get("id"))
+                enabled = _preferences()
+                segments = [segment for segment in fetch_segments(self.profile, context.get("kind"), context.get("id")) if enabled.get(segment.get("type"), True)]
             with self.lock:
                 if self.current_hash == digest:
                     self.segments = segments
