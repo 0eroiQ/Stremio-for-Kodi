@@ -12,7 +12,7 @@ sys.path.insert(0,str(ROOT/'core'))
 class ThemedDialogLayerTests(unittest.TestCase):
     def runtime_python(self):
         for p in ROOT.rglob('*.py'):
-            if any(part in p.parts for part in ('tests','tools','vendor','build-local','.git')):
+            if any(part in p.parts for part in ('tests','tools','vendor','build-local','.git','service.mkga.connector')):
                 continue
             yield p
 

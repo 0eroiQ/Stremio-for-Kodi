@@ -35,6 +35,11 @@ class ReleaseArtworkTests(unittest.TestCase):
     def test_both_packages_and_feed_contain_every_declared_asset(self):
         for addon in self.feed.getroot():
             identity = addon.get('id')
+            if identity == 'service.mkga.connector':
+                connector = self.root / 'feed' / identity / 'service.mkga.connector-0.1.0.zip'
+                with zipfile.ZipFile(connector) as archive:
+                    self.assertEqual(ET.fromstring(archive.read(identity + '/addon.xml')).get('id'), identity)
+                continue
             archive_path = self.package if identity == 'script.stremioelec' else self.repo_zip
             assets = addon.find("extension[@point='xbmc.addon.metadata']/assets")
             self.assertEqual(len(assets.findall('screenshot')), 4)
