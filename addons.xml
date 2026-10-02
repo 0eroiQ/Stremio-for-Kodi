@@ -44,12 +44,12 @@
       <screenshot>resources/previews/addons.jpg</screenshot>
     </assets>
   </extension>
-</addon><addon id="repository.stremioforkodi" name="Stremio for Kodi Repository" version="1.0.1" provider-name="0eroiQ">
+</addon><addon id="repository.stremioforkodi" name="Stremio for Kodi Repository" version="1.0.2" provider-name="0eroiQ">
   <extension point="xbmc.addon.repository" name="Stremio for Kodi Repository">
     <dir minversion="19.0.0">
-      <info>https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/addons.xml</info>
+      <info compressed="false">https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/addons.xml</info>
       <checksum>https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/addons.xml.sha256</checksum>
-      <datadir>https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/</datadir>
+      <datadir zip="true">https://raw.githubusercontent.com/0eroiQ/Stremio-for-Kodi/kodi-repository/</datadir>
       <hashes>false</hashes>
     </dir>
   </extension>
@@ -67,6 +67,8 @@
       <screenshot>resources/previews/streams.jpg</screenshot>
       <screenshot>resources/previews/addons.jpg</screenshot>
     </assets>
-    <news>1.0.1: Dark Cinematic icon, background and in-Kodi previews. Repository feed now serves every declared artwork asset.</news>
+    <news>1.0.2: Make repository transport flags explicit for Kodi clients and refresh the stable feed installer.
+
+1.0.1: Dark Cinematic icon, background and in-Kodi previews. Repository feed now serves every declared artwork asset.</news>
   </extension>
 </addon></addons>
