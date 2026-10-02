@@ -19,6 +19,7 @@ from addons_core import active_addons
 from ai_subtitles import CODE_NAMES, local_settings, prepare_embedded_auto, _apply_remote_style
 from subtitles import ai_source_candidates, download_original
 from lib.playback_observer import ProgressPlayer, flush_pending
+from lib.skip_segments import SkipSegmentWatcher
 from lib.ui_dialogs import dialog as themed_dialog, progress_bg
 
 ADDON = get_addon()
@@ -365,6 +366,7 @@ def main():
     watcher = PlaybackWatcher(monitor)
     subtitle_sync = SubtitleSettingsSync()
     continue_sync = ContinueIndexSync()
+    skip_watcher = SkipSegmentWatcher(PROFILE)
     session = xbmcgui.Window(SESSION_WINDOW_ID)
     session.setProperty(PROGRESS_READY, "true")
     try:
@@ -373,15 +375,21 @@ def main():
         watcher.schedule()
         subtitle_sync.tick()
         continue_sync.tick()
+        skip_watcher.tick()
         while not monitor.waitForAbort(1):
             subtitle_sync.tick()
             continue_sync.tick()
             player.tick()
+            skip_watcher.tick()
             while flush_pending(player):
                 pass
         while flush_pending(player):
             pass
     finally:
+        try:
+            skip_watcher.close()
+        except Exception:
+            pass
         session.clearProperty(PROGRESS_READY)
 
 

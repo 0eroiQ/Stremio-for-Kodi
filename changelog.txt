@@ -1,3 +1,10 @@
+v1.0.64
+- Add Supporter Skip Intro, Skip Recap, Skip Outro and Skip Post-Credits buttons.
+- Use IntroDB's free read API for per-episode/movie community timestamps; no IntroDB API key is required.
+- Cache IntroDB lookups locally for 24 hours and query only the item currently playing.
+- Keep the feature entitlement-controlled by MKGA Supporter status while the timestamp provider itself remains free.
+- Show IntroDB attribution on the skip overlay.
+
 v1.0.63
 - Keep the original subtitle visible immediately while AI translation runs in the background.
 - Replace the source subtitle only after a complete translated subtitle file is ready.

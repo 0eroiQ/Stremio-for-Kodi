@@ -63,7 +63,8 @@ def session_payload(module, *, premium=False):
         "premium": premium,
         "entitlements": {
             "trailers": premium,
-            "ai_translation": premium
+            "ai_translation": premium,
+            "skip_segments": premium
         }
     }
 
@@ -74,7 +75,8 @@ def entitlement_payload(*, premium=False):
         "premium": premium,
         "entitlements": {
             "trailers": premium,
-            "ai_translation": premium
+            "ai_translation": premium,
+            "skip_segments": premium
         }
     }
 
@@ -142,7 +144,7 @@ class PremiumTests(unittest.TestCase):
         opener = Opener([{
             "product": "stremio_for_kodi",
             "premium": False,
-            "entitlements": {"trailers": True, "ai_translation": False}
+            "entitlements": {"trailers": True, "ai_translation": False, "skip_segments": False}
         }])
         with self.assertRaises(module.PremiumError):
             module.fetch_entitlements("signed.vortexo.token", opener=opener)
@@ -334,7 +336,7 @@ class PremiumTests(unittest.TestCase):
             "vortexo_premium": {
                 "checked_at": 1,
                 "premium": False,
-                "entitlements": {"trailers": True, "ai_translation": False}
+                "entitlements": {"trailers": True, "ai_translation": False, "skip_segments": False}
             }
         })
         self.assertIsNone(module.cached_state(store))

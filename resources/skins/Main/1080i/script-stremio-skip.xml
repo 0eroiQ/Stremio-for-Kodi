@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog"><visible>true</visible><coordinates><system>1</system></coordinates><controls>
+<control type="image"><left>1480</left><top>820</top><width>330</width><height>92</height><texture colordiffuse="F2181720" border="28,28,28,28">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-card-rounded.png</texture></control>
+<control type="button" id="201"><left>1492</left><top>832</top><width>306</width><height>68</height><font>font20</font><textcolor>FFFFFFFF</textcolor><focusedcolor>FF0F1017</focusedcolor><texturefocus colordiffuse="FFC4ACFF" border="20,20,20,20">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-card-rounded.png</texturefocus><texturenofocus colordiffuse="FF302B41" border="20,20,20,20">special://home/addons/script.stremioelec/resources/skins/Main/media/controls/local-card-rounded.png</texturenofocus><label>$INFO[Window.Property(skip_label)]</label></control>
+<control type="label"><left>1492</left><top>905</top><width>306</width><height>24</height><font>font10</font><textcolor>FF8E8A99</textcolor><align>center</align><label>Intro data provided by IntroDB</label></control>
+</controls></window>
