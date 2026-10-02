@@ -44,7 +44,7 @@
       <screenshot>resources/previews/addons.jpg</screenshot>
     </assets>
   </extension>
-</addon><addon id="service.mkga.connector" name="MKGA Connector" version="0.1.0" provider-name="MKGA.TV">
+</addon><addon id="service.mkga.connector" name="MKGA Connector" version="0.1.1" provider-name="MKGA.TV">
   <requires><import addon="xbmc.python" version="3.0.0" /></requires>
   <extension point="xbmc.python.script" library="default.py"><provides>executable</provides></extension>
   <extension point="xbmc.service" library="service.py" start="login" />
