@@ -1,3 +1,9 @@
+v1.0.70
+- Restore the original proven two-press Back/Exit guard from before the September 30 exit-flow change.
+- First Back only focuses Home/sidebar and arms exit; it never opens the Exit dialog.
+- A separate second Back opens the Exit confirmation.
+- Remove the later page-aware/debounce exit experiments.
+
 v1.0.69
 - Debounce duplicate Kodi Back events so one remote press cannot both open the Home sidebar and trigger Exit.
 - Keep v1.0.68 AI playback-context retry and MKGA Repository support.
