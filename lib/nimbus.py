@@ -299,7 +299,6 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.home_row_loading = set()
         self.home_row_exhausted = set()
         self.home_row_cursor = {}
-        self._last_back_at = 0.0
         super().__init__(*args, **kwargs)
 
     def onInit(self):
@@ -705,36 +704,20 @@ class HomeWindow(AddonsPage, NimbusWindow):
             themed_dialog = xbmcgui.Dialog
         aid = action.getId()
         if aid in BACK:
-            # Some Kodi/remote combinations emit two Back actions for one physical
-            # press. Debounce them so one press can never both open the sidebar
-            # and immediately trigger the Exit dialog.
-            now = time.monotonic()
-            if now - self._last_back_at < 0.65:
+            # Restore the original proven two-press exit guard. The first Back
+            # only cancels preview, focuses the sidebar and arms exit. A later
+            # physical Back opens the confirmation dialog.
+            if not getattr(self, 'exit_armed', False):
+                self.cancel_trailer()
+                try:
+                    sidebar = self.getControl(9000)
+                    sidebar.selectItem(home_index())
+                except Exception:
+                    pass
+                self.setFocusId(9000)
+                self.exit_armed = True
                 return
-            self._last_back_at = now
-            # Back exits only from Home. From Search/Discover/Library/Addons/etc.
-            # it first returns to Home, matching normal TV navigation.
             self.exit_armed = False
-            if self.getProperty('page') != 'Home':
-                self.load_home()
-                try:
-                    sidebar = self.getControl(9000)
-                    sidebar.selectItem(home_index())
-                    self.setFocusId(9000)
-                except Exception:
-                    pass
-                return
-            # On Home, the first Back visibly moves focus to Home in the
-            # sidebar. Only Back again from that explicit Home-sidebar state
-            # asks to exit, preventing accidental one-press exit dialogs.
-            if self.getFocusId() != 9000:
-                try:
-                    sidebar = self.getControl(9000)
-                    sidebar.selectItem(home_index())
-                    self.setFocusId(9000)
-                except Exception:
-                    pass
-                return
             if themed_dialog().yesno(
                     'Exit Stremio for Kodi',
                     'Do you want to exit Stremio for Kodi?',
