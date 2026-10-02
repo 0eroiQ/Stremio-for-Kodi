@@ -5,6 +5,7 @@ class ExitBehaviorTests(unittest.TestCase):
   source=Path(__file__).resolve().parents[1].joinpath('lib/nimbus.py').read_text()
   start=source.index('        if aid in BACK:')
   block=source[start:source.index("        if aid in (1, 2, 3, 4, 7, 11, 100, 101):",start)]
+  self.assertIn('now - self._last_back_at < 0.65',block)
   self.assertIn("self.getProperty('page') != 'Home'",block)
   self.assertIn('self.load_home()',block)
   self.assertIn('self.getFocusId() != 9000',block)

@@ -299,6 +299,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.home_row_loading = set()
         self.home_row_exhausted = set()
         self.home_row_cursor = {}
+        self._last_back_at = 0.0
         super().__init__(*args, **kwargs)
 
     def onInit(self):
@@ -704,6 +705,13 @@ class HomeWindow(AddonsPage, NimbusWindow):
             themed_dialog = xbmcgui.Dialog
         aid = action.getId()
         if aid in BACK:
+            # Some Kodi/remote combinations emit two Back actions for one physical
+            # press. Debounce them so one press can never both open the sidebar
+            # and immediately trigger the Exit dialog.
+            now = time.monotonic()
+            if now - self._last_back_at < 0.65:
+                return
+            self._last_back_at = now
             # Back exits only from Home. From Search/Discover/Library/Addons/etc.
             # it first returns to Home, matching normal TV navigation.
             self.exit_armed = False
