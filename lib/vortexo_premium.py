@@ -199,7 +199,7 @@ def _bounded_stremio_hub(payload):
     if not isinstance(payload, dict) or not isinstance(payload.get("linked"), bool):
         raise PremiumError("Invalid MKGA Stremio settings response.")
     if not payload["linked"]:
-        return {"linked": False, "plan": "basic", "capabilities": {}, "settings": None}
+        return {"linked": False, "plan": "basic", "capabilities": {}, "settings": None, "mkgaSettings": None}
     plan = payload.get("plan")
     capabilities = payload.get("capabilities")
     settings = payload.get("settings")
@@ -229,7 +229,19 @@ def _bounded_stremio_hub(payload):
         "sourcePriority": [str(x)[:24] for x in settings.get("sourcePriority", []) if isinstance(x, str)][:5],
         "updatedAt": int(settings.get("updatedAt") or 0),
     }
-    return {"linked": True, "plan": plan, "capabilities": capabilities, "settings": safe}
+    raw_mkga = payload.get("mkgaSettings")
+    if raw_mkga is None:
+        raw_mkga = {}
+    if not isinstance(raw_mkga, dict):
+        raise PremiumError("Invalid MKGA settings response.")
+    mkga = {
+        "skipIntro": bool(raw_mkga.get("skipIntro", True)),
+        "skipRecap": bool(raw_mkga.get("skipRecap", True)),
+        "skipOutro": bool(raw_mkga.get("skipOutro", True)),
+        "skipPostCredits": bool(raw_mkga.get("skipPostCredits", True)),
+        "updatedAt": int(raw_mkga.get("updatedAt") or 0),
+    }
+    return {"linked": True, "plan": plan, "capabilities": capabilities, "settings": safe, "mkgaSettings": mkga}
 
 
 def resolve_subtitle_cloud(store, kind, identity, filename, target_language, opener=None):
@@ -491,7 +503,7 @@ def hub_state(store, opener=None, refresh_remote=False, max_age=300):
     try:
         return _bounded_stremio_hub(cached)
     except PremiumError:
-        return {"linked": False, "plan": "basic", "capabilities": {}, "settings": None}
+        return {"linked": False, "plan": "basic", "capabilities": {}, "settings": None, "mkgaSettings": None}
 
 
 def refresh_quiet(store):
