@@ -34,6 +34,9 @@ class KodiRepositoryTests(unittest.TestCase):
                 self.assertIsNotNone(directory)
                 for field in ('info', 'checksum', 'datadir'):
                     self.assertTrue(directory.findtext(field).startswith('https://'))
+                self.assertEqual(directory.find('info').get('compressed'), 'false')
+                self.assertEqual(directory.find('datadir').get('zip'), 'true')
+                self.assertEqual(repo.get('version'), '1.0.2')
             wrong = root / 'script.stremioelec-9.9.9.zip'
             wrong.write_bytes(before)
             with self.assertRaises(ValueError):
