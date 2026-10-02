@@ -1,3 +1,8 @@
+v1.0.66
+- Fix MKGA.TV Smart Subtitles being silently blocked by the legacy local AI master switch.
+- When subtitle settings source is MKGA.TV, the website Smart Subtitles toggle is now authoritative.
+- Keep local master switch behavior only when Local settings are selected.
+
 v1.0.65
 - Read Skip Intro, Recap, Outro and Post-Credits preferences from MKGA Settings.
 - Allow each skip button type to be enabled or disabled independently from the MKGA account.

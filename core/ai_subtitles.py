@@ -548,7 +548,9 @@ def local_settings():
             languages = [str(x).strip().lower() for x in remote.get("preferredLanguages", [])
                          if isinstance(x, str) and str(x).strip()]
             settings.update({
-                "enabled": settings["enabled"] and bool(remote.get("smartSubtitles")),
+                # MKGA.TV is authoritative when Remote settings are selected.
+                # Do not require the legacy local master switch as a second hidden gate.
+                "enabled": bool(remote.get("smartSubtitles")),
                 "target": target_code(languages[0]) if languages else settings["target"],
                 "remote": True,
                 "preferred_languages": languages,
