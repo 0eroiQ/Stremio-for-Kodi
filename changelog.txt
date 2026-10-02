@@ -1,3 +1,8 @@
+v1.0.67
+- Back from Search, Discover, Library, Addons or Settings now returns to Home first.
+- Exit confirmation is shown only when Back is pressed from Home.
+- Keeps the one-press Home exit confirmation while avoiding accidental exit prompts elsewhere.
+
 v1.0.66
 - Fix MKGA.TV Smart Subtitles being silently blocked by the legacy local AI master switch.
 - When subtitle settings source is MKGA.TV, the website Smart Subtitles toggle is now authoritative.
