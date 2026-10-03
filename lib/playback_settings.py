@@ -28,7 +28,12 @@ def write_keymap(directory, enabled):
 def apply():
     import xbmc
     import xbmcvfs
-    from addon_state import get_addon
+    try:
+        from addon_state import get_addon
+    except ModuleNotFoundError:
+        # Report/repository entry points can import this helper without default.py
+        # having first inserted core/ on sys.path. Keep startup independent.
+        from core.addon_state import get_addon
     if write_keymap(xbmcvfs.translatePath('special://profile/keymaps/'),
                     get_addon().getSetting('playback_back_stops') != 'false'):
         xbmc.executebuiltin('Action(ReloadKeymaps)')
