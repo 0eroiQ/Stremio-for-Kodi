@@ -1,3 +1,9 @@
+v1.0.71
+- Honor MKGA.TV Auto translate: turning it off skips both MKGA Cloud and local BYOK translation during playback.
+- Keep original subtitles available when automatic translation is disabled.
+- Handle an embedded-only subtitle source with no result without an unbound local variable error.
+- Add runtime preference coverage and strengthen isolated startup/Back/Exit lifecycle validation.
+
 v1.0.70
 - Restore the original proven two-press Back/Exit guard from before the September 30 exit-flow change.
 - First Back only focuses Home/sidebar and arms exit; it never opens the Exit dialog.
