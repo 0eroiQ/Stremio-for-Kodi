@@ -1,3 +1,9 @@
+v1.0.72
+- Keep a confirmed Exit closed instead of returning to the launcher and reopening Stremio.
+- Return to Kodi Home after Exit dialogs close.
+- Ignore queued launch requests for three seconds after confirmed Exit; normal opening works again after that short guard.
+- Preserve Cancel behavior and add Exit/session cleanup regression tests.
+
 v1.0.71
 - Honor MKGA.TV Auto translate: turning it off skips both MKGA Cloud and local BYOK translation during playback.
 - Keep original subtitles available when automatic translation is disabled.

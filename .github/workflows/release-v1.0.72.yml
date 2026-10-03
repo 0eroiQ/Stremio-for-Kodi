@@ -1,0 +1,122 @@
+name: Release v1.0.72
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-v1.0.72.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stremio-for-kodi-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tested release commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate source
+        run: |
+          python3 -m unittest discover -s tests
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          python3 tools/audit-public-source.py --history
+
+      - name: Verify release version
+        run: grep -q 'version="1.0.72"' addon.xml
+
+      - name: Verify source and tag consistency
+        env:
+          TAG: v1.0.72
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          if git show-ref --verify --quiet "refs/tags/$TAG"; then
+            test "$(git rev-parse "$TAG^{commit}")" = "$GITHUB_SHA"
+          fi
+
+      - name: Build addon package
+        run: python3 tools/build-stremio-addon.py --output dist
+
+      - name: Create or refresh GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v1.0.72
+        run: |
+          set -euo pipefail
+          PACKAGE="dist/script.stremioelec-1.0.72.zip"
+          test -f "$PACKAGE"
+          cat > /tmp/release-notes.md <<'EOF'
+          ## Stremio for Kodi 1.0.72
+
+          - Keep a confirmed Exit closed instead of returning to the launcher and reopening Stremio.
+          - Return to Kodi Home after Exit dialogs close.
+          - Ignore queued launch requests for three seconds after confirmed Exit; normal opening works again after that short guard.
+          - Preserve Cancel behavior and add Exit/session cleanup regression tests.
+          EOF
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$PACKAGE" --clobber
+            gh release edit "$TAG" --title "Stremio for Kodi 1.0.72" --notes-file /tmp/release-notes.md
+          else
+            gh release create "$TAG" "$PACKAGE" \
+              --target "${GITHUB_SHA}" \
+              --title "Stremio for Kodi 1.0.72" \
+              --notes-file /tmp/release-notes.md
+          fi
+
+      - name: Check out Kodi repository feed
+        uses: actions/checkout@v4
+        with:
+          ref: kodi-repository
+          path: dist/feed
+
+      - name: Publish Kodi repository feed and installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v1.0.72
+        run: |
+          set -euo pipefail
+          python3 tools/build-kodi-repository.py \
+            --package dist/script.stremioelec-1.0.72.zip \
+            --output dist/feed
+          git -C dist/feed config user.name 'github-actions[bot]'
+          git -C dist/feed config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C dist/feed add addons.xml addons.xml.sha256 README.md script.stremioelec service.mkga.connector repository.stremioforkodi
+          if ! git -C dist/feed diff --cached --quiet; then
+            git -C dist/feed commit -m "Publish ${TAG} to Kodi repository"
+            git -C dist/feed push origin kodi-repository
+          fi
+          gh release upload "$TAG" \
+            dist/feed/repository.stremioforkodi/repository.stremioforkodi-*.zip \
+            --clobber
+
+      - name: Sync published release to MKGA.TV
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MKGA_RELEASE_SYNC_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN }}
+          TAG: v1.0.72
+        run: |
+          set -euo pipefail
+          test -n "$MKGA_RELEASE_SYNC_TOKEN"
+          gh api "repos/${{ github.repository }}/releases/tags/$TAG" > /tmp/mkga-github-release.json
+          test "$(jq -r .tag_name /tmp/mkga-github-release.json)" = "$TAG"
+          jq --arg version "$TAG" '{version:$version,githubRelease:.}' \
+            /tmp/mkga-github-release.json > /tmp/mkga-release-sync.json
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $MKGA_RELEASE_SYNC_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/mkga-release-sync.json \
+            https://mkga.tv/api/projects/stremio-for-kodi/release-sync
