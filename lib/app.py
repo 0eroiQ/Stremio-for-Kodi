@@ -15,6 +15,8 @@ def run():
     guard = LaunchGuard()
     if not guard.acquire():
         return
+    confirmed_exit = False
+    closing_window_id = None
     try:
         from lib.signin import signed_in, show_signin
         if not signed_in() and not show_signin():
@@ -38,6 +40,8 @@ def run():
             try:
                 window.doModal()
                 reload_appearance = getattr(window, 'reload_appearance', False)
+                confirmed_exit = getattr(window, 'exit_requested', False) is True
+                closing_window_id = getattr(window, 'exit_window_id', None)
             finally:
                 unmark_window(window)
                 del window
@@ -47,4 +51,19 @@ def run():
                 ADDON_PATH, xbmcvfs.translatePath(ADDON.getAddonInfo('profile')),
                 max(8, len(rows), backend.account_home_capacity()), options(ADDON))
     finally:
-        guard.release()
+        try:
+            if confirmed_exit:
+                # Exit returns to Kodi Home, rather than the addon launcher
+                # underneath the modal. Keep the lease until navigation finishes.
+                import xbmc
+                # doModal can return before Kodi handles its queued native
+                # previous-window message. Let that restore the launcher first.
+                for _ in range(20):
+                    if (xbmcgui.getCurrentWindowId() != closing_window_id
+                            and not xbmc.getCondVisibility('System.HasVisibleModalDialog')):
+                        break
+                    xbmc.sleep(50)
+                guard.defer_relaunch()
+                xbmc.executebuiltin('ActivateWindow(Home)', True)
+        finally:
+            guard.release()

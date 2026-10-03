@@ -4,8 +4,8 @@ from pathlib import Path
 import subprocess
 import sys
 import unittest
-from unittest.mock import Mock
-from lib.launch_guard import LaunchGuard, mark_window, OWNER, ROLE, RUNNING, TOKEN
+from unittest.mock import Mock, patch
+from lib.launch_guard import LaunchGuard, mark_window, OWNER, ROLE, RUNNING, TOKEN, EXIT_DEADLINE, EXIT_DELAY
 
 class Window:
     def __init__(self):
@@ -109,6 +109,35 @@ class LaunchTests(unittest.TestCase):
         guard = self.guard()
         self.assertTrue(guard.acquire())
         guard.release()
+    def test_confirmed_exit_blocks_queued_relaunch_quietly_then_allows_reopen(self):
+        first = self.guard()
+        self.assertTrue(first.acquire())
+        self.view(13002, 'home')
+        with patch('lib.launch_guard.time.monotonic', return_value=100):
+            first.defer_relaunch()
+            self.assertFalse(self.guard().acquire())
+        self.kodi.executebuiltin.assert_not_called()
+        self.gui.dialog.notification.assert_not_called()
+        self.gui.windows.pop(13002)
+        first.release()
+        with patch('lib.launch_guard.time.monotonic', return_value=101):
+            self.assertFalse(self.guard().acquire())
+        with patch('lib.launch_guard.time.monotonic', return_value=100 + EXIT_DELAY):
+            reopened = self.guard()
+            self.assertTrue(reopened.acquire())
+        self.assertEqual(self.session.getProperty(EXIT_DEADLINE), '')
+        reopened.release()
+
+    def test_invalid_or_stale_exit_flag_cannot_lock_user_out(self):
+        for value in ('garbage', 'nan', 'inf', '99', '1000', '-1'):
+            with self.subTest(value=value):
+                self.session.setProperty(EXIT_DEADLINE, value)
+                with patch('lib.launch_guard.time.monotonic', return_value=100):
+                    guard = self.guard()
+                    self.assertTrue(guard.acquire())
+                    guard.release()
+                self.assertEqual(self.session.getProperty(EXIT_DEADLINE), '')
+
     def test_cold_entrypoint_adds_core_import_path(self):
         root = Path(__file__).resolve().parents[1]
         code = ('import runpy,sys,importlib.util; '
