@@ -27,6 +27,9 @@ MAX_FILE_BYTES = 512 * 1024
 MAX_CUES = 2400
 MAX_CUE_TEXT = 8000
 TIMEOUT_SECONDS = 15
+MAX_REQUEST_TIMEOUT_SECONDS = 90
+REQUEST_CUES_PER_TIMEOUT = 150
+REQUEST_CHARACTERS_PER_TIMEOUT = 5000
 MAX_MODEL_ATTEMPTS = 2
 MAX_BATCH_CUES = 2400
 MAX_BATCH_CHARACTERS = 120000
@@ -312,6 +315,21 @@ def _ordered_models():
     return MODEL_CHAIN
 
 
+def _request_timeout(cues):
+    """Scale the request timeout for whole-track subtitle output."""
+    characters = sum(len(str(cue.get("text") or "")) for cue in cues)
+    cue_windows = (
+        len(cues) + REQUEST_CUES_PER_TIMEOUT - 1
+    ) // REQUEST_CUES_PER_TIMEOUT
+    text_windows = (
+        characters + REQUEST_CHARACTERS_PER_TIMEOUT - 1
+    ) // REQUEST_CHARACTERS_PER_TIMEOUT
+    return min(
+        MAX_REQUEST_TIMEOUT_SECONDS,
+        TIMEOUT_SECONDS * max(1, cue_windows, text_windows),
+    )
+
+
 def _request_translation(cues, api_key, target_language, source_language=None, opener=None):
     global _preferred_model
     body = json.dumps({
@@ -325,6 +343,7 @@ def _request_translation(cues, api_key, target_language, source_language=None, o
         },
     }, ensure_ascii=False).encode("utf-8")
     client = opener or build_opener()
+    request_timeout = _request_timeout(cues)
     last_error = None
     for model in _ordered_models()[:MAX_MODEL_ATTEMPTS]:
         request = Request(
@@ -339,7 +358,7 @@ def _request_translation(cues, api_key, target_language, source_language=None, o
             method="POST",
         )
         try:
-            with client.open(request, timeout=TIMEOUT_SECONDS) as response:
+            with client.open(request, timeout=request_timeout) as response:
                 raw = response.read(MAX_FILE_BYTES * 4 + 1)
             if len(raw) > MAX_FILE_BYTES * 4:
                 raise AITranslationError("Gemini response was too large.")
