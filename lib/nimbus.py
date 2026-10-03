@@ -294,6 +294,7 @@ class HomeWindow(AddonsPage, NimbusWindow):
         self.hero_request = None
         self.hero_loading = False
         self.closed = False
+        self.exit_requested = False
         self.home_refreshing = False
         self.home_row_specs = {}
         self.home_row_loading = set()
@@ -722,6 +723,10 @@ class HomeWindow(AddonsPage, NimbusWindow):
                     'Exit Stremio for Kodi',
                     'Do you want to exit Stremio for Kodi?',
                     nolabel='Cancel', yeslabel='Exit'):
+                self.exit_requested = True
+                self.exit_window_id = xbmcgui.getCurrentWindowId()
+                from lib.launch_guard import defer_relaunch
+                defer_relaunch()
                 self.close()
             return
         if aid in (1, 2, 3, 4, 7, 11, 100, 101):

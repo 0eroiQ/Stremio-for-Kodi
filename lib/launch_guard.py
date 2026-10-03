@@ -3,6 +3,7 @@
 A live Kodi-owned lease window protects startup. Window existence, not a stale
 Home property, is authoritative. Hidden addon windows are brought forward.
 """
+import time
 import uuid
 
 RUNNING = 'stremioforkodi.running'
@@ -10,6 +11,14 @@ TOKEN = 'stremioforkodi.launch.token'
 OWNER = 'stremioforkodi.window.owner'
 ROLE = 'stremioforkodi.window.role'
 ADDON_ID = 'script.stremioelec'
+EXIT_DEADLINE = 'stremioforkodi.exit.deadline'
+EXIT_DELAY = 3.0
+
+
+def defer_relaunch(gui=None):
+    if gui is None:
+        import xbmcgui as gui
+    gui.Window(10000).setProperty(EXIT_DEADLINE, str(time.monotonic() + EXIT_DELAY))
 
 
 def mark_window(window, role):
@@ -61,7 +70,21 @@ class LaunchGuard:
                 continue
         return found
 
+    def defer_relaunch(self):
+        defer_relaunch(self.gui)
+
     def acquire(self):
+        # A queued launcher action can arrive while native modal close restores
+        # its previous Kodi window. Only an explicitly confirmed Exit sets this.
+        raw_deadline = self.session.getProperty(EXIT_DEADLINE)
+        if raw_deadline:
+            try:
+                remaining = float(raw_deadline) - time.monotonic()
+            except (ValueError, TypeError):
+                remaining = 0
+            if 0 < remaining <= EXIT_DELAY:
+                return False  # Quiet: never foreground a closing view or toast.
+            self.session.clearProperty(EXIT_DEADLINE)
         windows = self._windows()
         views = [(wid, role) for wid, role in windows if role != 'lease']
         if views:

@@ -2,7 +2,7 @@
 import ast
 from pathlib import Path
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -51,12 +51,18 @@ class StartupShellTests(unittest.TestCase):
 
     def home_action(self, accepted=False):
         on_action = function_from_file(ROOT / "lib/nimbus.py", "onAction", "HomeWindow")
+        exit_guard = Mock()
+        self.exit_guard = exit_guard
+        override = patch("lib.launch_guard.defer_relaunch", exit_guard)
+        override.start(); self.addCleanup(override.stop)
         dialog = Mock()
         dialog.yesno.return_value = accepted
         gui = Mock()
         gui.Dialog.return_value = dialog
+        gui.getCurrentWindowId.return_value = 13002
         window = Mock()
         window.exit_armed = False
+        window.exit_requested = False
         window.rows = {}
         window.getProperty.return_value = "Home"
         window.getFocusId.return_value = 9000
@@ -82,6 +88,8 @@ class StartupShellTests(unittest.TestCase):
         on_action(window, action)
         on_action(window, action)
         self.assertIs(window.exit_armed, False)
+        self.assertIs(window.exit_requested, False)
+        self.exit_guard.assert_not_called()
         dialog.yesno.assert_called_once_with(
             "Exit Stremio for Kodi", "Do you want to exit Stremio for Kodi?",
             nolabel="Cancel", yeslabel="Exit")
@@ -91,6 +99,7 @@ class StartupShellTests(unittest.TestCase):
         window.close.assert_not_called()
         on_action(window, action)
         window.close.assert_called_once_with()
+        self.exit_guard.assert_called_once_with()
 
     def test_second_back_exit_closes_home(self):
         window, dialog, action, on_action = self.home_action(accepted=True)
@@ -99,6 +108,7 @@ class StartupShellTests(unittest.TestCase):
         on_action(window, action)
         window.close.assert_called_once_with()
         self.assertIs(window.exit_armed, False)
+        self.assertIs(window.exit_requested, True)
 
     def test_navigation_disarms_back_confirmation(self):
         window, dialog, action, on_action = self.home_action(accepted=True)
@@ -119,6 +129,7 @@ class StartupShellTests(unittest.TestCase):
         launch = ModuleType("lib.launch_guard")
         guard = Mock()
         guard.acquire.return_value = True
+        launch.defer_relaunch = self.exit_guard if hasattr(self, "exit_guard") else Mock()
         launch.LaunchGuard = Mock(return_value=guard)
         launch.mark_window = Mock()
         launch.unmark_window = Mock()
@@ -136,12 +147,17 @@ class StartupShellTests(unittest.TestCase):
         appearance.options = Mock(return_value={})
         window, dialog, action, on_action = self.home_action(accepted=True)
         window.reload_appearance = False
+        window.close.side_effect = lambda: launch.defer_relaunch.assert_called_once_with()
         window.doModal.side_effect = lambda: (on_action(window, action), on_action(window, action))
         factory = Mock(return_value=window)
-        scope = {"HomeWindow": factory, "ADDON": Mock(),
+        gui = Mock(); gui.getCurrentWindowId.return_value = 10025
+        scope = {"xbmcgui": gui, "HomeWindow": factory, "ADDON": Mock(),
                  "ADDON_PATH": "/addon", "SKIN": "Main", "RES": "1080i"}
         exec(compile(ast.Module(body=[run], type_ignores=[]), "<app>", "exec"), scope)
-        modules = {"lib.launch_guard": launch, "lib.signin": signin,
+        kodi = Mock()
+        kodi.getCondVisibility.return_value = False
+        kodi.executebuiltin.side_effect = lambda *args: guard.release.assert_not_called()
+        modules = {"xbmc": kodi, "lib.launch_guard": launch, "lib.signin": signin,
                    "xbmcvfs": vfs, "lib.backend": backend,
                    "lib.home_layout": layout, "lib.appearance": appearance}
         with patch.dict(sys.modules, modules), patch("lib.backend", backend, create=True):
@@ -149,6 +165,93 @@ class StartupShellTests(unittest.TestCase):
         factory.assert_called_once()
         window.close.assert_called_once_with()
         launch.unmark_window.assert_called_once_with(window)
+        kodi.executebuiltin.assert_called_once_with("ActivateWindow(Home)", True)
+        guard.release.assert_called_once_with()
+
+    def app_context(self, windows):
+        import sys
+        from types import ModuleType
+        from unittest.mock import patch
+        run = function_from_file(ROOT / "lib/app.py", "run")
+        launch = ModuleType("lib.launch_guard")
+        guard = Mock(); guard.acquire.return_value = True
+        launch.defer_relaunch = self.exit_guard if hasattr(self, "exit_guard") else Mock()
+        launch.LaunchGuard = Mock(return_value=guard)
+        launch.mark_window = Mock(); launch.unmark_window = Mock()
+        signin = ModuleType("lib.signin")
+        signin.signed_in = Mock(return_value=True); signin.show_signin = Mock()
+        vfs = ModuleType("xbmcvfs"); vfs.translatePath = lambda value: value
+        backend = ModuleType("lib.backend")
+        backend.account_home = Mock(return_value=[])
+        backend.account_home_capacity = Mock(return_value=8)
+        layout = ModuleType("lib.home_layout")
+        layout.build_layout = Mock(return_value=("home.xml", "/tmp", 8))
+        appearance = ModuleType("lib.appearance"); appearance.options = Mock(return_value={})
+        kodi = Mock()
+        kodi.getCondVisibility.return_value = False
+        factory = Mock(side_effect=windows)
+        gui = Mock(); gui.getCurrentWindowId.return_value = 10025
+        scope = {"xbmcgui": gui, "HomeWindow": factory, "ADDON": Mock(),
+                 "ADDON_PATH": "/addon", "SKIN": "Main", "RES": "1080i"}
+        exec(compile(ast.Module(body=[run], type_ignores=[]), "<app>", "exec"), scope)
+        modules = {"xbmc": kodi, "lib.launch_guard": launch, "lib.signin": signin,
+                   "xbmcvfs": vfs, "lib.backend": backend,
+                   "lib.home_layout": layout, "lib.appearance": appearance}
+        def execute():
+            with patch.dict(sys.modules, modules), patch("lib.backend", backend, create=True):
+                scope["run"]()
+        return execute, guard, kodi, factory, layout, gui
+
+    def test_cancelled_modal_return_does_not_navigate_away(self):
+        window = Mock(); window.reload_appearance = False; window.exit_requested = False
+        execute, guard, kodi, factory, layout, gui = self.app_context([window])
+        execute()
+        kodi.executebuiltin.assert_not_called()
+        guard.defer_relaunch.assert_not_called()
+        guard.release.assert_called_once_with()
+
+    def test_appearance_reload_recreates_home_without_exit_navigation(self):
+        first = Mock(); first.reload_appearance = True; first.exit_requested = False
+        second = Mock(); second.reload_appearance = False; second.exit_requested = False
+        execute, guard, kodi, factory, layout, gui = self.app_context([first, second])
+        execute()
+        self.assertEqual(factory.call_count, 2)
+        self.assertEqual(layout.build_layout.call_count, 2)
+        kodi.executebuiltin.assert_not_called()
+        guard.defer_relaunch.assert_not_called()
+        guard.release.assert_called_once_with()
+
+    def test_exit_waits_for_native_previous_window_before_returning_home(self):
+        window = Mock(); window.reload_appearance = False
+        window.exit_requested = True; window.exit_window_id = 13002
+        execute, guard, kodi, factory, layout, gui = self.app_context([window])
+        gui.getCurrentWindowId.side_effect = [13002, 13002, 10025]
+        def navigate(*args):
+            self.assertEqual(kodi.sleep.call_count, 2)
+            guard.release.assert_not_called()
+        kodi.executebuiltin.side_effect = navigate
+        execute()
+        kodi.executebuiltin.assert_called_once_with("ActivateWindow(Home)", True)
+        guard.release.assert_called_once_with()
+
+    def test_exit_waits_for_closing_modal_before_home_navigation(self):
+        window = Mock(); window.reload_appearance = False
+        window.exit_requested = True; window.exit_window_id = 13002
+        execute, guard, kodi, factory, layout, gui = self.app_context([window])
+        kodi.getCondVisibility.side_effect = [True, True, False]
+        execute()
+        self.assertEqual(kodi.sleep.call_count, 2)
+        kodi.executebuiltin.assert_called_once_with("ActivateWindow(Home)", True)
+
+    def test_navigation_failure_still_releases_launch_lease(self):
+        window = Mock(); window.reload_appearance = False; window.exit_requested = True
+        execute, guard, kodi, factory, layout, gui = self.app_context([window])
+        def unavailable(*args):
+            guard.release.assert_not_called()
+            raise RuntimeError("Kodi navigation unavailable")
+        kodi.executebuiltin.side_effect = unavailable
+        with self.assertRaisesRegex(RuntimeError, "navigation unavailable"):
+            execute()
         guard.release.assert_called_once_with()
 
     def test_service_does_not_relaunch_after_user_exit_in_same_session(self):
@@ -164,6 +267,7 @@ class StartupShellTests(unittest.TestCase):
         gui = Mock()
         gui.Window.return_value = session
         kodi = Mock()
+        kodi.getCondVisibility.return_value = False
         monitor = Mock()
         monitor.abortRequested.return_value = False
         scope = {"ADDON": addon, "SESSION_WINDOW_ID": 10000,
