@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.70" provider-name="0eroiQ">
+<addons><addon id="script.stremioelec" name="Stremio for Kodi" version="1.0.71" provider-name="0eroiQ">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.qrcode" version="6.1.0+matrix.3" optional="true" />
@@ -18,7 +18,11 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/0eroiQ/Stremio-for-Kodi</source>
-    <news>1.0.62: Faster Home refresh with cursor-safe infinite catalogs, incremental row patching, and background-only account/library/CW maintenance.
+    <news>1.0.71: Honor the MKGA.TV Auto translate preference for both cloud and BYOK playback paths, keep original subtitles when translation is off, and handle empty embedded-only subtitle results safely.
+
+1.0.70: Restore the proven two-press Back/Exit guard.
+
+1.0.62: Faster Home refresh with cursor-safe infinite catalogs, incremental row patching, and background-only account/library/CW maintenance.
 
 1.0.61: Add stale-while-revalidate Streams SQLite v2 and idle Continue Watching stream prefetch for faster source opening.
 
