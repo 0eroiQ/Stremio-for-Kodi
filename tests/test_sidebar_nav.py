@@ -85,7 +85,9 @@ class SidebarTests(unittest.TestCase):
         window=Mock();window.initialized=False;window.row_count=2
         scope={'menu_items':menu_items,'home_index':home_index,'xbmcgui':Mock()}
         exec(compile(ast.Module(body=[self.function('onInit')],type_ignores=[]),'<sidebar-init>','exec'),scope)
-        with patch('lib.weather_widget.request_refresh'):
+        # The sidebar test has no Kodi runtime; keep performance reporting
+        # isolated from xbmc stubs installed by unrelated test modules.
+        with patch('lib.weather_widget.request_refresh'), patch('lib.perf_trace.log'):
             scope['onInit'](window)
         window.getControl.return_value.selectItem.assert_called_once_with(1)
         window.load_home.assert_called_once_with()
