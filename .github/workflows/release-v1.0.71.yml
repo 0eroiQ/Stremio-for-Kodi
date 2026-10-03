@@ -88,3 +88,21 @@ jobs:
           gh release upload "$TAG" \
             dist/feed/repository.stremioforkodi/repository.stremioforkodi-*.zip \
             --clobber
+
+      - name: Sync published release to MKGA.TV
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MKGA_RELEASE_SYNC_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN }}
+          TAG: v1.0.71
+        run: |
+          set -euo pipefail
+          test -n "$MKGA_RELEASE_SYNC_TOKEN"
+          gh api "repos/${{ github.repository }}/releases/tags/$TAG" > /tmp/mkga-github-release.json
+          test "$(jq -r .tag_name /tmp/mkga-github-release.json)" = "$TAG"
+          jq --arg version "$TAG" '{version:$version,githubRelease:.}' \
+            /tmp/mkga-github-release.json > /tmp/mkga-release-sync.json
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $MKGA_RELEASE_SYNC_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/mkga-release-sync.json \
+            https://mkga.tv/api/projects/stremio-for-kodi/release-sync
