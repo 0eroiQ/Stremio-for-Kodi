@@ -1,3 +1,9 @@
+v1.0.73
+- Give full-episode BYOK subtitle translations time to finish instead of abandoning each request after 15 seconds.
+- Scale the request timeout by subtitle cue count and text size, up to 90 seconds per request.
+- Keep the existing 15-second timeout for short translations and preserve model fallback and cancellation behavior.
+- Add regression coverage for small, full-episode, text-heavy, and maximum-size subtitle requests.
+
 v1.0.72
 - Keep a confirmed Exit closed instead of returning to the launcher and reopening Stremio.
 - Return to Kodi Home after Exit dialogs close.

@@ -175,6 +175,105 @@ class AISubtitleTests(unittest.TestCase):
                     source_language="eng", opener=opener
                 )
 
+    def test_episode_translation_has_time_to_finish_and_stays_cached(self):
+        module = load_module()
+        # Match the failing N60 track's size without copying private subtitles.
+        texts = ["English dialogue ".ljust(32 if index < 145 else 31, ".")
+                 for index in range(545)]
+        self.assertEqual(sum(map(len, texts)), 17040)
+        source_text = "\n\n".join(
+            "{}\n00:{:02d}:{:02d},000 --> 00:{:02d}:{:02d},500\n{}".format(
+                index + 1, (index // 60) % 60, index % 60,
+                (index // 60) % 60, index % 60, text,
+            ) for index, text in enumerate(texts)
+        ) + "\n"
+        rows = [{"id": str(index + 1), "text": "Hrvatski dijalog " + str(index)}
+                for index in range(len(texts))]
+        opener = Opener([gemini_payload(rows)])
+        original_open = opener.open
+
+        def finish_after_generation(request, timeout=None):
+            # The real full-track request took about 36 seconds. No test sleep.
+            if timeout is None or timeout <= 36:
+                raise TimeoutError("subtitle generation exceeded request timeout")
+            return original_open(request, timeout)
+
+        opener.open = finish_after_generation
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(module, "_cloud_translation", return_value={}):
+            source = Path(directory) / "episode.srt"
+            cache = Path(directory) / "cache"
+            source.write_text(source_text, encoding="utf-8")
+            first = Path(module.translate_subtitle_file(
+                source, cache, "test-user-key", "hr", "en", opener
+            ))
+            translated = first.read_text(encoding="utf-8")
+            second = module.translate_subtitle_file(
+                source, cache, "test-user-key", "hr", "en", opener
+            )
+            source_timings = [line for line in source_text.splitlines() if "-->" in line]
+            result_timings = [line for line in translated.splitlines() if "-->" in line]
+            self.assertEqual(source_timings, result_timings)
+            self.assertEqual(translated.count("Hrvatski dijalog"), 545)
+            self.assertEqual(str(first), second)
+            self.assertEqual(source.read_text(encoding="utf-8"), source_text)
+        self.assertEqual(len(opener.requests), 1)
+        self.assertGreater(opener.timeouts[0], 36)
+        self.assertLessEqual(opener.timeouts[0], 90)
+
+    def test_short_translation_keeps_the_original_timeout(self):
+        module = load_module()
+        cues = [{"id": "1", "text": "Hello."}, {"id": "2", "text": "Good night."}]
+        opener = Opener([gemini_payload([
+            {"id": "1", "text": "Bok."}, {"id": "2", "text": "Laku noć."},
+        ])])
+        module._request_translation(cues, "test-key", "hr", "en", opener)
+        self.assertEqual(opener.timeouts, [15])
+
+    def test_many_short_cues_and_few_long_cues_receive_bounded_time(self):
+        module = load_module()
+        shapes = [
+            [{"id": str(index + 1), "text": "Yes."} for index in range(module.MAX_CUES)],
+            [{"id": str(index + 1), "text": "x" * module.MAX_CUE_TEXT} for index in range(20)],
+        ]
+        for cues in shapes:
+            with self.subTest(count=len(cues)):
+                opener = Opener([gemini_payload([
+                    {"id": cue["id"], "text": "Prevedeno."} for cue in cues
+                ])])
+                module._request_translation(cues, "test-key", "hr", "en", opener)
+                self.assertGreater(opener.timeouts[0], 15)
+                self.assertLessEqual(opener.timeouts[0], 90)
+
+    def test_large_timeout_failure_has_two_attempts_and_no_partial_cache(self):
+        module = load_module()
+        module._preferred_model = None
+        timeouts = []
+
+        class TimedOutOpener:
+            def open(self, request, timeout=None):
+                timeouts.append(timeout)
+                raise TimeoutError("subtitle generation timed out")
+
+        source_text = "\n\n".join(
+            "{}\n00:00:01,000 --> 00:00:02,000\nEnglish dialogue".format(index + 1)
+            for index in range(545)
+        ) + "\n"
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(module, "_cloud_translation", return_value={}):
+            source = Path(directory) / "episode.srt"
+            cache = Path(directory) / "cache"
+            source.write_text(source_text, encoding="utf-8")
+            with self.assertRaises(module.AITranslationError) as raised:
+                module.translate_subtitle_file(
+                    source, cache, "test-user-key", "hr", "en", TimedOutOpener()
+                )
+            self.assertIsInstance(raised.exception.__cause__, TimeoutError)
+            self.assertEqual(source.read_text(encoding="utf-8"), source_text)
+            self.assertFalse(list(cache.glob("*")))
+        self.assertEqual(len(timeouts), 2)
+        self.assertTrue(all(15 < value <= 90 for value in timeouts))
+
     def test_source_already_target_skips_ai(self):
         module = load_module()
         opener = Opener([])
