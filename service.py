@@ -138,22 +138,25 @@ class PlaybackWatcher(xbmc.Player):
         progress.update(2, "Checking subtitles from the video…")
         embedded_error = None
         last_fallback_error = None
+        entries = []
         try:
-            # Fastest path: MKGA resolves the user's own Stremio subtitle addons
-            # server-side, translates/caches there, and returns a ready SRT.
-            try:
-                from lib.signin import account_store
-                from lib.vortexo_premium import resolve_subtitle_cloud
-                cloud = resolve_subtitle_cloud(account_store(), context["kind"], context["id"], context.get("filename", ""), target)
-                if cloud and self._matches(digest):
-                    import hashlib as _hashlib
-                    path = PROFILE / "subtitles" / ("mkga-cloud-" + _hashlib.sha256(cloud["subtitle"].encode("utf-8")).hexdigest() + ".srt")
-                    from setup_profile import atomic_write
-                    atomic_write(path, cloud["subtitle"].encode("utf-8"))
-                    if self._apply(str(path), digest, "MKGA Cloud", cloud["source_language"], cloud["target_language"]):
-                        return
-            except Exception as error:
-                _remember_ai_error("MKGA subtitle cloud resolver", error)
+            # Auto translate is authoritative for both cloud and BYOK paths.
+            if settings.get("auto_translate", True):
+                # Fastest path: MKGA resolves the user's own Stremio subtitle addons
+                # server-side, translates/caches there, and returns a ready SRT.
+                try:
+                    from lib.signin import account_store
+                    from lib.vortexo_premium import resolve_subtitle_cloud
+                    cloud = resolve_subtitle_cloud(account_store(), context["kind"], context["id"], context.get("filename", ""), target)
+                    if cloud and self._matches(digest):
+                        import hashlib as _hashlib
+                        path = PROFILE / "subtitles" / ("mkga-cloud-" + _hashlib.sha256(cloud["subtitle"].encode("utf-8")).hexdigest() + ".srt")
+                        from setup_profile import atomic_write
+                        atomic_write(path, cloud["subtitle"].encode("utf-8"))
+                        if self._apply(str(path), digest, "MKGA Cloud", cloud["source_language"], cloud["target_language"]):
+                            return
+                except Exception as error:
+                    _remember_ai_error("MKGA subtitle cloud resolver", error)
 
             # Noiro-style local fallback: ask subtitle addons first. Remote 4K MKV
             # embedded extraction can require reading/seeking the whole stream on
@@ -182,7 +185,7 @@ class PlaybackWatcher(xbmc.Player):
                         # Show the source subtitle immediately, then replace it only
                         # after a complete translated file is ready.
                         self._apply(original, digest, "Stremio addon", source_language, source_language or target)
-                        if source_language == target:
+                        if source_language == target or not settings.get("auto_translate", True):
                             return
                         def fallback_progress(percent, message):
                             update(18 + int(percent * 0.78), message)
@@ -196,7 +199,8 @@ class PlaybackWatcher(xbmc.Player):
                         last_fallback_error = error
                         _remember_ai_error("AI subtitles Stremio translation", error)
 
-            if not self._matches(digest) or settings.get("source") == "2":
+            if (not self._matches(digest) or settings.get("source") == "2"
+                    or not settings.get("auto_translate", True)):
                 return
 
             # Embedded is fallback, not the fast path. This preserves support for
